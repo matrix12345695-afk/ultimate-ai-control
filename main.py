@@ -9,6 +9,7 @@ from ai_provider import status as ai_status, propose as ai_propose
 from control_v08 import setup as setup_v08, save_proposal, list_proposals, proposal_detail, budget_status
 from telegram_menu import WELCOME, HELP, keyboard, route
 from diagnostics import snapshot, format_snapshot
+from operations import snapshot_once, backup_status, AlertLimiter
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -61,6 +62,8 @@ def command(text):
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
     if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.9\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/backups":
+        return backup_status(DB.parent / "backups")
     if c=="/diagnostics":
         with db() as conn:
             return format_snapshot(snapshot(conn,ai_status()["enabled"]))
@@ -107,6 +110,8 @@ def main():
     db().close()
     offset=0
     next_check=time.monotonic()+3600
+    next_backup=time.monotonic()+60
+    alerts=AlertLimiter(3600)
     while True:
         try:
             updates=api("getUpdates",offset=offset,timeout=20,allowed_updates=json.dumps(["message"]))
@@ -119,11 +124,22 @@ def main():
                 text=message.get("text","")
                 if text.startswith("/") or text in __import__("telegram_menu").ROUTES:
                     reply(chat["id"],command(text),show_keyboard=text in ("/start", "📖 Помощь"))
+            if time.monotonic()>=next_backup:
+                try:
+                    created=snapshot_once(DB, DB.parent / 'backups')
+                    if created: print('Local SQLite snapshot verified',flush=True)
+                except Exception as exc:
+                    print('Backup failed:',type(exc).__name__,flush=True)
+                    if alerts.should_send('backup'): reply(ADMIN,'⚠️ Резервное копирование не выполнено. Проверь журнал Render.')
+                next_backup=time.monotonic()+3600
             if time.monotonic()>=next_check:
                 result=check()
                 if "unavailable" in result: reply(ADMIN,result)
                 next_check=time.monotonic()+3600
         except Exception as exc:
             print("Polling error:",type(exc).__name__,flush=True)
+            if alerts.should_send('polling'):
+                try: reply(ADMIN,'⚠️ Ошибка Telegram-подключения. Проверь Render.')
+                except Exception: pass
             time.sleep(5)
 if __name__=="__main__": main()
