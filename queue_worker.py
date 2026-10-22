@@ -19,6 +19,9 @@ import task_queue as queue
 import scheduler
 import roadmap
 import budget_gate
+import offline_developer
+from isolated_python import run_bundle, SandboxUnavailable
+from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
 from chat_binding import action as chat_action
 
@@ -45,6 +48,7 @@ def initialize(conn):
     roadmap.initialize(conn)
     init_inbox(conn)
     budget_gate.initialize(conn)
+    offline_developer.initialize(conn)
 
 
 def send_event(conn,kind,title,reason,event_key,task=None):
@@ -103,6 +107,19 @@ def inspect_source(payload,root=ROOT):
             "method":"AST parse and source fingerprints; no test or source code was executed"}
 
 
+def record_failed_interval(conn,job,start,tick):
+    end=start+max(0.000001,time.monotonic()-tick)
+    prior=conn.execute('SELECT MAX(ended_at) FROM agent_work_spans WHERE job_id=? AND attempt=?',(job['id'],job['attempt'])).fetchone()[0]
+    begin=max(start,prior or start)
+    if begin>=end: return
+    try:
+        queue.add_work_span(conn,job['id'],job['lease_token'],
+                            'testing' if job['kind'] in ('test_release','review_change') else 'active',
+                            begin,end,now=max(time.time(),end))
+    except PermissionError:
+        pass  # Expired work is never assigned to another worker's lease.
+
+
 def run_once(path,root=ROOT,site_checker=check_site):
     with connect(path) as conn:
         scheduler.tick(conn)
@@ -117,6 +134,15 @@ def run_once(path,root=ROOT,site_checker=check_site):
     try:
         if job["kind"]=="check_site": result=site_checker(job["payload"])
         elif job["kind"]=="inspect_repository": result=inspect_source(job["payload"],root)
+        elif job["kind"]=="test_release" and job['payload'].get('target')=='sandbox-smoke':
+            policy=Path(path).parent/'sandbox-policy.json'
+            report=run_bundle(SANDBOX_SMOKE,policy,timeout=10)
+            result={'test_status':report['status'],'backend':report['backend'],'test_elapsed_seconds':report['elapsed_seconds'],
+                    'source_digest':report['source_digest'],'output':report['output'][-4000:],'network':False,'writable_tmp':report['writable_tmp']}
+        elif job["kind"]=="review_change" and job['payload'].get('recipe'):
+            with connect(path) as conn:
+                result=offline_developer.prepare(conn,job,Path(path).parent/'artifacts',Path(path).parent/'sandbox-policy.json')
+            waiting=result['test_status']=='passed'
         elif job["kind"]=="daily_report":
             with connect(path) as conn:
                 result={"report":queue.report(conn,start-86400,start),"budget":budget_gate.summary(conn)}
@@ -128,11 +154,17 @@ def run_once(path,root=ROOT,site_checker=check_site):
         end=start+max(0.000001,time.monotonic()-tick)
         # Record only the measured handler interval. Time waiting in the queue is not work.
         with connect(path) as conn:
-            queue.add_work_span(conn,job["id"],job["lease_token"],"active",start,end,now=max(time.time(),end))
-            if waiting:
+            category='testing' if job['kind'] in ('test_release','review_change') else 'active'
+            queue.add_work_span(conn,job["id"],job["lease_token"],category,start,end,now=max(time.time(),end))
+            if waiting and result.get('blocked'):
                 send_event(conn,"decision","Нужен исполнитель для текстовых задач",
                            "Задачи сохранены. Платный провайдер с API-ключом и изолированный AI-разработчик ещё не подключены. Ключ нужно настраивать приватно на VPS. Мониторинг и независимые проверки продолжаются.",
                            "runtime-needs-ai-executor-v4",job["id"])
+            elif result.get('artifact_id'):
+                send_event(conn,'decision' if result['test_status']=='passed' else 'critical',
+                           'Кодовый черновик проверен' if result['test_status']=='passed' else 'Проверка кодового черновика не прошла',
+                           f"Артефакт #{result['artifact_id']}, SHA-256 {result['source_digest']}. Тесты: {result['test_status']}. Просмотр: /artifact {result['artifact_id']}. Движок: детерминированный рецепт без LLM. Исходники и отчёт сохранены; публикации не было.",
+                           'artifact-'+str(job['id'])+'-'+result['source_digest'],job['id'])
             elif job["kind"]=="check_site":
                 old=conn.execute("SELECT healthy FROM agent_health WHERE target=?",(result["target"],)).fetchone()
                 if (old is None and not result["healthy"]) or (old and bool(old[0])!=result["healthy"]):
@@ -148,14 +180,34 @@ def run_once(path,root=ROOT,site_checker=check_site):
                            "daily-job-"+str(job["id"]),job["id"])
             elif result.get("syntax_errors"):
                 send_event(conn,"critical","Ошибки синтаксиса ULTIMATE",str(result["syntax_errors"])[:500],"syntax-job-"+str(job["id"]),job["id"])
+            if result.get('test_status') not in (None,'passed'):
+                if not result.get('artifact_id'):
+                    send_event(conn,'critical','Изолированные тесты не прошли',result['test_status'],
+                               'test-failed-'+str(job['id']),job['id'])
+                conn.execute('UPDATE agent_jobs SET result=? WHERE id=?',(json.dumps(result),job['id']))
+                conn.commit()
+                queue.fail(conn,job['id'],job['lease_token'],'isolated_tests_'+result['test_status'],retryable=False)
+                return {'id':job['id'],'state':'failed'}
             queue.finish(conn,job["id"],job["lease_token"],result,awaiting_owner=waiting)
             conn.execute("UPDATE agent_worker_status SET heartbeat=?,state=?,detail=? WHERE worker=?",(time.time(),"waiting_owner" if waiting else "idle",str(job["id"]),WORKER))
             conn.commit()
         return {"id":job["id"],"state":"awaiting_owner" if waiting else "succeeded"}
+    except (SandboxUnavailable,FileNotFoundError) as exc:
+        with connect(path) as conn:
+            record_failed_interval(conn,job,start,tick)
+            send_event(conn,'critical','Изолированный исполнитель недоступен',type(exc).__name__,
+                       'sandbox-unavailable-'+str(job['id']),job['id'])
+            queue.fail(conn,job['id'],job['lease_token'],type(exc).__name__,retryable=False)
+        return {'id':job['id'],'state':'failed','error':type(exc).__name__}
     except Exception as exc:
         with connect(path) as conn:
+            record_failed_interval(conn,job,start,tick)
             queue.fail(conn,job["id"],job["lease_token"],type(exc).__name__)
-        return {"id":job["id"],"state":"retry_scheduled","error":type(exc).__name__}
+            state=conn.execute('SELECT state FROM agent_jobs WHERE id=?',(job['id'],)).fetchone()[0]
+            if state=='failed':
+                send_event(conn,'critical','Задача исчерпала попытки',type(exc).__name__,
+                           'job-exhausted-'+str(job['id']),job['id'])
+        return {"id":job["id"],"state":state,"error":type(exc).__name__}
 
 
 def apply_limits():
