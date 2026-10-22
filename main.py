@@ -17,6 +17,8 @@ from developer_v13 import prepare as developer_prepare, render as developer_rend
 from execution_gate import stage as stage_changes
 from github_requests import initialize as init_github_requests, create_request as create_github_request, describe as describe_github_request
 from handoff_v16 import prepare_handoff
+from owner_notifications import initialize as initialize_owner_inbox, format_pending as format_owner_inbox, create as notify_owner
+from owner_delivery import deliver_one
 from review_bot_v45 import handle as review_handle
 from code_reviews_v48 import handle as code_review_handle
 from ai_commands_v30 import handle as ai30_handle
@@ -43,16 +45,20 @@ def db():
     initialize(c)
     setup_v08(c)
     init_github_requests(c)
+    initialize_owner_inbox(c)
     c.commit()
     return c
 def api(method,**kwargs):
     data=urllib.parse.urlencode(kwargs).encode()
     with urllib.request.urlopen(f"https://api.telegram.org/bot{TOKEN}/{method}",data=data,timeout=35) as response:
-        return json.load(response)["result"]
+        payload=json.load(response)
+        if payload.get("ok") is not True:
+            raise ValueError("Telegram request rejected")
+        return payload["result"]
 def reply(chat,msg,show_keyboard=False):
     args={"chat_id":chat,"text":msg[:4000]}
     if show_keyboard: args["reply_markup"]=keyboard()
-    api("sendMessage",**args)
+    return api("sendMessage",**args)
 def check():
     results=[]
     for url in URL:
@@ -63,8 +69,20 @@ def check():
                 results.append(f"{url}: HTTP {r.status}")
         except Exception as e: results.append(f"{url}: unavailable ({type(e).__name__})")
     return "\n".join(results) or "No HTTPS monitoring URLs configured."
+def owner_event(project, kind, title, reason, next_action):
+    import hashlib
+    # The same condition produces at most one inbox item per UTC hour, including restarts.
+    hour=datetime.now(timezone.utc).strftime("%Y%m%d%H")
+    key=hashlib.sha256((project+kind+title+reason+hour).encode()).hexdigest()
+    with db() as conn:
+        ident=notify_owner(conn,project,kind,title,reason[:500],next_action,event_key=key)
+        record(conn,"owner_notification",str(ident))
+        conn.commit()
+    return ident
 def command(text):
     text=route(text)
+    if text.split("@")[0] == "/owner_inbox":
+        with db() as conn: return format_owner_inbox(conn)
     if text == "/start": return WELCOME
     if text == "/help": return HELP
     github_result=github_command(text)
@@ -188,6 +206,7 @@ def main():
     previous_monitor={}
     previous_github={}
     next_github=time.monotonic()+120
+    next_owner_delivery=time.monotonic()+1
     while True:
         try:
             updates=api("getUpdates",offset=offset,timeout=20,allowed_updates=json.dumps(["message"]))
@@ -200,11 +219,14 @@ def main():
                 text=message.get("text","")
                 if text.startswith("/") or text in __import__("telegram_menu").ROUTES:
                     reply(chat["id"],command(text),show_keyboard=text in ("/start", "📖 Помощь"))
+            if time.monotonic()>=next_owner_delivery:
+                deliver_one(db, reply, ADMIN)
+                next_owner_delivery=time.monotonic()+5
             if time.monotonic()>=next_github:
                 try:
                     current_github=github_scan()
                     for alert in transitions(previous_github,current_github):
-                        reply(ADMIN,alert)
+                        owner_event("control","info","Изменилось состояние GitHub",alert,"Открой /github_check в этом боте.")
                     previous_github=current_github
                 except Exception as exc:
                     print('GitHub monitor failed:',type(exc).__name__,flush=True)
@@ -215,7 +237,8 @@ def main():
                     if created: print('Local SQLite snapshot verified',flush=True)
                 except Exception as exc:
                     print('Backup failed:',type(exc).__name__,flush=True)
-                    if alerts.should_send('backup'): reply(ADMIN,'⚠️ Резервное копирование не выполнено. Проверь журнал Render.')
+                    if alerts.should_send('backup'):
+                        owner_event("control","critical","Ошибка резервного копирования",type(exc).__name__,"Проверь /backups и журнал ULTIMATE на VPS.")
                 next_backup=time.monotonic()+3600
             if time.monotonic()>=next_check:
                 result=check()
@@ -225,7 +248,8 @@ def main():
                     if separator:
                         current_monitor[target]=(not detail.startswith('unavailable'),detail)
                 for alert in transitions(previous_monitor,current_monitor):
-                    reply(ADMIN,alert)
+                    owner_event("monitoring","info" if alert.startswith("RECOVERED") else "critical",
+                                "Изменилось состояние сайта",alert,"Проверь /check. Исправления и публикации требуют отдельного согласования.")
                 previous_monitor=current_monitor
                 next_check=time.monotonic()+3600
         except Exception as exc:
