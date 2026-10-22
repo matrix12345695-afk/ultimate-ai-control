@@ -19,6 +19,10 @@ from github_requests import initialize as init_github_requests, create_request a
 from handoff_v16 import prepare_handoff
 from owner_notifications import initialize as initialize_owner_inbox, format_pending as format_owner_inbox, create as notify_owner
 from owner_delivery import deliver_one
+from queue_worker import initialize as initialize_runtime
+from runtime_commands import handle as runtime_handle, submit_text
+from roadmap import setting, set_setting
+from chat_binding import current as bound_chat
 from review_bot_v45 import handle as review_handle
 from code_reviews_v48 import handle as code_review_handle
 from ai_commands_v30 import handle as ai30_handle
@@ -46,6 +50,7 @@ def db():
     setup_v08(c)
     init_github_requests(c)
     initialize_owner_inbox(c)
+    initialize_runtime(c)
     c.commit()
     return c
 def api(method,**kwargs):
@@ -58,6 +63,9 @@ def api(method,**kwargs):
 def reply(chat,msg,show_keyboard=False):
     args={"chat_id":chat,"text":msg[:4000]}
     if show_keyboard: args["reply_markup"]=keyboard()
+    elif msg.startswith("🔔 ULTIMATE AI CONTROL"):
+        with db() as conn: link=bound_chat(conn)["url"]
+        if link: args["reply_markup"]=json.dumps({"inline_keyboard":[[{"text":"Открыть чат Codex","url":link}]]})
     return api("sendMessage",**args)
 def check():
     results=[]
@@ -79,8 +87,10 @@ def owner_event(project, kind, title, reason, next_action):
         record(conn,"owner_notification",str(ident))
         conn.commit()
     return ident
-def command(text):
+def command(text,source_key=None):
     text=route(text)
+    runtime_result=runtime_handle(text,db,source_key)
+    if runtime_result is not None: return runtime_result
     if text.split("@")[0] == "/owner_inbox":
         with db() as conn: return format_owner_inbox(conn)
     if text == "/start": return WELCOME
@@ -199,7 +209,7 @@ def command(text):
 def main():
     if not TOKEN or not ADMIN.isdecimal(): raise SystemExit("Configure TELEGRAM_BOT_TOKEN and ADMIN_TELEGRAM_ID")
     db().close()
-    offset=0
+    with db() as conn: offset=int(setting(conn,"telegram_offset","0"))
     next_check=time.monotonic()+3600
     next_backup=time.monotonic()+60
     alerts=AlertLimiter(3600)
@@ -218,7 +228,15 @@ def main():
                 if str(sender.get("id"))!=ADMIN or chat.get("type")!="private": continue
                 text=message.get("text","")
                 if text.startswith("/") or text in __import__("telegram_menu").ROUTES:
-                    reply(chat["id"],command(text),show_keyboard=text in ("/start", "📖 Помощь"))
+                    reply(chat["id"],command(text,source_key="telegram:"+str(update["update_id"])),show_keyboard=text in ("/start", "📖 Помощь"))
+                elif text.strip():
+                    try:
+                        with db() as conn: ident=submit_text(conn,text,event_key="telegram:"+str(update["update_id"]))
+                        reply(chat["id"],f"Текстовая задача #{ident} сохранена. /job {ident}. Если потребуется решение, придёт уведомление.")
+                    except ValueError as exc: reply(chat["id"],str(exc))
+                elif message.get("voice"):
+                    reply(chat["id"],"Распознавание голоса ещё не подключено. Отправь задачу текстом; этап есть в /roadmap.")
+                with db() as conn: set_setting(conn,"telegram_offset",str(offset))
             if time.monotonic()>=next_owner_delivery:
                 deliver_one(db, reply, ADMIN)
                 next_owner_delivery=time.monotonic()+5

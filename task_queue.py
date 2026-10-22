@@ -10,7 +10,7 @@ import secrets
 import time
 
 PROJECTS = {"control", "nova", "kinder", "sap", "qualisift", "iiko-loader", "sap-mb51"}
-KINDS = {"inspect_repository", "plan_change", "test_release", "check_site", "review_change"}
+KINDS = {"inspect_repository", "plan_change", "test_release", "check_site", "review_change", "daily_report"}
 CATEGORIES = {"active", "testing", "waiting"}
 
 
