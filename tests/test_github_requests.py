@@ -13,5 +13,10 @@ class TestGithubRequests(unittest.TestCase):
   self.assertIn("Готово к передаче на ручную проверку: нет",describe(self.c,ident))
   decide(self.c,approval,"123","123",True)
   self.assertIn("Готово к передаче на ручную проверку: да",describe(self.c,ident))
+ def test_multiple_requests(self):
+  a=create_request(self.c,"control","First",{"docs/first.md":"First"})
+  b=create_request(self.c,"control","Second",{"docs/second.md":"Second"})
+  self.assertNotEqual(a[0],b[0])
+  self.assertNotEqual(a[1],b[1])
  def test_missing(self):
   self.assertIn("не найдена",describe(self.c,500))
