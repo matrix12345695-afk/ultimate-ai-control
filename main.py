@@ -2,6 +2,7 @@
 import os, json, time, sqlite3, urllib.request, urllib.parse
 from pathlib import Path
 from datetime import datetime, timezone
+from telegram_pro import initialize, handle, record
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -13,6 +14,7 @@ def db():
     DB.parent.mkdir(parents=True,exist_ok=True)
     c=sqlite3.connect(DB)
     c.execute("CREATE TABLE IF NOT EXISTS tasks(id INTEGER PRIMARY KEY, project TEXT, description TEXT, created_at TEXT)")
+    initialize(c)
     c.commit()
     return c
 def api(method,**kwargs):
@@ -31,21 +33,24 @@ def check():
         except Exception as e: results.append(f"{url}: unavailable ({type(e).__name__})")
     return "\n".join(results) or "No HTTPS monitoring URLs configured."
 def command(text):
+    extra=handle(text, db, ADMIN)
+    if extra is not None: return extra
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
-    if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.1\n/status /projects /tasks /task <project> <description> /check\nAI disabled. No production changes."
+    if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.3\n/status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
     if c=="/status": return "Dispatcher online. AI: disabled. Production changes: prohibited."
     if c=="/projects": return "\n".join(f"{k}: {v}" for k,v in PROJECTS.items())
     if c=="/check": return check()
     if c=="/tasks":
-        with db() as conn: rows=conn.execute("SELECT id,project,description FROM tasks ORDER BY id DESC LIMIT 10").fetchall()
-        return "\n".join(f"#{i} {p}: {d}" for i,p,d in rows) or "No tasks yet."
+        with db() as conn: rows=conn.execute("SELECT id,project,description,status FROM tasks ORDER BY id DESC LIMIT 10").fetchall()
+        return "\n".join(f"#{i} [{state}] {p}: {d}" for i,p,d,state in rows) or "No tasks yet."
     if c=="/task":
         if len(parts)<3 or parts[1] not in PROJECTS: return "Usage: /task nova Check website"
         with db() as conn:
             conn.execute("INSERT INTO tasks(project,description,created_at) VALUES(?,?,?)",(parts[1],parts[2][:1000],datetime.now(timezone.utc).isoformat()))
+            record(conn,"task_created",f"{parts[1]}: {parts[2][:300]}")
             conn.commit()
-        return "Task saved (not executed)."
+        return "Task queued (not executed)."
     return "Unknown command. Use /help"
 def main():
     if not TOKEN or not ADMIN.isdecimal(): raise SystemExit("Configure TELEGRAM_BOT_TOKEN and ADMIN_TELEGRAM_ID")
