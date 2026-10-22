@@ -74,3 +74,11 @@ At 21:17 UTC the installed application advanced to
 real queued jobs, Telegram receipts and Inventory-preservation checks. Detailed evidence,
 limitations and the current rollback action are in
 [OFFLINE_EXECUTOR_EVIDENCE.md](OFFLINE_EXECUTOR_EVIDENCE.md).
+
+## Disabled metered provider update
+
+At 21:41 UTC the application advanced to `ace13302ccf97e633d5bf84790c6944c0d873d8f`.
+The priced Responses transport, conservative $30 ledger and /provider4 were installed with
+a disabled policy. There were no real API calls or model key provisioning. See
+[METERED_PROVIDER_EVIDENCE.md](METERED_PROVIDER_EVIDENCE.md) for 266-test, live guard,
+notification, independent-process and Inventory-preservation evidence.

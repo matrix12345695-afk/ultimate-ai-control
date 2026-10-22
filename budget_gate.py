@@ -23,7 +23,23 @@ def month(): return datetime.now(timezone.utc).strftime('%Y-%m')
 
 
 def charged(conn,period=None):
-    return conn.execute("SELECT COALESCE(SUM(CASE WHEN state='settled' THEN actual_microusd ELSE reserved_microusd END),0) FROM provider_costs WHERE month=?",(period or month(),)).fetchone()[0]
+    # Unresolved requests retain their hold across UTC month boundaries.
+    return conn.execute("SELECT COALESCE(SUM(CASE WHEN state='settled' THEN actual_microusd ELSE reserved_microusd END),0) FROM provider_costs WHERE month=? OR state!='settled'",(period or month(),)).fetchone()[0]
+
+
+def reserve_locked(conn,project,agent,model,maximum_microusd,*,job_id=None,limit_microusd=HARD_LIMIT_MICROUSD):
+    """Caller owns BEGIN IMMEDIATE; atomically combine a hold with its request record."""
+    if not conn.in_transaction: raise RuntimeError('budget write transaction required')
+    if type(maximum_microusd) is not int or maximum_microusd<=0: raise ValueError('invalid maximum cost')
+    if type(limit_microusd) is not int or not 0<limit_microusd<=HARD_LIMIT_MICROUSD: raise ValueError('budget exceeds owner limit')
+    for value in (project,agent,model):
+        if not isinstance(value,str) or not 1<=len(value)<=100: raise ValueError('invalid cost attribution')
+    period=month()
+    if charged(conn,period)+maximum_microusd>limit_microusd: return None
+    ident=secrets.token_hex(16)
+    conn.execute("INSERT INTO provider_costs VALUES(?,?,?,?,?,?,?,?,'reserved',NULL,NULL,?,NULL)",
+                 (ident,period,project,agent,job_id,model,maximum_microusd,None,time.time()))
+    return ident
 
 
 def reserve(conn,project,agent,model,maximum_microusd,*,job_id=None,limit_microusd=HARD_LIMIT_MICROUSD):

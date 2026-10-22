@@ -1,4 +1,4 @@
-# AI Provider (opt-in, disabled by default)
+# Legacy AI Provider (disabled)
 
 No provider is active in v0.7. Existing ChatGPT subscriptions do not automatically fund API requests.
 
@@ -21,6 +21,8 @@ The AI response is untrusted advisory text, not code to execute. No automatic wr
 
 The separate `budget_gate.py` ledger now provides atomic conservative monthly reservations
 with a hard $30 ceiling, per-project/agent attribution and usage receipts. It does not make the
-legacy provider safe to enable: the old unmetered transport is blocked. A reviewed priced
-transport, private key configuration and real provider usage reconciliation remain required.
+legacy provider safe to enable: the old unmetered transport is blocked. The separate reviewed
+priced transport is now implemented in `metered_provider.py` and remains disabled. Private key
+configuration, a credential broker, queue integration and real provider usage verification
+remain required; see [METERED_PROVIDER.md](METERED_PROVIDER.md).
 No paid provider is enabled by the offline code recipes or rootless test executor.
