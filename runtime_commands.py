@@ -5,6 +5,9 @@ import task_queue as queue
 import roadmap
 import chat_binding
 import budget_gate
+import offline_developer
+from isolated_python import load_policy, SandboxUnavailable
+from pathlib import Path
 from ai_gateway_v30 import SECRET
 
 
@@ -19,10 +22,27 @@ def handle(text,connect,source_key=None):
     args=text.split(maxsplit=2)
     if not args: return None
     op=args[0].split("@")[0].lower()
-    known={"/roadmap","/queue","/job","/work","/project","/agents","/daily","/memory","/budget4","/pause","/resume","/chat_link","/chat_bind","/job_cancel"}
+    known={"/roadmap","/queue","/job","/work","/project","/agents","/daily","/memory","/budget4","/pause","/resume","/chat_link","/chat_bind","/job_cancel","/sandbox","/recipe","/selftest","/artifact","/artifact_code"}
     if op not in known: return None
     with connect() as conn:
         try:
+            if op=='/sandbox':
+                try: cfg=load_policy(Path(conn.execute('PRAGMA database_list').fetchone()[2]).parent/'sandbox-policy.json')
+                except (OSError,ValueError,SandboxUnavailable): return 'Изолированный исполнитель не настроен или проверка целостности не прошла.'
+                return 'Bubblewrap: настроен. Сеть, новые процессы и потоки запрещены. Один CPU, 320 MiB, максимум 20 сек.\n'+('Scratch: 32 MiB.' if cfg['writable_tmp'] else 'Файловая система только для чтения; файловые тесты пока не поддерживаются.')
+            if op=='/recipe':
+                if len(args)!=2 or args[1] not in ('safe-paths','sha-check'): return 'Использование: /recipe safe-paths или /recipe sha-check. Это детерминированный генератор, не LLM.'
+                ident=queue.enqueue(conn,'control','review_change',{'recipe':args[1]},event_key=source_key)
+                return f'Кодовый рецепт #{ident} поставлен в очередь. Генерация → изолированные тесты → артефакт. Публикации нет.'
+            if op=='/selftest':
+                ident=queue.enqueue(conn,'control','test_release',{'target':'sandbox-smoke'},event_key=source_key)
+                return f'Проверка изоляции #{ident} поставлена в очередь. /job {ident}'
+            if op=='/artifact':
+                if len(args)!=2 or not args[1].isdigit(): return 'Использование: /artifact <номер>'
+                return offline_developer.describe(conn,int(args[1]))
+            if op=='/artifact_code':
+                if len(args)<2 or not args[1].isdigit() or (len(args)==3 and not args[2].isdigit()): return 'Использование: /artifact_code <номер> [номер файла]'
+                return offline_developer.source_preview(conn,int(args[1]),int(args[2]) if len(args)==3 else 1)
             if op=="/roadmap": return roadmap.describe(conn)
             if op=="/chat_bind":
                 if len(args)!=2: return "Использование: /chat_bind https://chatgpt.com/c/..."

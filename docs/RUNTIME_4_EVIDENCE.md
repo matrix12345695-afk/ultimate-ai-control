@@ -50,7 +50,7 @@ but not HEAD requests. This was a monitor false alarm, not proof that the websit
 
 A bounded GET probe and a regression test were prepared in
 b6d2d201c995637f89ba67be4208d4c5048cc1f1 and verified on the VPS at 20:36 UTC.
-This is now the installed application commit. All 240 source tests and 10 transport tests passed.
+This was the installed application commit at that verification. All 240 source tests and 10 transport tests passed.
 NOVA's recorded health is HTTP 200. Telegram accepted correction message 141. Confirmed recovered
 availability alarms were resolved; owner decision records were preserved.
 Current worker PID: 628833. Dispatcher PID: 629214. Inventory remained PID 67760 with matching
@@ -63,6 +63,14 @@ No NOVA deployment, DNS, database or source change was performed.
 
 The operations worker is not a complete autonomous development team. General text requests
 are preserved as awaiting_owner when no isolated model executor exists; independent operational
-checks continue. Model configuration, priced transport, isolated code/test execution, broad
+checks continue. Model configuration, priced transport, general code/test execution, broad
 project permissions, exact-release publication approval, speech and full designer/researcher
 automation remain roadmap items. The roadmap never reports these as complete.
+
+## Rootless component executor update
+
+At 21:17 UTC the installed application advanced to
+`b5d9888aa2d15fb1a91ffd5968ddae26992b52ee`. The offline recipe/test/artifact pipeline passed
+real queued jobs, Telegram receipts and Inventory-preservation checks. Detailed evidence,
+limitations and the current rollback action are in
+[OFFLINE_EXECUTOR_EVIDENCE.md](OFFLINE_EXECUTOR_EVIDENCE.md).

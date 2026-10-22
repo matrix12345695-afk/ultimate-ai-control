@@ -1,6 +1,10 @@
 # ULTIMATE AI CONTROL: isolated VPS preparation
 
-Status: **configuration template only**, NOT a deployed or running executor.
+Status: **legacy GitHub review executor configuration template only**.
+The separate limited rootless Python component-test runner is documented in
+[ISOLATED_PYTHON_V1.md](ISOLATED_PYTHON_V1.md) and
+[OFFLINE_EXECUTOR_EVIDENCE.md](OFFLINE_EXECUTOR_EVIDENCE.md). Its activation does not enable
+the GitHub App broker or privileges described in this legacy template.
 Target host: existing Ubuntu 22.04 VPS. Render production v1.8 unchanged.
 
 Known IDs:
