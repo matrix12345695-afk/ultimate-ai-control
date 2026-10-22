@@ -73,7 +73,8 @@ def check():
         url=url.strip()
         if not url.startswith("https://"): continue
         try:
-            with urllib.request.urlopen(urllib.request.Request(url,method="HEAD"),timeout=12) as r:
+            with urllib.request.urlopen(urllib.request.Request(url,method="GET",headers={"Range":"bytes=0-1023"}),timeout=12) as r:
+                r.read(1024)
                 results.append(f"{url}: HTTP {r.status}")
         except Exception as e: results.append(f"{url}: unavailable ({type(e).__name__})")
     return "\n".join(results) or "No HTTPS monitoring URLs configured."

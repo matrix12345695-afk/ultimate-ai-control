@@ -107,6 +107,26 @@ class RuntimeTests(unittest.TestCase):
         result=queue_worker.inspect_source({'target':'control'},self.root)
         self.assertEqual(result['syntax_errors'],['bad.py'])
 
+    def test_monitor_checks_get_page_instead_of_unsupported_head(self):
+        requests=[]
+        class Response:
+            status=200
+            def __enter__(self): return self
+            def __exit__(self,*args): pass
+            def read(self,size):
+                self_size=size
+                if self_size!=1024: raise AssertionError('unbounded monitor read')
+                return b'page'
+        def opener(request,timeout):
+            requests.append(request)
+            self.assertEqual(request.get_method(),'GET')
+            self.assertEqual(timeout,12)
+            return Response()
+        result=queue_worker.check_site({'target':'nova'},opener=opener)
+        self.assertTrue(result['healthy'])
+        self.assertEqual(result['detail'],'HTTP 200')
+        self.assertEqual(len(requests),1)
+
     def test_commands_and_secret_rejection(self):
         self.assertIn('16.',main.command('/roadmap'))
         self.assertIn('сохранена',main.command('/work nova Проверить сайт'))

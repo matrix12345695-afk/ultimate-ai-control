@@ -70,8 +70,9 @@ def check_site(payload,opener=None):
     url=TARGETS[target]
     opener=opener or urllib.request.build_opener(SafeRedirect()).open
     try:
-        request=urllib.request.Request(url,method="HEAD",headers={"User-Agent":"ULTIMATE-Availability/4.0"})
+        request=urllib.request.Request(url,method="GET",headers={"User-Agent":"ULTIMATE-Availability/4.0","Range":"bytes=0-1023"})
         with opener(request,timeout=12) as response:
+            response.read(1024)
             healthy=200<=response.status<400
             detail="HTTP "+str(response.status)
     except urllib.error.HTTPError as exc:
