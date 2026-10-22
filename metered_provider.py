@@ -183,6 +183,7 @@ def generate(conn,policy_path,key_path,request_key,prompt,*,project='control',ag
         if reservation is None: raise ProviderBlocked('monthly_budget_exhausted')
         conn.execute("INSERT INTO metered_requests VALUES(?,?,?,'pending',NULL,NULL,NULL,?,NULL)",
                      (request_key,fingerprint,reservation,time.time()))
+        reservation_period=conn.execute('SELECT month FROM provider_costs WHERE id=?',(reservation,)).fetchone()[0]
         conn.commit()
     except BaseException as exc:
         conn.rollback()
@@ -190,8 +191,10 @@ def generate(conn,policy_path,key_path,request_key,prompt,*,project='control',ag
             notice(conn,'decision','Месячный бюджет API исчерпан','Новый запрос не отправлен: максимальная стоимость не помещается в оставшийся лимит. Дождись следующего месяца или проверь учёт. Предел не повышается.','provider-budget-stop-'+budget.month())
         raise
     try:
+        if budget.month()!=reservation_period: raise ProviderBlocked('month_changed_before_send')
         body=(transport or send)(payload,key,reservation)
         usage=receipt(body,cfg)
+        if budget.month()!=reservation_period: raise ProviderBlocked('month_changed_during_send')
         result=dict(advisory(body),**usage,model=cfg['model'],replayed=False,published=False)
         # Receipt, settled budget and durable response become visible atomically.
         conn.execute('BEGIN IMMEDIATE')

@@ -185,5 +185,16 @@ class MeteredProviderTests(unittest.TestCase):
         with self.assertRaisesRegex(api.ProviderBlocked,'redirect_rejected'):
             api.NoRedirect().redirect_request(req,None,307,'redirect',{},'https://evil.invalid/')
 
+    def test_slow_request_crossing_utc_month_keeps_hold_for_new_month(self):
+        with patch.object(budget_gate,'month',return_value='2026-10') as month:
+            def slow_response(*args):
+                month.return_value='2026-11'
+                return self.body()
+            with self.assertRaisesRegex(api.ProviderBlocked,'ambiguous_send'):
+                self.call(transport=slow_response)
+            self.assertEqual(self.conn.execute('SELECT month,state FROM provider_costs').fetchone(),('2026-10','unknown'))
+            self.assertEqual(budget_gate.charged(self.conn),api.quote(api.policy(self.policy)))
+            with self.assertRaisesRegex(api.ProviderBlocked,'unresolved_usage'): self.call(key='test:next-month')
+
 
 if __name__=='__main__': unittest.main()

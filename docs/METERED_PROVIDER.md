@@ -20,6 +20,9 @@ A crash after reservation, timeout, malformed receipt, unexpected model/tier, un
 write or excessive usage keeps the full hold and prevents further calls. The critical owner
 notice is durable and deduplicated. Unresolved holds carry across UTC month boundaries.
 Automatic dispatch is blocked during the last 60 seconds of a UTC month.
+The recorded reservation month is checked again immediately before sending and after the
+receipt. A delayed request crossing into a new month retains its full hold and stops the
+provider rather than guessing which billing month the provider used.
 
 A valid receipt atomically settles token costs and stores the response. Cached input is billed
 using its reviewed rate; output tokens include reasoning tokens. Incomplete, refused, sensitive,

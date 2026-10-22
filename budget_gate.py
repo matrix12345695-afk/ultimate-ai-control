@@ -34,10 +34,11 @@ def reserve_locked(conn,project,agent,model,maximum_microusd,*,job_id=None,limit
     if type(limit_microusd) is not int or not 0<limit_microusd<=HARD_LIMIT_MICROUSD: raise ValueError('budget exceeds owner limit')
     for value in (project,agent,model):
         if not isinstance(value,str) or not 1<=len(value)<=100: raise ValueError('invalid cost attribution')
-    if charged(conn)+maximum_microusd>limit_microusd: return None
+    period=month()
+    if charged(conn,period)+maximum_microusd>limit_microusd: return None
     ident=secrets.token_hex(16)
     conn.execute("INSERT INTO provider_costs VALUES(?,?,?,?,?,?,?,?,'reserved',NULL,NULL,?,NULL)",
-                 (ident,month(),project,agent,job_id,model,maximum_microusd,None,time.time()))
+                 (ident,period,project,agent,job_id,model,maximum_microusd,None,time.time()))
     return ident
 
 
