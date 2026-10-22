@@ -17,6 +17,7 @@ from github_ci_reader_v30 import GithubCIReader
 from github_rest_transport_v28 import GithubTransport
 from github_app_auth_v46 import installation_token
 from review_bot_v45 import _document
+from code_recipes_v48 import build_files, is_recipe_task
 from review_outbox_v21 import initialize as init_outbox
 from full_review_workflow_v29 import execute_approved_review
 from telegram_http_sender_v27 import make_sender
@@ -48,13 +49,20 @@ def exact_files(project, task, raw_manifest):
     if project != "control" or not isinstance(task, str) or not 1 <= len(task) <= 300:
         raise PermissionError("Only verified control review requests can execute")
     manifest = json.loads(raw_manifest)
-    digest = hashlib.sha256(task.encode("utf-8")).hexdigest()[:16]
-    path = "proposals/review-" + digest + ".md"
-    content = _document(task)
-    expected = [{"path": path, "sha256": hashlib.sha256(content.encode()).hexdigest(), "bytes": len(content.encode())}]
+    if is_recipe_task(task):
+        files = build_files(task)
+    else:
+        digest = hashlib.sha256(task.encode("utf-8")).hexdigest()[:16]
+        path = "proposals/review-" + digest + ".md"
+        files = {path: _document(task)}
+    expected = [
+        {"path": path, "sha256": hashlib.sha256(content.encode()).hexdigest(),
+         "bytes": len(content.encode())}
+        for path, content in sorted(files.items())
+    ]
     if manifest.get("project") != "control" or manifest.get("files") != expected:
         raise PermissionError("Requested file no longer matches the approved content")
-    return {path: content}
+    return files
 
 
 def find_pending(conn):
