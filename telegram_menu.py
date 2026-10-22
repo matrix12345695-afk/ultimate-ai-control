@@ -1,0 +1,45 @@
+"""Russian Telegram menu: display only, no privileged automatic operations."""
+import json
+
+BUTTONS = [
+    ["📊 Статус", "🗂 Проекты"],
+    ["📋 Задачи", "🌐 Проверить сайт"],
+    ["📝 Черновики", "✅ Согласования"],
+    ["🧠 AI-статус", "📖 Помощь"],
+]
+ROUTES = {
+    "📊 Статус": "/status",
+    "🗂 Проекты": "/projects",
+    "📋 Задачи": "/tasks",
+    "🌐 Проверить сайт": "/check",
+    "📝 Черновики": "/proposals",
+    "✅ Согласования": "/approvals",
+    "🧠 AI-статус": "/ai_status",
+    "📖 Помощь": "/help",
+}
+WELCOME = (
+    "🧠 ULTIMATE AI CONTROL v0.9\n"
+    "Центр управления проектами\n\n"
+    "📡 Telegram: подключён\n"
+    "🛡 Режим: AI-исполнитель, уровень 2\n"
+    "🤖 AI-модель: пока отключена\n\n"
+    "Выбери раздел с помощью кнопок ниже. "
+    "Изменения рабочих систем без подтверждения запрещены."
+)
+HELP = (
+    "📖 Команды ULTIMATE AI CONTROL\n\n"
+    "/task nova Описание — сохранить задачу\n"
+    "/plan nova Описание — получить офлайн-план\n"
+    "/draft nova Описание — создать черновик\n"
+    "/taskstatus 1 — статус задачи\n"
+    "/cancel 1 — отменить ожидающую задачу\n"
+    "/proposal ID — посмотреть черновик\n"
+    "/approve ID или /reject ID — решение по запросу\n"
+    "/audit — журнал действий\n"
+    "/repos — разрешённые репозитории\n\n"
+    "⚠️ Задачи сохраняются, но ещё не исполняются автономно."
+)
+def keyboard():
+    return json.dumps({"keyboard":BUTTONS, "resize_keyboard":True, "is_persistent":True}, ensure_ascii=False)
+def route(text):
+    return ROUTES.get(text, text)
