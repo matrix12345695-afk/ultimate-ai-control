@@ -15,6 +15,7 @@ from github_watch import scan as github_scan
 from project_reports import project_report
 from developer_v13 import prepare as developer_prepare, render as developer_render
 from execution_gate import stage as stage_changes
+from github_requests import initialize as init_github_requests, create_request as create_github_request, describe as describe_github_request
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -35,6 +36,7 @@ def db():
     c.execute("CREATE TABLE IF NOT EXISTS tasks(id INTEGER PRIMARY KEY, project TEXT, description TEXT, created_at TEXT)")
     initialize(c)
     setup_v08(c)
+    init_github_requests(c)
     c.commit()
     return c
 def api(method,**kwargs):
@@ -67,6 +69,16 @@ def command(text):
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
     if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.9\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/github_request":
+        if len(parts)<3: return "Использование: /github_request control Описание задачи"
+        try:
+            with db() as conn:
+                task_id,approval_id,manifest=create_github_request(conn,parts[1],parts[2],{"docs/review.md":"Требуется ручная проверка"})
+            return f"Заявка #{task_id} создана. Одобрение: {approval_id}\\nПросмотр: /github_request_status {task_id}\\nЭто заявка на проверку, код не создан."
+        except ValueError: return "Недопустимый проект или текст запроса."
+    if c=="/github_request_status":
+        if len(parts)<2 or not parts[1].isdigit(): return "Использование: /github_request_status <id>"
+        with db() as conn: return describe_github_request(conn,int(parts[1]))
     if c=="/changegate":
         if len(parts)<3: return "Использование: /changegate control Описание"
         try:
