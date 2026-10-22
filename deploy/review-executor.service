@@ -1,0 +1,21 @@
+[Unit]
+Description=Ultimate AI Control isolated review executor (disabled until provisioned)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ultimate-review
+Group=ultimate-review
+WorkingDirectory=/opt/ultimate-review
+EnvironmentFile=/etc/ultimate-review/review.env
+ExecStart=/opt/ultimate-review/.venv/bin/python -m unittest discover -s tests -q
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/ultimate-review
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
