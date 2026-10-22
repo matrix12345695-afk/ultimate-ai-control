@@ -17,7 +17,8 @@ from developer_v13 import prepare as developer_prepare, render as developer_rend
 from execution_gate import stage as stage_changes
 from github_requests import initialize as init_github_requests, create_request as create_github_request, describe as describe_github_request
 from handoff_v16 import prepare_handoff
-from owner_notifications import initialize as initialize_owner_inbox, format_pending as format_owner_inbox
+from owner_notifications import (initialize as initialize_owner_inbox, format_pending as format_owner_inbox,
+    initialize_delivery, claim_delivery, mark_delivered, release_delivery, format_delivery)
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -40,6 +41,7 @@ def db():
     setup_v08(c)
     init_github_requests(c)
     initialize_owner_inbox(c)
+    initialize_delivery(c)
     c.commit()
     return c
 def api(method,**kwargs):
@@ -165,6 +167,7 @@ def main():
     previous_monitor={}
     previous_github={}
     next_github=time.monotonic()+120
+    next_owner_delivery=time.monotonic()+10
     while True:
         try:
             updates=api("getUpdates",offset=offset,timeout=20,allowed_updates=json.dumps(["message"]))
@@ -177,6 +180,21 @@ def main():
                 text=message.get("text","")
                 if text.startswith("/") or text in __import__("telegram_menu").ROUTES:
                     reply(chat["id"],command(text),show_keyboard=text in ("/start", "📖 Помощь"))
+            if time.monotonic()>=next_owner_delivery:
+                try:
+                    with db() as conn:
+                        item=claim_delivery(conn)
+                    if item:
+                        try:
+                            reply(ADMIN,format_delivery(item))
+                        except Exception:
+                            with db() as conn: release_delivery(conn,item[0])
+                            raise
+                        else:
+                            with db() as conn: mark_delivered(conn,item[0])
+                except Exception as exc:
+                    print('Owner delivery failed:',type(exc).__name__,flush=True)
+                next_owner_delivery=time.monotonic()+30
             if time.monotonic()>=next_github:
                 try:
                     current_github=github_scan()
