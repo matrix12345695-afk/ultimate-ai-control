@@ -6,7 +6,7 @@ from handoff_v16 import prepare_handoff
 from dispatch_v17 import initialize as init_dispatch
 
 SHA=re.compile(r"^[0-9a-f]{40}$")
-PR_URL=re.compile(r"^https://github\\.com/matrix12345695-afk/ultimate-ai-control/pull/[1-9][0-9]*$")
+PR_URL=re.compile(r"^https://github[.]com/matrix12345695-afk/ultimate-ai-control/pull/[1-9][0-9]*$")
 
 def initialize(conn):
     init_dispatch(conn)
