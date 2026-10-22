@@ -12,15 +12,15 @@ clears the environment and supplies only the Python runtime/libraries. Productio
 host home directories, private configuration, databases and sockets are absent.
 
 A seccomp filter denies network calls, fork/vfork, process clone, new namespaces, mounting,
-ptrace, cross-process memory access and CPU affinity changes. Threads are allowed only with
-CLONE_THREAD and no namespace flags. All test threads share one address space and one CPU.
+ptrace, cross-process memory access and CPU affinity changes. All clone variants and thread creation are denied. This initial runner is single-threaded and
+uses one address space and one CPU.
 Limits: 320 MiB address space, 15 CPU seconds, 20 seconds wall time, 64 descriptors, no core dump,
 bounded file size and a 256000-byte output budget with a retained 64000-byte tail.
 Timeout/output overflow kills only the dedicated sandbox process group. No host fallback exists.
 
 Ubuntu's pinned 0.6.1 utility lacks size-limited tmpfs support. Therefore this backend has a
 read-only /tmp and read-only root, not an unlimited writable temporary filesystem. It supports
-pure Python component tests and in-memory state; tests requiring file writes or child processes
+pure Python component tests and in-memory state; tests requiring file writes, threads or child processes
 must fail or remain unsupported. This is not yet a complete application/browser test platform.
 Newer verified Bubblewrap builds may use a bounded 32 MiB scratch mount instead.
 

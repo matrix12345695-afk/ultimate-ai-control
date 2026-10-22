@@ -2,7 +2,7 @@
 
 Untrusted code never runs on the host interpreter. Only runtime libraries and a materialized
 read-only bundle enter the namespace. Network, process forks, namespace creation and affinity
-changes are denied. Threads share one bounded address space and one CPU. Older Bubblewrap
+changes and threads are denied. Execution uses one address space and one CPU. Older Bubblewrap
 without sized tmpfs support gets a read-only /tmp, never an unlimited writable scratch mount.
 """
 import errno
@@ -83,14 +83,11 @@ def seccomp_filter():
     code=[(LD,0,0,4),(JEQ,1,0,0xc000003e),(RET,0,0,KILL),
           (LD,0,0,0),(JGE,0,1,0x40000000),(RET,0,0,KILL)]
     # No network, new processes, tracing, new namespaces, mounts, kernel control or CPU escape.
-    blocked=(41,42,44,46,57,58,101,155,161,165,166,167,168,169,172,173,203,
+    blocked=(41,42,44,46,56,57,58,101,155,161,165,166,167,168,169,172,173,203,
              246,248,249,250,272,298,303,304,308,310,311,321,323,425,426,427,428,429,430,431,432,438,442)
     for number in blocked: code.extend([(JEQ,0,1,number),(RET,0,0,DENY)])
-    # glibc falls back from clone3 to clone when ENOSYS is returned.
-    code.extend([(JEQ,0,1,435),(RET,0,0,0x00050000|errno.ENOSYS)])
-    # clone is permitted for threads only, with no namespace flags. Threads share memory/CPU.
-    code.extend([(JEQ,0,4,56),(LD,0,0,16),(JSET,1,0,0x7e020000),
-                 (JSET,1,0,0x00010000),(RET,0,0,DENY),(RET,0,0,ALLOW)])
+    # All clone variants are denied: this component runner is single-threaded.
+    code.extend([(JEQ,0,1,435),(RET,0,0,DENY),(RET,0,0,ALLOW)])
     return b''.join(struct.pack('HBBI',*insn) for insn in code)
 
 
@@ -201,4 +198,4 @@ def run_bundle(files,policy_path,timeout=MAX_SECONDS):
         return {'status':status,'exit_code':code,'elapsed_seconds':round(time.monotonic()-started,4),
                 'output':tail.decode(errors='replace'),'source_digest':digest,'files':entries,
                 'backend':'bubblewrap-v1','writable_tmp':cfg['writable_tmp'],
-                'network':False,'process_forks':False,'cpu_count':1,'address_space_mib':320}
+                'network':False,'process_forks':False,'threads':False,'cpu_count':1,'address_space_mib':320}

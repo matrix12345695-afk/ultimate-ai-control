@@ -121,14 +121,13 @@ class RealSandboxTests(unittest.TestCase):
         with patch.dict(os.environ,{'UAC_PRIVATE_CANARY':'never-export-this'}): report=self.run_code(code)
         self.assertEqual(report['status'],'passed',report['output'])
 
-    def test_memory_and_threads_remain_bounded(self):
-        code='''import unittest, concurrent.futures
+    def test_memory_bounded_and_threads_denied(self):
+        code='''import unittest, threading
 class T(unittest.TestCase):
  def test_memory(self):
   with self.assertRaises(MemoryError): bytearray(1024**3)
  def test_threads(self):
-  with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
-   self.assertEqual(list(pool.map(abs,[-1,-2,-3])),[1,2,3])
+  with self.assertRaises(RuntimeError): threading.Thread(target=lambda: None).start()
 '''
         report=self.run_code(code)
         self.assertEqual(report['status'],'passed',report['output'])

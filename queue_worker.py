@@ -1,6 +1,6 @@
-"""Continuous, bounded operations worker. No arbitrary shell, model calls or code execution.
+"""Continuous, bounded operations worker. No arbitrary shell or model calls.
 
-Typed handlers perform HTTPS health checks and AST inspection of ULTIMATE's own source.
+Typed handlers perform HTTPS checks, AST inspection, isolated tests and fixed code recipes.
 Development tasks remain blocked with durable owner notifications until isolated AI execution
 is actually configured. They are never reported as implemented by the offline planner.
 """

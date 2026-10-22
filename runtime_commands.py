@@ -29,7 +29,7 @@ def handle(text,connect,source_key=None):
             if op=='/sandbox':
                 try: cfg=load_policy(Path(conn.execute('PRAGMA database_list').fetchone()[2]).parent/'sandbox-policy.json')
                 except (OSError,ValueError,SandboxUnavailable): return 'Изолированный исполнитель не настроен или проверка целостности не прошла.'
-                return 'Bubblewrap: настроен. Сеть и новые процессы запрещены. Один CPU, 320 MiB, максимум 20 сек.\n'+('Scratch: 32 MiB.' if cfg['writable_tmp'] else 'Файловая система только для чтения; файловые тесты пока не поддерживаются.')
+                return 'Bubblewrap: настроен. Сеть, новые процессы и потоки запрещены. Один CPU, 320 MiB, максимум 20 сек.\n'+('Scratch: 32 MiB.' if cfg['writable_tmp'] else 'Файловая система только для чтения; файловые тесты пока не поддерживаются.')
             if op=='/recipe':
                 if len(args)!=2 or args[1] not in ('safe-paths','sha-check'): return 'Использование: /recipe safe-paths или /recipe sha-check. Это детерминированный генератор, не LLM.'
                 ident=queue.enqueue(conn,'control','review_change',{'recipe':args[1]},event_key=source_key)
