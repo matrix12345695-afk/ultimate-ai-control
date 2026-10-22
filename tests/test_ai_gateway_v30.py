@@ -27,10 +27,10 @@ class Stage30Tests(unittest.TestCase):
         with self.assertRaises(PermissionError):
             validate_policy(DEFAULT_POLICY)
         policy=dict(DEFAULT_POLICY,enabled=True,network_enabled=True,
-                    max_monthly_spend_usd=1,max_calls_per_task=1)
+                    max_monthly_spend_usd=0,max_calls_per_task=1)
         with self.assertRaises(PermissionError):
             validate_policy(policy)
-        policy.update(allow_git_writes=False,allow_code_execution=False,allow_merge=False,allow_deploy=False)
+        policy["max_monthly_spend_usd"]=1
         self.assertTrue(validate_policy(policy))
         policy["allow_deploy"]=True
         with self.assertRaises(PermissionError):
