@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 from telegram_pro import initialize, handle, record
 from github_readonly import command as github_command
+from planner import plan, format_plan
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -41,7 +42,10 @@ def command(text):
     if extra is not None: return extra
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
-    if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.3\n/status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.5\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/plan":
+        if len(parts)<3 or parts[1] not in PROJECTS: return "Usage: /plan nova Improve website"
+        return format_plan(plan(parts[1],parts[2]))
     if c=="/status": return "Dispatcher online. AI: disabled. Production changes: prohibited."
     if c=="/projects": return "\n".join(f"{k}: {v}" for k,v in PROJECTS.items())
     if c=="/check": return check()
