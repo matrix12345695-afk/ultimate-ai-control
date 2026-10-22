@@ -15,10 +15,17 @@ DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
 TOKEN=os.getenv("TELEGRAM_BOT_TOKEN","")
 ADMIN=os.getenv("ADMIN_TELEGRAM_ID","")
 URL=os.getenv("MONITOR_URLS","https://novaweb.uz/").split(",")
+class ManagedConnection(sqlite3.Connection):
+    def __exit__(self, exc_type, exc_value, traceback):
+        try:
+            return super().__exit__(exc_type, exc_value, traceback)
+        finally:
+            self.close()
+
 PROJECTS={"nova":"NOVA WEB","inventory":"Inventory","sap":"SAP / iiko","kinder":"Kinder Spa","qualisift":"QualiSift"}
 def db():
     DB.parent.mkdir(parents=True,exist_ok=True)
-    c=sqlite3.connect(DB)
+    c=sqlite3.connect(DB, factory=ManagedConnection)
     c.execute("CREATE TABLE IF NOT EXISTS tasks(id INTEGER PRIMARY KEY, project TEXT, description TEXT, created_at TEXT)")
     initialize(c)
     setup_v08(c)
