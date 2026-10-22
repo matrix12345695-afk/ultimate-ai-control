@@ -172,6 +172,34 @@ def finish(conn, ident, token, result, *, awaiting_owner=False, now=None):
         _event(conn,ident,now,state)
 
 
+def finish_with_test(conn,ident,token,result,payload,*,event_key,now=None):
+    """Commit successful generation and its control-project test job in one transaction."""
+    now=_now(now)
+    _text(event_key,200)
+    if (not isinstance(payload,dict) or set(payload)!={'target','generation_job_id','source_digest'} or
+            payload['target']!='developer-bundle' or type(payload['generation_job_id']) is not int or payload['generation_job_id']!=ident or
+            not isinstance(payload['source_digest'],str) or len(payload['source_digest'])!=64 or
+            any(c not in '0123456789abcdef' for c in payload['source_digest']) or
+            not isinstance(result,dict) or result.get('source_digest')!=payload['source_digest']):
+        raise ValueError('invalid developer test follow-up')
+    raw=_json(payload)
+    with _write(conn):
+        _owned(conn,ident,token,now)
+        parent=conn.execute('SELECT project,kind FROM agent_jobs WHERE id=?',(ident,)).fetchone()
+        if parent!=('control','review_change'): raise PermissionError('only ULTIMATE generation may create a test follow-up')
+        existing=conn.execute('SELECT id,project,kind,payload FROM agent_jobs WHERE event_key=?',(event_key,)).fetchone()
+        if existing:
+            if existing[1:]!=('control','test_release',raw): raise ValueError('follow-up event key conflict')
+            child=existing[0]
+        else:
+            child=conn.execute("INSERT INTO agent_jobs(project,kind,payload,event_key,priority,max_attempts,created_at,available_at,updated_at) VALUES('control','test_release',?,?,50,3,?,?,?)",(raw,event_key,now,now,now)).lastrowid
+            _event(conn,child,now,'queued')
+        saved=_json(dict(result,followup_job_id=child))
+        conn.execute("UPDATE agent_jobs SET state='succeeded',result=?,worker=NULL,lease_token=NULL,lease_until=NULL,updated_at=? WHERE id=?",(saved,now,ident))
+        _event(conn,ident,now,'succeeded','draft awaits isolated tests')
+        return child
+
+
 def fail(conn, ident, token, error, *, retryable=True, now=None):
     if type(retryable) is not bool: raise ValueError("invalid retry flag")
     now=_now(now)

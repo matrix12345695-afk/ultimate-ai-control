@@ -26,13 +26,22 @@ def recipe_files(recipe,job_id):
 def prepare(conn,job,artifact_root,policy_path,runner=run_bundle):
     if job['project']!='control': raise PermissionError("offline recipes are enabled only for ULTIMATE drafts")
     if type(job.get('attempt')) is not int or not 1<=job['attempt']<=5: raise ValueError("invalid job attempt")
-    existing=conn.execute('SELECT id,source_digest,test_status FROM code_artifacts WHERE job_id=? AND attempt=?',(job['id'],job['attempt'])).fetchone()
-    if existing:
-        return {'artifact_id':existing[0],'source_digest':existing[1],'test_status':existing[2],'engine':'deterministic_recipe','code_draft_created':True,'published':False}
     files=recipe_files(job['payload'].get('recipe'),job['id'])
+    return prepare_files(conn,job,artifact_root,policy_path,files,engine='deterministic_recipe',runner=runner)
+
+
+def prepare_files(conn,job,artifact_root,policy_path,files,*,engine,provenance=None,runner=run_bundle):
+    if job['project']!='control' or engine not in ('deterministic_recipe','offline_broker_demo','openai_broker'):
+        raise PermissionError('draft source is not enabled')
+    if type(job.get('attempt')) is not int or not 1<=job['attempt']<=5: raise ValueError('invalid job attempt')
+    existing=conn.execute('SELECT id,source_digest,test_status,engine FROM code_artifacts WHERE job_id=? AND attempt=?',(job['id'],job['attempt'])).fetchone()
+    if existing:
+        if existing[1]!=manifest(files)[1] or existing[3]!=engine: raise ValueError('artifact source changed')
+        return {'artifact_id':existing[0],'source_digest':existing[1],'test_status':existing[2],'engine':engine,'code_draft_created':True,'published':False}
     entries,digest=manifest(files)
     report=runner(files,policy_path)
     if report.get('source_digest')!=digest: raise ValueError("test report source digest mismatch")
+    if provenance is not None: report=dict(report,provenance=provenance)
     root=Path(artifact_root)
     root.mkdir(parents=True,exist_ok=True,mode=0o700)
     if root.is_symlink() or 'inventory-bot' in root.resolve().parts: raise PermissionError("invalid artifact root")
@@ -53,10 +62,10 @@ def prepare(conn,job,artifact_root,policy_path,runner=run_bundle):
             p.chmod(0o600)
         stage.rename(target)
     cur=conn.execute("INSERT INTO code_artifacts(job_id,attempt,project,engine,source_digest,manifest,test_status,test_report,path,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)",
-                     (job['id'],job['attempt'],'control','deterministic_recipe',digest,json.dumps(entries),report['status'],json.dumps(report,ensure_ascii=False),str(target),time.time()))
+                     (job['id'],job['attempt'],'control',engine,digest,json.dumps(entries),report['status'],json.dumps(report,ensure_ascii=False),str(target),time.time()))
     conn.commit()
     return {'artifact_id':cur.lastrowid,'source_digest':digest,'test_status':report['status'],
-            'engine':'deterministic_recipe','code_draft_created':True,'published':False,
+            'engine':engine,'code_draft_created':True,'published':False,
             'test_elapsed_seconds':report['elapsed_seconds'],'backend':report['backend'],
             'writable_tmp':report['writable_tmp'],'files':entries}
 
@@ -65,7 +74,8 @@ def describe(conn,ident):
     row=conn.execute('SELECT project,engine,source_digest,manifest,test_status,test_report FROM code_artifacts WHERE id=?',(ident,)).fetchone()
     if row is None: return 'Артефакт не найден.'
     report=json.loads(row[5])
-    return (f'Кодовый черновик #{ident} · {row[0]}\nДвижок: {row[1]} (без LLM)\n'
+    label='OpenAI: результат требует проверки' if row[1]=='openai_broker' else 'без LLM'
+    return (f'Кодовый черновик #{ident} · {row[0]}\nДвижок: {row[1]} ({label})\n'
             f'SHA-256: {row[2]}\nТесты: {row[4]} · {report.get("elapsed_seconds",0):.3f} сек.\n'
             f'Изоляция: {report.get("backend")} · сеть отключена\n'
             +'\n'.join(item['path'] for item in json.loads(row[3]))
