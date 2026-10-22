@@ -20,6 +20,7 @@ import scheduler
 import roadmap
 import budget_gate
 import offline_developer
+import metered_provider
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -49,6 +50,7 @@ def initialize(conn):
     init_inbox(conn)
     budget_gate.initialize(conn)
     offline_developer.initialize(conn)
+    metered_provider.initialize(conn)
 
 
 def send_event(conn,kind,title,reason,event_key,task=None):

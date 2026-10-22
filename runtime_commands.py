@@ -6,6 +6,7 @@ import roadmap
 import chat_binding
 import budget_gate
 import offline_developer
+import metered_provider
 from isolated_python import load_policy, SandboxUnavailable
 from pathlib import Path
 from ai_gateway_v30 import SECRET
@@ -22,10 +23,19 @@ def handle(text,connect,source_key=None):
     args=text.split(maxsplit=2)
     if not args: return None
     op=args[0].split("@")[0].lower()
-    known={"/roadmap","/queue","/job","/work","/project","/agents","/daily","/memory","/budget4","/pause","/resume","/chat_link","/chat_bind","/job_cancel","/sandbox","/recipe","/selftest","/artifact","/artifact_code"}
+    known={"/roadmap","/queue","/job","/work","/project","/agents","/daily","/memory","/budget4","/pause","/resume","/chat_link","/chat_bind","/job_cancel","/sandbox","/recipe","/selftest","/artifact","/artifact_code","/provider4"}
     if op not in known: return None
     with connect() as conn:
         try:
+            if op=='/provider4':
+                folder=Path(conn.execute('PRAGMA database_list').fetchone()[2]).parent
+                result=metered_provider.status(conn,folder/'provider-policy.json')
+                return ('OpenAI: транспорт с учётом расходов подготовлен.\n'
+                        +'Политика: '+('включена' if result['policy_enabled'] else 'выключена/не настроена')
+                        +'\nМодель: '+result['model']
+                        +'\nНеразрешённых резервов: '+str(result['unresolved_reservations'])
+                        +'\nУчтено/зарезервировано: $'+f"{result['accounted_usd']:.4f}"
+                        +'\nАвтоматические вызовы модели из очереди выключены. Ключ настраивается приватно на VPS; не отправляй его сюда.')
             if op=='/sandbox':
                 try: cfg=load_policy(Path(conn.execute('PRAGMA database_list').fetchone()[2]).parent/'sandbox-policy.json')
                 except (OSError,ValueError,SandboxUnavailable): return 'Изолированный исполнитель не настроен или проверка целостности не прошла.'
