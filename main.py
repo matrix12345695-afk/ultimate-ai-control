@@ -8,6 +8,7 @@ from planner import plan, format_plan
 from ai_provider import status as ai_status, propose as ai_propose
 from control_v08 import setup as setup_v08, save_proposal, list_proposals, proposal_detail, budget_status
 from telegram_menu import WELCOME, HELP, keyboard, route
+from diagnostics import snapshot, format_snapshot
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -53,6 +54,9 @@ def command(text):
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
     if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.9\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/diagnostics":
+        with db() as conn:
+            return format_snapshot(snapshot(conn,ai_status()["enabled"]))
     if c=="/budget":
         with db() as conn: return budget_status(conn,0)
     if c=="/proposals":
