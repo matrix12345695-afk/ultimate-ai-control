@@ -88,7 +88,7 @@ def command(text):
         if len(parts)!=2 or parts[1] not in ("newline","whitespace"):
             return "Использование: /autofix34 newline или /autofix34 whitespace"
         try:
-            fixture=("answer = 42","missing-final-newline") if parts[1]=="newline" else ("answer = 42   \\n","trim-trailing-whitespace")
+            fixture=("answer = 42","missing-final-newline") if parts[1]=="newline" else ("answer = 42   "+chr(10),"trim-trailing-whitespace")
             return message_v34(evidence_v34("proposals/review_example.py",fixture[0],fixture[1]))
         except (ValueError,PermissionError,SyntaxError) as exc:
             return "Поведенческая проверка отклонена: "+str(exc)
