@@ -9,9 +9,12 @@ class AutofixEvidencePersistenceTests(unittest.TestCase):
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory()
         self.old=main.DB
+        self.old_admin=main.ADMIN
+        main.ADMIN='test-admin'
         main.DB=pathlib.Path(self.tmp.name)/"control.db"
     def tearDown(self):
         main.DB=self.old
+        main.ADMIN=self.old_admin
         self.tmp.cleanup()
     def test_new_report_approval_and_no_pr(self):
         response=main.command("/autofix35_new newline")
@@ -33,7 +36,7 @@ class AutofixEvidencePersistenceTests(unittest.TestCase):
         with main.db() as conn:
             conn.execute("UPDATE autofix_evidence_v35 SET report_json='{}' WHERE id=1")
             conn.commit()
-        self.assertIn("не совпадает",main.command("/autofix35_status 1"))
+        self.assertIn("недействительно",main.command("/autofix35_status 1"))
     def test_bad_inputs(self):
         self.assertIn("Использование",main.command("/autofix35_new unrestricted"))
         self.assertIn("Использование",main.command("/autofix35_status abc"))
