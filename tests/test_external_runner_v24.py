@@ -13,6 +13,8 @@ class Transport:
  def create_file(self,*x):self.calls.append("file")
  def get_branch_sha(self,*x):return "b"*40
  def create_draft_pr(self,*x):self.calls.append("draft");return "https://github.com/matrix12345695-afk/ultimate-ai-control/pull/20"
+ def fetch_pr(self,repo,url):
+  return {"url":url,"draft":True,"merged":False,"head":"ai-review/control-test","head_sha":"b"*40,"base":"main","base_sha":"a"*40,"head_repo_full_name":repo}
 
 class RunnerTests(unittest.TestCase):
  def setUp(self):
