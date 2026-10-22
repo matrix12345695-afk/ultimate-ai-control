@@ -10,6 +10,7 @@ from control_v08 import setup as setup_v08, save_proposal, list_proposals, propo
 from telegram_menu import WELCOME, HELP, keyboard, route
 from diagnostics import snapshot, format_snapshot
 from operations import snapshot_once, backup_status, AlertLimiter
+from monitoring import transitions, format_report
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -112,6 +113,7 @@ def main():
     next_check=time.monotonic()+3600
     next_backup=time.monotonic()+60
     alerts=AlertLimiter(3600)
+    previous_monitor={}
     while True:
         try:
             updates=api("getUpdates",offset=offset,timeout=20,allowed_updates=json.dumps(["message"]))
@@ -134,7 +136,14 @@ def main():
                 next_backup=time.monotonic()+3600
             if time.monotonic()>=next_check:
                 result=check()
-                if "unavailable" in result: reply(ADMIN,result)
+                current_monitor={}
+                for line in result.splitlines():
+                    target, separator, detail=line.partition(': ')
+                    if separator:
+                        current_monitor[target]=(not detail.startswith('unavailable'),detail)
+                for alert in transitions(previous_monitor,current_monitor):
+                    reply(ADMIN,alert)
+                previous_monitor=current_monitor
                 next_check=time.monotonic()+3600
         except Exception as exc:
             print("Polling error:",type(exc).__name__,flush=True)
