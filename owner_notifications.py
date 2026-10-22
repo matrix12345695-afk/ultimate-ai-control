@@ -131,7 +131,7 @@ def release_delivery(conn, notification_id):
 
 def format_delivery(row):
     ident, project, kind, title, reason, action = row
-    return (f"🔔 ULTIMATE AI CONTROL · {kind.upper()}\\n"
-            f"Проект: {project}\\nТема: {title}\\n"
-            f"Причина: {reason}\\nЧто сделать: {action}\\n"
+    return (f"🔔 ULTIMATE AI CONTROL · {kind.upper()}\n"
+            f"Проект: {project}\nТема: {title}\n"
+            f"Причина: {reason}\nЧто сделать: {action}\n"
             f"Запрос #{ident} · /owner_inbox")
