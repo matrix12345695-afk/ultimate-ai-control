@@ -22,7 +22,7 @@ ROUTES = {
     "🧪 Код / PR": "/code",
 }
 WELCOME = (
-    "🧠 ULTIMATE AI CONTROL v2.0 REVIEW (пилот)\n"
+    "🧠 ULTIMATE AI CONTROL v2.1 REVIEW (пилот)\n"
     "Центр управления проектами\n\n"
     "📡 Telegram: подключён\n"
     "🛡 Режим: v2.0 согласования, только проверка\n"
