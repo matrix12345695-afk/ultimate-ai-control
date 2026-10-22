@@ -7,6 +7,7 @@ from github_readonly import command as github_command
 from planner import plan, format_plan
 from ai_provider import status as ai_status, propose as ai_propose
 from control_v08 import setup as setup_v08, save_proposal, list_proposals, proposal_detail, budget_status
+from telegram_menu import WELCOME, HELP, keyboard, route
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -26,7 +27,10 @@ def api(method,**kwargs):
     data=urllib.parse.urlencode(kwargs).encode()
     with urllib.request.urlopen(f"https://api.telegram.org/bot{TOKEN}/{method}",data=data,timeout=35) as response:
         return json.load(response)["result"]
-def reply(chat,msg): api("sendMessage",chat_id=chat,text=msg[:4000])
+def reply(chat,msg,show_keyboard=False):
+    args={"chat_id":chat,"text":msg[:4000]}
+    if show_keyboard: args["reply_markup"]=keyboard()
+    api("sendMessage",**args)
 def check():
     results=[]
     for url in URL:
@@ -38,6 +42,9 @@ def check():
         except Exception as e: results.append(f"{url}: unavailable ({type(e).__name__})")
     return "\n".join(results) or "No HTTPS monitoring URLs configured."
 def command(text):
+    text=route(text)
+    if text == "/start": return WELCOME
+    if text == "/help": return HELP
     github_result=github_command(text)
     if github_result is not None:
         return github_result
@@ -45,7 +52,7 @@ def command(text):
     if extra is not None: return extra
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
-    if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.8\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.9\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
     if c=="/budget":
         with db() as conn: return budget_status(conn,0)
     if c=="/proposals":
@@ -99,7 +106,8 @@ def main():
                 chat=message.get("chat",{})
                 if str(sender.get("id"))!=ADMIN or chat.get("type")!="private": continue
                 text=message.get("text","")
-                if text.startswith("/"): reply(chat["id"],command(text))
+                if text.startswith("/") or text in __import__("telegram_menu").ROUTES:
+                    reply(chat["id"],command(text),show_keyboard=text in ("/start", "📖 Помощь"))
             if time.monotonic()>=next_check:
                 result=check()
                 if "unavailable" in result: reply(ADMIN,result)
