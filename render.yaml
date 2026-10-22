@@ -1,0 +1,22 @@
+# Preview only. Do not apply without reviewing hosting price and approval.
+services:
+  - type: worker
+    name: ultimate-ai-control
+    runtime: python
+    plan: starter
+    buildCommand: "python -m compileall -q ."
+    startCommand: "python main.py"
+    autoDeployTrigger: "off"
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: ADMIN_TELEGRAM_ID
+        sync: false
+      - key: AI_ENABLED
+        value: "false"
+      - key: AI_MONTHLY_BUDGET_USD
+        value: "0"
+      - key: MONITOR_URLS
+        value: "https://novaweb.uz/"
+# NOTE: Worker has no guaranteed persistent local disk. SQLite data requires
+# external persistent storage before real production use. No service created.
