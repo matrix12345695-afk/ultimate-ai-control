@@ -22,6 +22,7 @@ from code_reviews_v48 import handle as code_review_handle
 from ai_commands_v30 import handle as ai30_handle
 from isolated_development_v31 import prepare as prepare_v31, format_report as report_v31
 from behavior_review_v34 import evidence as evidence_v34, review_message as message_v34
+from autofix_evidence_v35 import create as create_v35, describe as describe_v35
 from ai_commands_v30 import handle as ai30_handle
 
 BASE=Path(__file__).parent
@@ -84,6 +85,21 @@ def command(text):
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
     if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.9\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/autofix35_new":
+        if len(parts)!=2 or parts[1] not in ("newline","whitespace"):
+            return "Использование: /autofix35_new newline или /autofix35_new whitespace"
+        with db() as conn:
+            ident,approval,report=create_v35(conn,parts[1])
+        return (f"🧾 Пакет исправления #{ident} сохранён.\\n"
+                f"SHA-256: {report['evidence_sha256']}\\n"
+                f"Проверить: /autofix35_status {ident}\\n"
+                f"Одобрение отчёта: /approve {approval}\\n"
+                "Одобрение не создаёт PR, не изменяет проекты и не запускает код.")
+    if c=="/autofix35_status":
+        if len(parts)!=2 or not parts[1].isdigit() or int(parts[1])<=0:
+            return "Использование: /autofix35_status <номер>"
+        with db() as conn:
+            return describe_v35(conn,int(parts[1]))
     if c=="/autofix34":
         if len(parts)!=2 or parts[1] not in ("newline","whitespace"):
             return "Использование: /autofix34 newline или /autofix34 whitespace"
