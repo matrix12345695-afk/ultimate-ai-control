@@ -37,3 +37,10 @@ class RunnerTests(unittest.TestCase):
   decide(self.db,self.approval,"1","1",True)
   with self.assertRaises(ValueError):submit_review(self.db,self.id,"a"*40,{"docs/test.md":"EVIL"},self.t,True)
   self.assertEqual(self.t.calls,[])
+
+class InvalidPRTests(RunnerTests):
+ def test_mismatched_remote_pr_stays_reserved(self):
+  decide(self.db,self.approval,'1','1',True)
+  self.t.fetch_pr=lambda repo,url:{'url':url,'draft':False}
+  with self.assertRaises(ValueError):submit_review(self.db,self.id,'a'*40,{'docs/test.md':'SAFE'},self.t,True)
+  self.assertEqual(self.db.execute('SELECT state FROM dispatch_receipts WHERE request_id=?',(self.id,)).fetchone()[0],'reserved')
