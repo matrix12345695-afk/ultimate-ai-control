@@ -20,6 +20,7 @@ from handoff_v16 import prepare_handoff
 from review_bot_v45 import handle as review_handle
 from code_reviews_v48 import handle as code_review_handle
 from ai_commands_v30 import handle as ai30_handle
+from isolated_development_v31 import prepare as prepare_v31, format_report as report_v31
 from ai_commands_v30 import handle as ai30_handle
 
 BASE=Path(__file__).parent
@@ -82,6 +83,20 @@ def command(text):
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
     if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.9\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/dev31":
+        if len(parts)!=2 or not parts[1].isdigit() or int(parts[1])<=0:
+            return "Использование: /dev31 <номер_кодовой_заявки>"
+        try:
+            with db() as conn:
+                row=conn.execute("SELECT project,task,manifest_json FROM github_change_requests WHERE id=?",(int(parts[1]),)).fetchone()
+                if not row: return "Заявка не найдена."
+                import json as _json
+                bundle=prepare_v31(row[0],row[1])
+                if bundle["manifest"]!=_json.loads(row[2]):
+                    return "Заявка изменена: пакет не прошёл SHA-256 проверку."
+                return report_v31(bundle)
+        except (ValueError,PermissionError,SyntaxError) as exc:
+            return "Изолированная подготовка отклонена: "+str(exc)
     if c=="/github_handoff":
         args=text.split()
         if len(args)!=3 or not args[1].isdigit(): return "Использование: /github_handoff <request_id> <full_40_char_base_sha>"
