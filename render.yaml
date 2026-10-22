@@ -1,22 +1,27 @@
-# Preview only. Do not apply without reviewing hosting price and approval.
+# DEPLOYMENT PROPOSAL ONLY: applying this blueprint may incur charges.
+# Explicit owner approval of Render service + disk pricing is required.
 services:
   - type: worker
     name: ultimate-ai-control
     runtime: python
     plan: starter
-    buildCommand: "python -m compileall -q ."
+    buildCommand: "python -m compileall -q . && python -m unittest discover -s tests -v"
     startCommand: "python main.py"
     autoDeployTrigger: "off"
+    disk:
+      name: ultimate-control-data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: TELEGRAM_BOT_TOKEN
         sync: false
       - key: ADMIN_TELEGRAM_ID
         sync: false
+      - key: DB_PATH
+        value: /var/data/control.db
       - key: AI_ENABLED
         value: "false"
       - key: AI_MONTHLY_BUDGET_USD
         value: "0"
       - key: MONITOR_URLS
         value: "https://novaweb.uz/"
-# NOTE: Worker has no guaranteed persistent local disk. SQLite data requires
-# external persistent storage before real production use. No service created.
