@@ -13,6 +13,7 @@ from operations import snapshot_once, backup_status, AlertLimiter
 from monitoring import transitions, format_report
 from github_watch import scan as github_scan
 from project_reports import project_report
+from developer_v13 import prepare as developer_prepare, render as developer_render
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -65,6 +66,10 @@ def command(text):
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
     if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.9\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/devplan":
+        if len(parts)<3: return "Usage: /devplan nova Describe change"
+        try: return developer_render(developer_prepare(parts[1],parts[2]))
+        except ValueError: return "Недопустимый проект или текст задачи."
     if c=="/github_check":
         return format_report(github_scan())
     if c=="/report":
