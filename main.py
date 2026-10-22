@@ -11,6 +11,8 @@ from telegram_menu import WELCOME, HELP, keyboard, route
 from diagnostics import snapshot, format_snapshot
 from operations import snapshot_once, backup_status, AlertLimiter
 from monitoring import transitions, format_report
+from github_watch import scan as github_scan
+from project_reports import project_report
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -63,6 +65,11 @@ def command(text):
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
     if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.9\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/github_check":
+        return format_report(github_scan())
+    if c=="/report":
+        with db() as conn:
+            return project_report(conn, PROJECTS)
     if c=="/backups":
         return backup_status(DB.parent / "backups")
     if c=="/diagnostics":
@@ -114,6 +121,8 @@ def main():
     next_backup=time.monotonic()+60
     alerts=AlertLimiter(3600)
     previous_monitor={}
+    previous_github={}
+    next_github=time.monotonic()+120
     while True:
         try:
             updates=api("getUpdates",offset=offset,timeout=20,allowed_updates=json.dumps(["message"]))
@@ -126,6 +135,15 @@ def main():
                 text=message.get("text","")
                 if text.startswith("/") or text in __import__("telegram_menu").ROUTES:
                     reply(chat["id"],command(text),show_keyboard=text in ("/start", "📖 Помощь"))
+            if time.monotonic()>=next_github:
+                try:
+                    current_github=github_scan()
+                    for alert in transitions(previous_github,current_github):
+                        reply(ADMIN,alert)
+                    previous_github=current_github
+                except Exception as exc:
+                    print('GitHub monitor failed:',type(exc).__name__,flush=True)
+                next_github=time.monotonic()+3600
             if time.monotonic()>=next_backup:
                 try:
                     created=snapshot_once(DB, DB.parent / 'backups')
