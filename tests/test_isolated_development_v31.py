@@ -39,7 +39,7 @@ class IsolatedDevelopmentTests(unittest.TestCase):
                 self.assertIn("Python",status)
                 self.assertIn("Merge/Deploy: запрещены",status)
                 with main.db() as conn:
-                    self.assertEqual(conn.execute("SELECT COUNT(*) FROM dispatch_receipts").fetchone()[0],0)
+                    self.assertEqual(conn.execute("SELECT COUNT(*) FROM sqlite_master WHERE type=? AND name=?",("table","dispatch_receipts")).fetchone()[0],0)
                     conn.execute("UPDATE github_change_requests SET manifest_json='{}' WHERE id=1")
                     conn.commit()
                 self.assertIn("SHA-256",main.command("/dev31 1"))
