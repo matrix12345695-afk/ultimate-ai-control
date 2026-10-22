@@ -16,7 +16,7 @@ def initialize(conn):
 
 def create_request(conn, project, task, files):
     manifest=stage(project,task,files)
-    conn.execute("INSERT INTO github_change_requests(project,task,manifest_json,approval_id) VALUES(?,?,?,'temporary')",
+    conn.execute("INSERT INTO github_change_requests(project,task,manifest_json,approval_id) VALUES(?,?,?,'pending-' || lower(hex(randomblob(12))))",
                  (project,task,json.dumps(manifest,sort_keys=True)))
     task_id=conn.execute("SELECT last_insert_rowid()").fetchone()[0]
     approval_id=request_approval(conn,task_id,"github_draft_pr","review_only",manifest,ttl_minutes=60)
