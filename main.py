@@ -16,6 +16,7 @@ from project_reports import project_report
 from developer_v13 import prepare as developer_prepare, render as developer_render
 from execution_gate import stage as stage_changes
 from github_requests import initialize as init_github_requests, create_request as create_github_request, describe as describe_github_request
+from handoff_v16 import prepare_handoff
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -69,6 +70,18 @@ def command(text):
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
     if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.9\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/github_handoff":
+        args=text.split()
+        if len(args)!=3 or not args[1].isdigit(): return "Использование: /github_handoff <request_id> <full_40_char_base_sha>"
+        try:
+            with db() as conn: package=prepare_handoff(conn,int(args[1]),args[2])
+            return ("🔐 Пакет передачи подготовлен (без исполнения)\\n"
+                    +"Request: "+str(package["request_id"])+"\\n"
+                    +"Base: "+package["base_sha"]+"\\n"
+                    +"Digest: "+package["handoff_sha256"]+"\\n"
+                    +"Только черновой PR. Изменений в GitHub не сделано.")
+        except (ValueError,PermissionError) as exc:
+            return "Передача заблокирована: "+str(exc)
     if c=="/github_request":
         if len(parts)<3: return "Использование: /github_request control Описание задачи"
         try:
