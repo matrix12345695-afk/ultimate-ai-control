@@ -21,6 +21,7 @@ from review_bot_v45 import handle as review_handle
 from code_reviews_v48 import handle as code_review_handle
 from ai_commands_v30 import handle as ai30_handle
 from isolated_development_v31 import prepare as prepare_v31, format_report as report_v31
+from behavior_review_v34 import evidence as evidence_v34, review_message as message_v34
 from ai_commands_v30 import handle as ai30_handle
 
 BASE=Path(__file__).parent
@@ -83,6 +84,14 @@ def command(text):
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
     if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.9\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/autofix34":
+        if len(parts)!=2 or parts[1] not in ("newline","whitespace"):
+            return "Использование: /autofix34 newline или /autofix34 whitespace"
+        try:
+            fixture=("answer = 42","missing-final-newline") if parts[1]=="newline" else ("answer = 42   \\n","trim-trailing-whitespace")
+            return message_v34(evidence_v34("proposals/review_example.py",fixture[0],fixture[1]))
+        except (ValueError,PermissionError,SyntaxError) as exc:
+            return "Поведенческая проверка отклонена: "+str(exc)
     if c=="/dev31":
         if len(parts)!=2 or not parts[1].isdigit() or int(parts[1])<=0:
             return "Использование: /dev31 <номер_кодовой_заявки>"
