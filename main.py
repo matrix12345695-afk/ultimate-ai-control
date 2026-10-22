@@ -6,6 +6,7 @@ from telegram_pro import initialize, handle, record
 from github_readonly import command as github_command
 from planner import plan, format_plan
 from ai_provider import status as ai_status, propose as ai_propose
+from control_v08 import setup as setup_v08, save_proposal, list_proposals, proposal_detail, budget_status
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -18,6 +19,7 @@ def db():
     c=sqlite3.connect(DB)
     c.execute("CREATE TABLE IF NOT EXISTS tasks(id INTEGER PRIMARY KEY, project TEXT, description TEXT, created_at TEXT)")
     initialize(c)
+    setup_v08(c)
     c.commit()
     return c
 def api(method,**kwargs):
@@ -43,7 +45,22 @@ def command(text):
     if extra is not None: return extra
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
-    if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.7\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.8\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/budget":
+        with db() as conn: return budget_status(conn,0)
+    if c=="/proposals":
+        with db() as conn: return list_proposals(conn)
+    if c=="/proposal":
+        if len(parts)<2: return "Usage: /proposal <id>"
+        with db() as conn: return proposal_detail(conn,parts[1])
+    if c=="/draft":
+        if len(parts)<3 or parts[1] not in PROJECTS: return "Usage: /draft nova Improve SEO"
+        offline_plan=format_plan(plan(parts[1],parts[2]))
+        with db() as conn:
+            proposal_id=save_proposal(conn,parts[1],parts[2],offline_plan)
+            record(conn,"draft_created",proposal_id)
+            conn.commit()
+        return f"Draft {proposal_id} saved. No code was changed. /proposal {proposal_id}"
     if c=="/ai_status":
         state=ai_status()
         return f"AI enabled: {state['enabled']}\nProvider: {state['provider']}\nModel: {state['model']}\nBudget gate USD: {state['budget_usd']}"
