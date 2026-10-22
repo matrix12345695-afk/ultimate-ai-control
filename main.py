@@ -17,6 +17,13 @@ from developer_v13 import prepare as developer_prepare, render as developer_rend
 from execution_gate import stage as stage_changes
 from github_requests import initialize as init_github_requests, create_request as create_github_request, describe as describe_github_request
 from handoff_v16 import prepare_handoff
+from review_bot_v45 import handle as review_handle
+from code_reviews_v48 import handle as code_review_handle
+from ai_commands_v30 import handle as ai30_handle
+from isolated_development_v31 import prepare as prepare_v31, format_report as report_v31
+from behavior_review_v34 import evidence as evidence_v34, review_message as message_v34
+from autofix_evidence_v35 import create as create_v35, describe as describe_v35
+from ai_commands_v30 import handle as ai30_handle
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -67,9 +74,54 @@ def command(text):
         return github_result
     extra=handle(text, db, ADMIN)
     if extra is not None: return extra
+    review_response=review_handle(text, db)
+    if review_response is not None: return review_response
+    code_response=code_review_handle(text, db)
+    if code_response is not None: return code_response
+    ai30_response=ai30_handle(text)
+    if ai30_response is not None: return ai30_response
+    ai30_response=ai30_handle(text)
+    if ai30_response is not None: return ai30_response
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
     if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.9\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/autofix35_new":
+        if len(parts)!=2 or parts[1] not in ("newline","whitespace"):
+            return "Использование: /autofix35_new newline или /autofix35_new whitespace"
+        with db() as conn:
+            ident,approval,report=create_v35(conn,parts[1])
+        return (f"🧾 Пакет исправления #{ident} сохранён.\\n"
+                f"SHA-256: {report['evidence_sha256']}\\n"
+                f"Проверить: /autofix35_status {ident}\\n"
+                f"Одобрение отчёта: /approve {approval}\\n"
+                "Одобрение не создаёт PR, не изменяет проекты и не запускает код.")
+    if c=="/autofix35_status":
+        if len(parts)!=2 or not parts[1].isdigit() or int(parts[1])<=0:
+            return "Использование: /autofix35_status <номер>"
+        with db() as conn:
+            return describe_v35(conn,int(parts[1]))
+    if c=="/autofix34":
+        if len(parts)!=2 or parts[1] not in ("newline","whitespace"):
+            return "Использование: /autofix34 newline или /autofix34 whitespace"
+        try:
+            fixture=("answer = 42","missing-final-newline") if parts[1]=="newline" else ("answer = 42   "+chr(10),"trim-trailing-whitespace")
+            return message_v34(evidence_v34("proposals/review_example.py",fixture[0],fixture[1]))
+        except (ValueError,PermissionError,SyntaxError) as exc:
+            return "Поведенческая проверка отклонена: "+str(exc)
+    if c=="/dev31":
+        if len(parts)!=2 or not parts[1].isdigit() or int(parts[1])<=0:
+            return "Использование: /dev31 <номер_кодовой_заявки>"
+        try:
+            with db() as conn:
+                row=conn.execute("SELECT project,task,manifest_json FROM github_change_requests WHERE id=?",(int(parts[1]),)).fetchone()
+                if not row: return "Заявка не найдена."
+                import json as _json
+                bundle=prepare_v31(row[0],row[1])
+                if bundle["manifest"]!=_json.loads(row[2]):
+                    return "Заявка изменена: пакет не прошёл SHA-256 проверку."
+                return report_v31(bundle)
+        except (ValueError,PermissionError,SyntaxError) as exc:
+            return "Изолированная подготовка отклонена: "+str(exc)
     if c=="/github_handoff":
         args=text.split()
         if len(args)!=3 or not args[1].isdigit(): return "Использование: /github_handoff <request_id> <full_40_char_base_sha>"
