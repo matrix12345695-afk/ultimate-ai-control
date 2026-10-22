@@ -9,6 +9,7 @@ from dispatch_v17 import reserve_once, record_result
 from github_client_v22 import RestrictedGithub
 from github_executor_v18 import draft_pr
 from handoff_v16 import verify_material
+from pr_attestation_v25 import verify_draft_pr
 
 REPO="matrix12345695-afk/ultimate-ai-control"
 
@@ -25,5 +26,10 @@ def submit_review(conn,request_id,base_sha,files,transport,enabled=False):
     package=reserve_once(conn,request_id,base_sha)
     client=RestrictedGithub(transport)
     result=draft_pr(client,REPO,package,files,base_sha,approved=True)
+    # Read back remote PR before marking a dispatch completed.
+    if not callable(getattr(transport,"fetch_pr",None)):
+        raise RuntimeError("Remote PR verification unavailable; reconcile reserved request")
+    pr=transport.fetch_pr(REPO,result["url"])
+    verify_draft_pr(pr,REPO,result["branch"],result["base_sha"],result["head_sha"])
     record_result(conn,request_id,package["handoff_sha256"],result["url"],True)
     return result
