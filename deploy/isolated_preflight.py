@@ -8,12 +8,13 @@ import json
 INVENTORY = Path("/home/maksim/inventory-bot")
 DEFAULT_TARGET = Path("/home/maksim/ultimate-ai-control")
 def check(target=DEFAULT_TARGET, inventory=INVENTORY):
-    target = Path(target).resolve()
+    target = Path(target).absolute()
     inventory = Path(inventory).resolve()
-    if target == inventory or inventory in target.parents or target in inventory.parents:
-        raise ValueError("Target overlaps Inventory Bot directory")
     if target.is_symlink():
         raise ValueError("Symlink target not permitted")
+    target = target.resolve()
+    if target == inventory or inventory in target.parents or target in inventory.parents:
+        raise ValueError("Target overlaps Inventory Bot directory")
     if target.exists() and not target.is_dir():
         raise ValueError("Target is not a directory")
     if target.exists() and any(target.iterdir()):
