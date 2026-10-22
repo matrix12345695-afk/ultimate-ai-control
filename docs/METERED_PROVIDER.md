@@ -88,3 +88,9 @@ Validation includes concurrent duplicate requests, timeouts/restart/month rollov
 exhaustion, private-file boundaries, redirect rejection, cached-token arithmetic, refused/tool
 output and missing/unpriced/excessive receipts. These tests use deterministic fake responses,
 not paid API calls. Live billing and actual model behavior remain unverified until private setup.
+
+The trusted dispatcher, operator CLI and operations worker currently share the VPS Linux user.
+Keeping keys out of their environments is logical separation, not an OS permission boundary
+between same-UID processes. Before general agent tools receive broader host access, the future
+credential broker needs an independently reviewed OS access boundary. The existing untrusted
+Python test sandbox does not mount host home/configuration directories.
