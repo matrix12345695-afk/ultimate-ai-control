@@ -74,7 +74,7 @@ class ReviewExecutorTests(unittest.TestCase):
             reply = run_once(self.db, marker=self.marker, env_path=self.env,
                              token_issuer=lambda key: "temporary-token")
         self.assertIn("DRAFT_PR", reply)
-        self.assertIn(str(self.id), reply)
+        self.assertIn("DRAFT_PR " + str(ident) + " ", reply)
         # A reserved request is invisible to the automatic next-item selector.
         self.db.execute("""INSERT INTO dispatch_receipts VALUES(
             ?, 'sha-test', ?, 'reserved', ?, NULL)""", (self.id, "a"*40, "2026-10-22"))
