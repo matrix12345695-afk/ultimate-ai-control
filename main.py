@@ -14,6 +14,7 @@ from monitoring import transitions, format_report
 from github_watch import scan as github_scan
 from project_reports import project_report
 from developer_v13 import prepare as developer_prepare, render as developer_render
+from execution_gate import stage as stage_changes
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -66,6 +67,13 @@ def command(text):
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
     if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.9\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/changegate":
+        if len(parts)<3: return "Использование: /changegate control Описание"
+        try:
+            item=stage_changes(parts[1], parts[2], {"docs/review.md": "Требуется ручная проверка"})
+            return "🔒 Черновик проверки: "+item["proposed_branch"]+"\nСтатус: AWAITING_REVIEW. Ветка и PR ещё не созданы."
+        except ValueError:
+            return "Недопустимые параметры запроса."
     if c=="/devplan":
         if len(parts)<3: return "Usage: /devplan nova Describe change"
         try: return developer_render(developer_prepare(parts[1],parts[2]))
