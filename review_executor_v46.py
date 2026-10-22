@@ -20,6 +20,9 @@ from review_bot_v45 import _document
 from review_outbox_v21 import initialize as init_outbox
 from full_review_workflow_v29 import execute_approved_review
 from telegram_http_sender_v27 import make_sender
+from telegram_delivery_v22 import deliver_next
+from review_ci_sync_v47 import has_work as has_ci_work, refresh_pending
+from review_outbox_v21 import pending_messages
 
 BASE = pathlib.Path.home()
 DATA = BASE / ".ultimate-review-data" / "live"
@@ -92,11 +95,21 @@ def run_once(connection, marker=ACTIVATION, key_path=REVIEW_KEY,
     init_controller(connection)
     init_outbox(connection)
     ident = find_pending(connection)
-    if ident is None:
+    if ident is not None:
+        token = token_issuer(key_path)
+        result = dispatch(connection, ident, token, cfg["TELEGRAM_BOT_TOKEN"], cfg["ADMIN_TELEGRAM_ID"])
+        return "DRAFT_PR " + str(ident) + " " + result["draft_pr"]
+    if not has_ci_work(connection):
         return "EMPTY"
     token = token_issuer(key_path)
-    result = dispatch(connection, ident, token, cfg["TELEGRAM_BOT_TOKEN"], cfg["ADMIN_TELEGRAM_ID"])
-    return "DRAFT_PR " + str(ident) + " " + result["draft_pr"]
+    github = GithubTransport(token, enabled=True)
+    ci_reader = GithubCIReader(token, enabled=True)
+    reports = refresh_pending(connection, github, ci_reader)
+    delivery = "none"
+    if pending_messages(connection):
+        sender = make_sender(cfg["TELEGRAM_BOT_TOKEN"], enabled=True)
+        delivery = deliver_next(connection, sender, cfg["ADMIN_TELEGRAM_ID"])
+    return "CI_SYNC " + str(len(reports)) + " notification=" + delivery
 
 
 def main():
