@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from telegram_pro import initialize, handle, record
 from github_readonly import command as github_command
 from planner import plan, format_plan
+from ai_provider import status as ai_status, propose as ai_propose
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -42,7 +43,13 @@ def command(text):
     if extra is not None: return extra
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
-    if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.5\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.7\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/ai_status":
+        state=ai_status()
+        return f"AI enabled: {state['enabled']}\nProvider: {state['provider']}\nModel: {state['model']}\nBudget gate USD: {state['budget_usd']}"
+    if c=="/ai_plan":
+        if len(parts)<3 or parts[1] not in PROJECTS: return "Usage: /ai_plan nova Improve SEO"
+        return ai_propose(parts[1],parts[2])
     if c=="/plan":
         if len(parts)<3 or parts[1] not in PROJECTS: return "Usage: /plan nova Improve website"
         return format_plan(plan(parts[1],parts[2]))
