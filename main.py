@@ -18,6 +18,7 @@ from execution_gate import stage as stage_changes
 from github_requests import initialize as init_github_requests, create_request as create_github_request, describe as describe_github_request
 from handoff_v16 import prepare_handoff
 from review_bot_v45 import handle as review_handle
+from code_reviews_v48 import handle as code_review_handle
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -70,6 +71,8 @@ def command(text):
     if extra is not None: return extra
     review_response=review_handle(text, db)
     if review_response is not None: return review_response
+    code_response=code_review_handle(text, db)
+    if code_response is not None: return code_response
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
     if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.9\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
