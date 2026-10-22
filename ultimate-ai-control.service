@@ -1,0 +1,19 @@
+[Unit]
+Description=Ultimate AI Control dispatcher
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=simple
+User=ultimateai
+Group=ultimateai
+WorkingDirectory=/opt/ultimate-ai-control
+EnvironmentFile=/opt/ultimate-ai-control/.env
+ExecStart=/usr/bin/python3 /opt/ultimate-ai-control/main.py
+Restart=always
+RestartSec=8
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/ultimate-ai-control/data
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target
