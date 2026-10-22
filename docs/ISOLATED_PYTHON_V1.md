@@ -34,3 +34,8 @@ Telegram: /sandbox, /selftest, /recipe safe-paths, /recipe sha-check, /artifact 
 /artifact_code <id> [file_index]. Scheduled boundary self-tests use real execution and measured
 testing intervals; missing measurements are never invented. The generic model executor and
 priced provider remain disabled pending later implementation/configuration.
+
+RLIMIT_NPROC is deliberately not lowered: Linux counts all host threads sharing the owner UID,
+including independent services. A low per-child value can make namespace setup fail as unrelated
+services create threads. Process/thread creation inside the sandbox is denied by seccomp instead;
+no host limits are raised. The trusted Bubblewrap setup creates only its fixed supervision processes.

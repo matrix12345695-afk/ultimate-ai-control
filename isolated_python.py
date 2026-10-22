@@ -94,7 +94,8 @@ def seccomp_filter():
 def _limits():
     resource.setrlimit(resource.RLIMIT_AS,(320*1024*1024,320*1024*1024))
     resource.setrlimit(resource.RLIMIT_CPU,(15,15))
-    resource.setrlimit(resource.RLIMIT_NPROC,(128,128))
+    # RLIMIT_NPROC counts every host thread owned by the shared Linux user.
+    # Do not tie namespace setup to unrelated services; seccomp denies all clone/fork calls.
     resource.setrlimit(resource.RLIMIT_NOFILE,(64,64))
     resource.setrlimit(resource.RLIMIT_CORE,(0,0))
     resource.setrlimit(resource.RLIMIT_FSIZE,(8*1024*1024,8*1024*1024))
@@ -194,7 +195,7 @@ def run_bundle(files,policy_path,timeout=MAX_SECONDS):
                     proc.wait(timeout=3)
                     proc.stdout.close()
         if status=='failed' and tail.startswith(b'bwrap:'):
-            raise SandboxUnavailable('namespace setup failed; no host execution fallback')
+            raise SandboxUnavailable('namespace setup failed; no host fallback: '+tail.decode(errors='replace').splitlines()[0][:200])
         return {'status':status,'exit_code':code,'elapsed_seconds':round(time.monotonic()-started,4),
                 'output':tail.decode(errors='replace'),'source_digest':digest,'files':entries,
                 'backend':'bubblewrap-v1','writable_tmp':cfg['writable_tmp'],
