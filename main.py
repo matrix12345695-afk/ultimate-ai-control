@@ -17,6 +17,7 @@ from developer_v13 import prepare as developer_prepare, render as developer_rend
 from execution_gate import stage as stage_changes
 from github_requests import initialize as init_github_requests, create_request as create_github_request, describe as describe_github_request
 from handoff_v16 import prepare_handoff
+from owner_notifications import initialize as initialize_owner_inbox, format_pending as format_owner_inbox
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -38,6 +39,7 @@ def db():
     initialize(c)
     setup_v08(c)
     init_github_requests(c)
+    initialize_owner_inbox(c)
     c.commit()
     return c
 def api(method,**kwargs):
@@ -108,6 +110,8 @@ def command(text):
     if c=="/report":
         with db() as conn:
             return project_report(conn, PROJECTS)
+    if c=="/owner_inbox":
+        with db() as conn: return format_owner_inbox(conn)
     if c=="/backups":
         return backup_status(DB.parent / "backups")
     if c=="/diagnostics":
