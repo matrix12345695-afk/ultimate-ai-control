@@ -3,6 +3,7 @@ import os, json, time, sqlite3, urllib.request, urllib.parse
 from pathlib import Path
 from datetime import datetime, timezone
 from telegram_pro import initialize, handle, record
+from github_readonly import command as github_command
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -33,6 +34,9 @@ def check():
         except Exception as e: results.append(f"{url}: unavailable ({type(e).__name__})")
     return "\n".join(results) or "No HTTPS monitoring URLs configured."
 def command(text):
+    github_result=github_command(text)
+    if github_result is not None:
+        return github_result
     extra=handle(text, db, ADMIN)
     if extra is not None: return extra
     parts=text.split(maxsplit=2)
