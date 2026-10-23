@@ -41,6 +41,9 @@ class ArtifactRecoveryTests(unittest.TestCase):
 
     def test_crash_after_rename_recovers_same_attempt_then_later_attempt_without_tests(self):
         path=self.published_orphan()
+        with patch.object(artifact_recovery,'sync_directory',side_effect=OSError('artificial sync failure')):
+            with self.assertRaises(artifact_recovery.ArtifactRecoveryBlocked): self.prepare()
+        self.assertEqual(self.conn.execute('SELECT count(*) FROM code_artifacts').fetchone()[0],0)
         recovered=self.prepare(runner=Mock(side_effect=AssertionError('tests must not run again')))
         later=self.prepare(job=dict(self.job,attempt=2),runner=Mock(side_effect=AssertionError('tests must not repeat on a new lease')))
         self.assertEqual(recovered['artifact_id'],later['artifact_id'])

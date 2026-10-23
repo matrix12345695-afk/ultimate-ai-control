@@ -108,6 +108,10 @@ def restore(conn,job,root,files,engine,profile,provenance):
             require(report.get('artifact_identity')==identity,'unregistered artifact identity missing or changed')
             created=report.get('artifact_created_at')
             require(type(created) in (int,float) and math.isfinite(created) and created>0,'artifact creation time missing')
+            # A worker may have exited after rename but before the original directory sync.
+            # Finish that durability step before committing the recovered SQLite receipt.
+            sync_directory(target)
+            sync_directory(root)
             cur=conn.execute('INSERT INTO code_artifacts(job_id,attempt,project,engine,source_digest,manifest,test_status,test_report,path,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)',
                 (job['id'],attempt,'control',engine,digest,json.dumps(entries),report['status'],json.dumps(report,ensure_ascii=False),str(target),created))
             conn.commit();ident=cur.lastrowid
