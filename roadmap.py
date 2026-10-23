@@ -125,4 +125,6 @@ def completed_work(conn):
     if 'project_memory' in tables:
         count=conn.execute("SELECT count(*) FROM project_memory WHERE project!='policy'").fetchone()[0]
         if count: details[12]=f'✅ Контекстов проектов сохранено: {count}.'
+        if setting(conn,'owner_followups_verified_release'):
+            details[12]=(details.get(12,'')+' ✅ Список отложенных действий владельца проверен.').strip()
     return details
