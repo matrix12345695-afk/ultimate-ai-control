@@ -3,6 +3,7 @@ import json
 import time
 import task_queue as queue
 import roadmap
+import health_incidents
 import chat_binding
 import budget_gate
 import offline_developer
@@ -25,9 +26,11 @@ def handle(text,connect,source_key=None):
     if not args: return None
     op=args[0].split("@")[0].lower()
     known={"/roadmap","/queue","/job","/work","/project","/agents","/daily","/memory","/budget4","/pause","/resume","/chat_link","/chat_bind","/job_cancel","/sandbox","/recipe","/selftest","/artifact","/artifact_code","/provider4","/broker4","/develop","/developer_demo"}
+    known.add('/monitor4')
     if op not in known: return None
     with connect() as conn:
         try:
+            if op=='/monitor4': return health_incidents.describe(conn)
             if op=='/broker4':
                 folder=Path(conn.execute('PRAGMA database_list').fetchone()[2]).parent
                 result=model_broker.status(conn,folder)

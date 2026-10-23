@@ -25,13 +25,14 @@ import metered_provider
 import model_broker
 import broker_client
 import developer_pipeline
+import health_incidents
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
 from chat_binding import action as chat_action
 
 ROOT=Path(__file__).resolve().parent
-TARGETS={"nova":"https://novaweb.uz/"}
+TARGETS=health_incidents.TARGETS
 WORKER="operations-1"
 
 
@@ -56,6 +57,7 @@ def initialize(conn):
     offline_developer.initialize(conn)
     metered_provider.initialize(conn)
     model_broker.initialize(conn)
+    health_incidents.initialize(conn)
 
 
 def send_event(conn,kind,title,reason,event_key,task=None):
@@ -196,12 +198,7 @@ def run_once(path,root=ROOT,site_checker=check_site):
                            f"Артефакт #{result['artifact_id']}, SHA-256 {result['source_digest']}. Тесты: {result['test_status']}. Независимая приёмка: {result.get('independent_acceptance','not_configured')}. Просмотр: /artifact {result['artifact_id']}. Движок: {label}. "+('Восстановлен сохранённый результат; тесты повторно не запускались. ' if result.get('tests_reused') else '')+'Публикации не было.',
                            'artifact-'+str(job['id'])+'-'+result['source_digest'],job['id'])
             elif job["kind"]=="check_site":
-                old=conn.execute("SELECT healthy FROM agent_health WHERE target=?",(result["target"],)).fetchone()
-                if (old is None and not result["healthy"]) or (old and bool(old[0])!=result["healthy"]):
-                    send_event(conn,"info" if result["healthy"] else "critical","Состояние NOVA WEB изменилось",
-                               result["url"]+": "+result["detail"],"health-job-"+str(job["id"]),job["id"])
-                conn.execute("INSERT INTO agent_health VALUES(?,?,?,?) ON CONFLICT(target) DO UPDATE SET healthy=excluded.healthy,detail=excluded.detail,checked_at=excluded.checked_at",(result["target"],int(result["healthy"]),result["detail"],time.time()))
-                conn.commit()
+                result=health_incidents.complete(conn,job,result,observed_at=end)
             elif job["kind"]=="daily_report":
                 metrics=result["report"]
                 seconds=sum(row["seconds"] for row in metrics["measured_seconds"] if row["category"] in ("active","testing"))
@@ -223,7 +220,7 @@ def run_once(path,root=ROOT,site_checker=check_site):
                       {'target':'developer-bundle','generation_job_id':job['id'],'source_digest':result['source_digest']},
                       event_key='developer-test:'+str(job['id'])+':'+result['source_digest'])
                 result['followup_job_id']=child
-            else:
+            elif job['kind']!='check_site':
                 queue.finish(conn,job["id"],job["lease_token"],result,awaiting_owner=waiting)
             conn.execute("UPDATE agent_worker_status SET heartbeat=?,state=?,detail=? WHERE worker=?",(time.time(),"waiting_owner" if waiting else "idle",str(job["id"]),WORKER))
             conn.commit()

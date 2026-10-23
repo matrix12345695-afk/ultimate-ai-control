@@ -151,6 +151,11 @@ URL is still unknown; do not invent one or claim the chat is subscribed to Teleg
 
 ## Required progress updates
 
+Prepared next increment: [availability incident lifecycle](HEALTH_INCIDENTS.md), atomic with
+job completion and the health snapshot. It recognizes scoped legacy alarms, closes only
+eligible older alerts after a newer successful check, preserves other owner decisions and
+adds /monitor4. Server rollout evidence will be recorded after actual verification.
+
 Completed increment: [durable artifact recovery](ARTIFACT_RECOVERY.md), covering the
 rename-to-SQLite gap, later retry attempts, changed/missing evidence, finite-attempt exhaustion
 alerts and the owner's API deferral. Local and VPS tests include an actual Bubblewrap report
