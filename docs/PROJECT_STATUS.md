@@ -1,0 +1,103 @@
+# ULTIMATE AI CONTROL 4.0 — current checkpoint
+
+Updated 2026-10-23 UTC. This is the resume point for later scheduled development. Historical
+deployment records retain their original observations; this file identifies the latest state.
+
+## Installed state
+
+Application: `765800d4f573934959a7854a355a7325420365fe`, draft
+[PR #27](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/27).
+Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
+`/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
+one Telegram dispatcher and one operations worker. No separate systemd service was created.
+The bot is @UltimateAIControl_bot. Inventory is protected and remains unchanged.
+
+The typed short-lived broker and durable generation/test jobs are installed. The demonstrated
+bundle uses fixed offline source, not a model. Provider policy and broker paid policy are both
+disabled. No real model key is installed; no real API request, hold or spend was recorded.
+Private key transport preflight is verified; see [PRIVATE_MODEL_SETUP.md](PRIVATE_MODEL_SETUP.md).
+The owner setup request is persisted as notification 36 with Telegram receipt 203; reuse event
+`developer-private-key-setup-v1` rather than sending duplicate key requests.
+
+## Evidence
+
+- [Rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39861820710):
+  all 279 source tests passed on the VPS with eight actual Bubblewrap integration tests and
+  zero skipped in the sandbox-enabled pass; 13 transport tests passed. Default CI skips the
+  eight host-dependent integrations. These tests make no paid calls.
+- Source CI: [39861542085](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/39861542085)
+  and [39861547850](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/39861547850)
+  succeeded on the installed source commit.
+- Generation job 19 succeeded, atomically creating test job 20. That child ran four tests in
+  Bubblewrap, saved artifact 3 and entered awaiting_owner. Two actual work intervals were
+  recorded. Source SHA-256:
+  `d5228c581931a20bd7bc984d74e3c6e15804ad9b1af404bffedfa5bb10d56e0f`.
+  Telegram accepted artifact message 181 and activation message 182; these are delivery
+  receipts, not evidence the owner read them or approved publication.
+- [Independent verification after runner cleanup](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39903213154)
+  succeeded on 2026-10-23: worker PID 722759, sole dispatcher PID 723104, live heartbeat,
+  NOVA HTTP 200, retained artifacts, disabled paid policies and zero API requests.
+  Inventory PID remained 67760; source fingerprints/configuration metadata matched.
+- Verified backup:
+  `/home/maksim/.ultimate-review-data/backups/before-uac4-1792706525589637139.sqlite3`.
+
+## Development schedule
+
+The owner requested hourly continuation and a first start after the usage limit replenishes.
+A platform automation titled “ULTIMATE · продолжение проекта” is enabled with hourly
+condition checks and personal timezone Asia/Tashkent. Creation was confirmed on 2026-10-23;
+no execution or next-run timestamp was reported at setup. Do not infer a successful scheduled
+run from creation alone. The platform's ChatGPT/Codex quota/reset time is not exposed to the
+project or VPS. Hourly availability checks cannot guarantee execution at the exact reset moment.
+The owner was asked whether they meant platform quota or API balance; the distinction remains
+unresolved at this checkpoint. Neither a quota reset nor this automation enables paid API calls.
+
+Each development run must inspect this checkpoint, open PRs, CI and current runtime before
+choosing a small verifiable unfinished step. Avoid competing deployments and duplicate work;
+record changes, evidence, blocker and next step here. Never work around quota using paid APIs.
+The platform schedule is separate from the existing VPS queue/monitor supervisor. It does not
+give the VPS automatic access to new messages in this conversation. The private return-chat
+URL is still unknown; do not invent one or claim the chat is subscribed to Telegram.
+
+## Roadmap and next work
+
+The full 16-stage handover is retained in roadmap.py/project_memory.json and the live database.
+Stages below describe partial capabilities, not a declaration that every acceptance gate passed.
+
+| Stage | State and next acceptance gate |
+| --- | --- |
+| 1. Owner notifications | Live delivery, durable receipts/retries/inbox; continue connecting real agent events. |
+| 2. Scheduler/queue | Live durable jobs, leases, pause/recovery and serialized worker. |
+| 3. API / $30 | Priced transport and holds implemented; private key, actual model/usage receipt and enabled configuration pending. |
+| 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
+| 5. Tester | Network-free Python component tests live; independent acceptance tests and wider stacks pending. |
+| 6. Monitoring | NOVA availability and local source inspections scheduled; additional verified targets pending. |
+| 7. Multiple projects | Memory imported; repository identities/permissions must be verified before access. |
+| 8. Draft PRs | Private artifacts and human-created draft PRs exist; autonomous scoped patch-to-PR flow pending. |
+| 9. Publication approval | Required by policy; authenticated project/version/digest approval and rollback gates pending. |
+| 10. Voice | Pending transcription choice, budget accounting and task confirmation. |
+| 11. Analytics | Measured work spans and basic reports exist; full agent/project costs and waiting-time analysis pending. |
+| 12. Memory | Project rules/decisions persisted; evidence-linked lifecycle and retrieval improvements pending. |
+| 13. Design/browser | Pending isolated browser execution and visual/mobile acceptance. |
+| 14. Open source | Initial research exists; choose only after license/security/dependency/resource review. |
+| 15. Autonomous cycle | Operations run on VPS; general development, approvals/recovery and measured end-to-end acceptance pending. |
+| 16. NOVA commerce | Requirements retained; no NOVA production changes authorized by this checkpoint. |
+
+Next priority: complete [private model setup](PRIVATE_MODEL_SETUP.md), then a single bounded
+real generation → exact-bundle tests → owner notification with actual financial receipt.
+If key/account setup is blocked, improve independent acceptance validation and crash recovery
+using artificial responses, without representing those tests as actual model access.
+
+## Boundaries and rollback
+
+Never modify/restart Inventory code, configuration, data, tokens or services. Use only isolated
+ULTIMATE actions through the pinned transport, never the standard Inventory deploy. Never
+raise the $30 ceiling, buy services, disclose secrets or publish another project without its
+owner's specific approval. A model answer or a passed artifact does not authorize publication.
+
+Current UAC rollback: `uac4_broker_rollback`, with the recorded old app
+`ace13302ccf97e633d5bf84790c6944c0d873d8f` and state
+`.ultimate-review-data/live/uac4-model-broker-rollout.json`. It validates exact current code and
+unchanged reviewed policies, restores only UAC code, restarts only its worker/dispatcher and
+retains additive capsules, artifacts and history. Do not replace live accounting/history with
+the older backup. Reassess this rollback gate after any later activation or policy change.

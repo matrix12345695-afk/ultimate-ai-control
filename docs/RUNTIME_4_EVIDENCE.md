@@ -1,5 +1,7 @@
 # ULTIMATE 4.0: installed operations runtime
 
+Latest installed state and resume instructions: [PROJECT_STATUS.md](PROJECT_STATUS.md).
+
 Observed 2026-10-22 UTC. This record distinguishes deployed capabilities from planned agents.
 
 ## Deployment evidence

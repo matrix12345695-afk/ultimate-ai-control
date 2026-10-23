@@ -7,6 +7,7 @@ import chat_binding
 import budget_gate
 import offline_developer
 import metered_provider
+import model_broker
 from isolated_python import load_policy, SandboxUnavailable
 from pathlib import Path
 from ai_gateway_v30 import SECRET
@@ -23,10 +24,28 @@ def handle(text,connect,source_key=None):
     args=text.split(maxsplit=2)
     if not args: return None
     op=args[0].split("@")[0].lower()
-    known={"/roadmap","/queue","/job","/work","/project","/agents","/daily","/memory","/budget4","/pause","/resume","/chat_link","/chat_bind","/job_cancel","/sandbox","/recipe","/selftest","/artifact","/artifact_code","/provider4"}
+    known={"/roadmap","/queue","/job","/work","/project","/agents","/daily","/memory","/budget4","/pause","/resume","/chat_link","/chat_bind","/job_cancel","/sandbox","/recipe","/selftest","/artifact","/artifact_code","/provider4","/broker4","/develop","/developer_demo"}
     if op not in known: return None
     with connect() as conn:
         try:
+            if op=='/broker4':
+                folder=Path(conn.execute('PRAGMA database_list').fetchone()[2]).parent
+                result=model_broker.status(conn,folder)
+                return ('Посредник модели: отдельный короткоживущий процесс.\n'
+                        +'Генерация через OpenAI: '+('разрешена политикой' if result['enabled'] and result['allow_paid'] else 'выключена')
+                        +'\nДемонстрация без LLM: '+('разрешена' if result['allow_demo'] else 'выключена')
+                        +'\nСохранённые пакеты: '+json.dumps(result['bundles'],ensure_ascii=False)
+                        +'\nКлюч здесь не читается. Черновики проходят отдельное задание изолированных тестов; публикации требуют согласования.')
+            if op in ('/develop','/developer_demo'):
+                if op=='/developer_demo':
+                    if len(args)!=1: return 'Использование: /developer_demo'
+                    payload={'ai_task':model_broker.DEMO_TASK,'broker_demo':True,'source':'telegram'}
+                else:
+                    if len(args)!=3 or args[1]!='control': return 'Использование: /develop control Описание. Пока разрешены только отдельные Python-черновики ULTIMATE.'
+                    if not 1<=len(args[2])<=2500 or SECRET.search(args[2]): raise ValueError('invalid_or_sensitive_developer_task')
+                    payload={'ai_task':args[2],'source':'telegram'}
+                ident=queue.enqueue(conn,'control','review_change',payload,event_key=source_key)
+                return f'Задание разработчика #{ident} сохранено. Генерация и изолированные тесты — отдельные этапы. Демонстрация не вызывает LLM; платная модель требует приватной настройки. /job {ident}'
             if op=='/provider4':
                 folder=Path(conn.execute('PRAGMA database_list').fetchone()[2]).parent
                 result=metered_provider.status(conn,folder/'provider-policy.json')
@@ -35,7 +54,7 @@ def handle(text,connect,source_key=None):
                         +'\nМодель: '+result['model']
                         +'\nНеразрешённых резервов: '+str(result['unresolved_reservations'])
                         +'\nУчтено/зарезервировано: $'+f"{result['accounted_usd']:.4f}"
-                        +'\nАвтоматические вызовы модели из очереди выключены. Ключ настраивается приватно на VPS; не отправляй его сюда.')
+                        +'\nОчередь разработчика: /broker4. Ключ настраивается приватно на VPS; не отправляй его сюда.')
             if op=='/sandbox':
                 try: cfg=load_policy(Path(conn.execute('PRAGMA database_list').fetchone()[2]).parent/'sandbox-policy.json')
                 except (OSError,ValueError,SandboxUnavailable): return 'Изолированный исполнитель не настроен или проверка целостности не прошла.'
