@@ -1,0 +1,24 @@
+{
+  "source": "Owner handover: ULTIMATE AI CONTROL 4.0, accepted in current Codex chat",
+  "policy": {
+    "openai_monthly_usd": 30,
+    "publication": "Owner approval for the exact project and version is mandatory",
+    "inventory": "Never change code, data, environment, settings or processes; transport branches only",
+    "purchases": "No purchases, subscriptions or budget increases without separate approval",
+    "self_changes": "Isolated development, tests and rollback; never expand permissions or disable safeguards",
+    "parallelism": "Start at one worker; measure load before increasing; preserve production resources",
+    "notifications": "INFO, DECISION, CRITICAL; persisted delivery history; delivery never authorizes an action",
+    "chat": "Current chat is a source of explicit imports and a return destination, not an automatically readable API"
+  },
+  "projects": {
+    "control": {"name": "ULTIMATE AI CONTROL", "goal": "Persistent coordinator, developer, tester, designer, monitoring, analyst and researcher roles", "approval": "Publication, payments, permission changes and business-rule changes require scoped decisions"},
+    "nova": {"name": "NOVA WEB", "url": "https://novaweb.uz/", "goal": "Commercial website and digital services business", "requirements": ["RU/UZ", "Responsive UI, animations and SEO", "Leads and order statuses", "Commercial proposals and client-site development", "Automated tests", "Sales analytics and owner notifications"], "infrastructure": "GitHub, Render, PostgreSQL", "infrastructure_budget_usd": {"target": 13, "maximum": 25}, "financial_authority": "No commercial commitments or purchases"},
+    "kinder": {"name": "Kinder Spa", "requirements": ["Android app, RU/UZ, blue UI", "Admin-only registration; login/password", "Web admin, PostgreSQL, QR and photos", "Massage 10 sessions", "Hydromassage 10 sessions", "Pool 4/8/12 sessions"], "hours": "Monday-Saturday 09:00-19:00; Sunday closed", "pool_duration": "45 minutes: 5 changing, 40 swimming", "cancellation": "Pool session expires unless cancellation is before 19:00 the previous day", "exception": "Admin restoration requires a reason and a Telegram notification to superadmin; never change this rule without owner approval"},
+    "inventory": {"name": "Inventory Bot", "protected": true, "path": "/home/maksim/inventory-bot", "requirements": ["Inventory schedules", "Branches and JSON templates", "File uploads and blank validation", "Video-circle confirmation", "Reports and administration"], "current_access": "No worker access. Repository transit only in isolated branches"},
+    "sap": {"name": "SAP / iiko reconciliation", "requirements": ["SAP, iiko, mapping dictionary, discrepancies worksheets", "Preserve article leading zeros", "Aggregate duplicates", "Map different article codes", "Report unmapped products", "Excel discrepancy export"]},
+    "inventory-mini-app": {"name": "Inventory Mini App", "protected": true, "requirements": ["Shop, bar, kitchen, workshop, freezer, raw materials", "Search, quantities, packs/units, calculator", "Database persistence, Excel, filters and statuses"], "stack": "FastAPI and web UI", "current_access": "Deployment boundaries must be confirmed before worker access"},
+    "iiko-loader": {"name": "iiko Loader Pro", "requirements": ["Windows, Python, pywinauto", "Excel incoming invoices", "Supplier, products, quantities, warehouse", "Posting and error report"], "constraint": "Windows UI execution is unavailable on this Ubuntu VPS"},
+    "sap-mb51": {"name": "SAP MB51 Analytics", "requirements": ["Load MB51 and filter movements", "Shortages, surpluses and mis-sorting", "Periods between inventories", "Suspicious transactions and exports"]},
+    "qualisift": {"name": "QualiSift", "goal": "SaaS, AI, white-label, catalog and autonomy", "constraint": "Audit the actual repository before specifying implementation"}
+  }
+}

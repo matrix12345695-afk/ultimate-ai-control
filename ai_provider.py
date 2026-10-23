@@ -54,17 +54,6 @@ def propose(project, task):
     allow_hosts={h.strip() for h in os.getenv("AI_ALLOWED_HOSTS","").split(",") if h.strip()}
     if not key or not cfg["model"] or host.scheme!="https" or not host.hostname or host.hostname not in allow_hosts or host.username or host.password:
         return "AI request blocked: missing key/model or endpoint not allowlisted."
-    body=json.dumps(build_request(project,task)).encode()
-    req=urllib.request.Request(endpoint,data=body,method="POST",
-        headers={"Authorization":"Bearer "+key,"Content-Type":"application/json"})
-    try:
-        with urllib.request.urlopen(req,timeout=20) as res:
-            if int(res.headers.get("Content-Length","0"))>MAX_RESPONSE_BYTES:
-                return "AI response blocked: too large."
-            raw=res.read(MAX_RESPONSE_BYTES+1)
-            if len(raw)>MAX_RESPONSE_BYTES: return "AI response blocked: too large."
-        result=json.loads(raw)
-        message=result["choices"][0]["message"]["content"]
-        return str(message)[:3500]
-    except Exception as exc:
-        return f"AI request failed ({type(exc).__name__})."
+    # The legacy adapter had no cumulative spend accounting. Keep it fail-closed until
+    # a priced transport reserves the maximum cost through budget_gate before network I/O.
+    return "AI request blocked: metered provider transport is not configured. Limit: $30/month."
