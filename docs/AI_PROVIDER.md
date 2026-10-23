@@ -1,4 +1,4 @@
-# AI Provider (opt-in, disabled by default)
+# Legacy AI Provider (disabled)
 
 No provider is active in v0.7. Existing ChatGPT subscriptions do not automatically fund API requests.
 
@@ -16,3 +16,13 @@ AI_MONTHLY_BUDGET_USD=0
 **Limitations:** The monthly budget setting is a configuration gate, NOT a real spend tracker. Before using a paid provider, implement token/cost accounting, durable quotas, provider billing limits and error handling. Never enable until all limits and explicit owner approval are established. Do not feed sensitive project data or Kinder Spa client information to any external model.
 
 The AI response is untrusted advisory text, not code to execute. No automatic writes or production deployments.
+
+## UAC4 operations update
+
+The separate `budget_gate.py` ledger now provides atomic conservative monthly reservations
+with a hard $30 ceiling, per-project/agent attribution and usage receipts. It does not make the
+legacy provider safe to enable: the old unmetered transport is blocked. The separate reviewed
+priced transport is now implemented in `metered_provider.py` and remains disabled. Private key
+configuration, a credential broker, queue integration and real provider usage verification
+remain required; see [METERED_PROVIDER.md](METERED_PROVIDER.md).
+No paid provider is enabled by the offline code recipes or rootless test executor.

@@ -17,6 +17,17 @@ from developer_v13 import prepare as developer_prepare, render as developer_rend
 from execution_gate import stage as stage_changes
 from github_requests import initialize as init_github_requests, create_request as create_github_request, describe as describe_github_request
 from handoff_v16 import prepare_handoff
+from owner_notifications import initialize as initialize_owner_inbox, format_pending as format_owner_inbox, create as notify_owner
+from owner_delivery import deliver_one
+from queue_worker import initialize as initialize_runtime
+from runtime_commands import handle as runtime_handle, submit_text
+from roadmap import setting, set_setting
+from chat_binding import current as bound_chat
+from review_bot_v45 import handle as review_handle
+from code_reviews_v48 import handle as code_review_handle
+from ai_commands_v30 import handle as ai30_handle
+from isolated_development_v31 import prepare as prepare_v31, format_report as report_v31
+from ai_commands_v30 import handle as ai30_handle
 
 BASE=Path(__file__).parent
 DB=Path(os.getenv("DB_PATH",str(BASE/"data"/"control.db")))
@@ -38,28 +49,51 @@ def db():
     initialize(c)
     setup_v08(c)
     init_github_requests(c)
+    initialize_owner_inbox(c)
+    initialize_runtime(c)
     c.commit()
     return c
 def api(method,**kwargs):
     data=urllib.parse.urlencode(kwargs).encode()
     with urllib.request.urlopen(f"https://api.telegram.org/bot{TOKEN}/{method}",data=data,timeout=35) as response:
-        return json.load(response)["result"]
+        payload=json.load(response)
+        if payload.get("ok") is not True:
+            raise ValueError("Telegram request rejected")
+        return payload["result"]
 def reply(chat,msg,show_keyboard=False):
     args={"chat_id":chat,"text":msg[:4000]}
     if show_keyboard: args["reply_markup"]=keyboard()
-    api("sendMessage",**args)
+    elif msg.startswith("🔔 ULTIMATE AI CONTROL"):
+        with db() as conn: link=bound_chat(conn)["url"]
+        if link: args["reply_markup"]=json.dumps({"inline_keyboard":[[{"text":"Открыть чат Codex","url":link}]]})
+    return api("sendMessage",**args)
 def check():
     results=[]
     for url in URL:
         url=url.strip()
         if not url.startswith("https://"): continue
         try:
-            with urllib.request.urlopen(urllib.request.Request(url,method="HEAD"),timeout=12) as r:
+            with urllib.request.urlopen(urllib.request.Request(url,method="GET",headers={"Range":"bytes=0-1023"}),timeout=12) as r:
+                r.read(1024)
                 results.append(f"{url}: HTTP {r.status}")
         except Exception as e: results.append(f"{url}: unavailable ({type(e).__name__})")
     return "\n".join(results) or "No HTTPS monitoring URLs configured."
-def command(text):
+def owner_event(project, kind, title, reason, next_action):
+    import hashlib
+    # The same condition produces at most one inbox item per UTC hour, including restarts.
+    hour=datetime.now(timezone.utc).strftime("%Y%m%d%H")
+    key=hashlib.sha256((project+kind+title+reason+hour).encode()).hexdigest()
+    with db() as conn:
+        ident=notify_owner(conn,project,kind,title,reason[:500],next_action,event_key=key)
+        record(conn,"owner_notification",str(ident))
+        conn.commit()
+    return ident
+def command(text,source_key=None):
     text=route(text)
+    runtime_result=runtime_handle(text,db,source_key)
+    if runtime_result is not None: return runtime_result
+    if text.split("@")[0] == "/owner_inbox":
+        with db() as conn: return format_owner_inbox(conn)
     if text == "/start": return WELCOME
     if text == "/help": return HELP
     github_result=github_command(text)
@@ -67,9 +101,31 @@ def command(text):
         return github_result
     extra=handle(text, db, ADMIN)
     if extra is not None: return extra
+    review_response=review_handle(text, db)
+    if review_response is not None: return review_response
+    code_response=code_review_handle(text, db)
+    if code_response is not None: return code_response
+    ai30_response=ai30_handle(text)
+    if ai30_response is not None: return ai30_response
+    ai30_response=ai30_handle(text)
+    if ai30_response is not None: return ai30_response
     parts=text.split(maxsplit=2)
     c=parts[0].split("@")[0].lower()
     if c in ("/start","/help"): return "ULTIMATE AI CONTROL v0.9\n/plan <project> <task> /repos /repo <label> /status /projects /tasks /task <project> <description> /check /taskstatus <id> /cancel <id> /approvals /approve <id> /reject <id> /audit\nAI disabled. No production changes."
+    if c=="/dev31":
+        if len(parts)!=2 or not parts[1].isdigit() or int(parts[1])<=0:
+            return "Использование: /dev31 <номер_кодовой_заявки>"
+        try:
+            with db() as conn:
+                row=conn.execute("SELECT project,task,manifest_json FROM github_change_requests WHERE id=?",(int(parts[1]),)).fetchone()
+                if not row: return "Заявка не найдена."
+                import json as _json
+                bundle=prepare_v31(row[0],row[1])
+                if bundle["manifest"]!=_json.loads(row[2]):
+                    return "Заявка изменена: пакет не прошёл SHA-256 проверку."
+                return report_v31(bundle)
+        except (ValueError,PermissionError,SyntaxError) as exc:
+            return "Изолированная подготовка отклонена: "+str(exc)
     if c=="/github_handoff":
         args=text.split()
         if len(args)!=3 or not args[1].isdigit(): return "Использование: /github_handoff <request_id> <full_40_char_base_sha>"
@@ -154,13 +210,14 @@ def command(text):
 def main():
     if not TOKEN or not ADMIN.isdecimal(): raise SystemExit("Configure TELEGRAM_BOT_TOKEN and ADMIN_TELEGRAM_ID")
     db().close()
-    offset=0
+    with db() as conn: offset=int(setting(conn,"telegram_offset","0"))
     next_check=time.monotonic()+3600
     next_backup=time.monotonic()+60
     alerts=AlertLimiter(3600)
     previous_monitor={}
     previous_github={}
     next_github=time.monotonic()+120
+    next_owner_delivery=time.monotonic()+1
     while True:
         try:
             updates=api("getUpdates",offset=offset,timeout=20,allowed_updates=json.dumps(["message"]))
@@ -172,12 +229,23 @@ def main():
                 if str(sender.get("id"))!=ADMIN or chat.get("type")!="private": continue
                 text=message.get("text","")
                 if text.startswith("/") or text in __import__("telegram_menu").ROUTES:
-                    reply(chat["id"],command(text),show_keyboard=text in ("/start", "📖 Помощь"))
+                    reply(chat["id"],command(text,source_key="telegram:"+str(update["update_id"])),show_keyboard=text in ("/start", "📖 Помощь"))
+                elif text.strip():
+                    try:
+                        with db() as conn: ident=submit_text(conn,text,event_key="telegram:"+str(update["update_id"]))
+                        reply(chat["id"],f"Текстовая задача #{ident} сохранена. /job {ident}. Если потребуется решение, придёт уведомление.")
+                    except ValueError as exc: reply(chat["id"],str(exc))
+                elif message.get("voice"):
+                    reply(chat["id"],"Распознавание голоса ещё не подключено. Отправь задачу текстом; этап есть в /roadmap.")
+                with db() as conn: set_setting(conn,"telegram_offset",str(offset))
+            if time.monotonic()>=next_owner_delivery:
+                deliver_one(db, reply, ADMIN)
+                next_owner_delivery=time.monotonic()+5
             if time.monotonic()>=next_github:
                 try:
                     current_github=github_scan()
                     for alert in transitions(previous_github,current_github):
-                        reply(ADMIN,alert)
+                        owner_event("control","info","Изменилось состояние GitHub",alert,"Открой /github_check в этом боте.")
                     previous_github=current_github
                 except Exception as exc:
                     print('GitHub monitor failed:',type(exc).__name__,flush=True)
@@ -188,7 +256,8 @@ def main():
                     if created: print('Local SQLite snapshot verified',flush=True)
                 except Exception as exc:
                     print('Backup failed:',type(exc).__name__,flush=True)
-                    if alerts.should_send('backup'): reply(ADMIN,'⚠️ Резервное копирование не выполнено. Проверь журнал Render.')
+                    if alerts.should_send('backup'):
+                        owner_event("control","critical","Ошибка резервного копирования",type(exc).__name__,"Проверь /backups и журнал ULTIMATE на VPS.")
                 next_backup=time.monotonic()+3600
             if time.monotonic()>=next_check:
                 result=check()
@@ -198,7 +267,8 @@ def main():
                     if separator:
                         current_monitor[target]=(not detail.startswith('unavailable'),detail)
                 for alert in transitions(previous_monitor,current_monitor):
-                    reply(ADMIN,alert)
+                    owner_event("monitoring","info" if alert.startswith("RECOVERED") else "critical",
+                                "Изменилось состояние сайта",alert,"Проверь /check. Исправления и публикации требуют отдельного согласования.")
                 previous_monitor=current_monitor
                 next_check=time.monotonic()+3600
         except Exception as exc:
