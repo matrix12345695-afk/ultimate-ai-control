@@ -191,6 +191,10 @@ Current owner follow-ups:
 
 These follow-ups do not authorize payments, policy changes, or Inventory modifications.
 
+Prepared next increment: [owner follow-up view](OWNER_FOLLOWUPS.md), a read-only paginated
+list of critical/decision requests with full details and deferred setup context. Server rollout
+and live command verification are pending. No automatic reminder or new schedule is added.
+
 Completed increment: [availability incident lifecycle](HEALTH_INCIDENTS.md), atomic with
 job completion and the health snapshot. It recognizes scoped legacy alarms, closes only
 eligible older alerts after a newer successful check, preserves other owner decisions and

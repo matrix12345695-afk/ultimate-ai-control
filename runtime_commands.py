@@ -4,6 +4,7 @@ import time
 import task_queue as queue
 import roadmap
 import health_incidents
+import owner_followups
 import chat_binding
 import budget_gate
 import offline_developer
@@ -27,10 +28,17 @@ def handle(text,connect,source_key=None):
     op=args[0].split("@")[0].lower()
     known={"/roadmap","/queue","/job","/work","/project","/agents","/daily","/memory","/budget4","/pause","/resume","/chat_link","/chat_bind","/job_cancel","/sandbox","/recipe","/selftest","/artifact","/artifact_code","/provider4","/broker4","/develop","/developer_demo"}
     known.add('/monitor4')
+    known.update(('/owner_later','/owner_item'))
     if op not in known: return None
     with connect() as conn:
         try:
             if op=='/monitor4': return health_incidents.describe(conn)
+            if op=='/owner_later':
+                if len(args)>2: return 'Использование: /owner_later [страница]'
+                return owner_followups.describe(conn,owner_followups.number(args[1]) if len(args)==2 else 1)
+            if op=='/owner_item':
+                if len(args)!=2: return 'Использование: /owner_item <номер>'
+                return owner_followups.detail(conn,owner_followups.number(args[1]))
             if op=='/broker4':
                 folder=Path(conn.execute('PRAGMA database_list').fetchone()[2]).parent
                 result=model_broker.status(conn,folder)
