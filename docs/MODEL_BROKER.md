@@ -1,5 +1,8 @@
 # Developer broker and durable two-job pipeline
 
+Installed source, server proof and next gates: [PROJECT_STATUS.md](PROJECT_STATUS.md).
+Private key route: [PRIVATE_MODEL_SETUP.md](PRIVATE_MODEL_SETUP.md).
+
 The broker is a short-lived Python subprocess with a narrow JSON protocol. The operations
 worker sends only a protocol identifier, job ID and current lease token. Task text, project
 and permissions are checked against the existing database, rather than accepted as arbitrary

@@ -1,9 +1,10 @@
 # Metered OpenAI transport: disabled until private configuration
 
-This increment implements a direct Responses API transport and conservative cost ledger. It
-does not enable automatic queue/model calls, start a credential broker, generate production
-changes or run model output. Legacy unmetered adapters stay blocked. No key or paid call is
-needed for installation, status, quotations, or fault tests.
+This module implements a direct Responses API transport and conservative cost ledger.
+The separate [model broker](MODEL_BROKER.md) now connects typed development jobs to this
+transport, followed by independent sandbox test jobs. Both paid policies remain disabled.
+Legacy unmetered adapters stay blocked. No key or paid call is needed for installation,
+status, quotations, or fault tests. Current observed state is in [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
 ## Financial contract
 
@@ -66,10 +67,10 @@ policy. The separate owner-only key file must also be mode 0600, owned by the ex
 and not reached through symlinks. Environment keys, Telegram messages and GitHub source files
 are not key inputs. This increment never reads Inventory credentials for model use.
 
-Only the private operator CLI may explicitly call this transport after configuration. It is
-not exposed as a Telegram paid-call command. The operations worker and sandbox never receive
-the key. A future authenticated credential broker and developer queue handler still need to
-be implemented and tested; setting a key alone does not activate autonomous coding.
+The private operator CLI and typed model broker may call this transport only after private
+configuration. /develop control creates a durable job, whose broker checks its lease, project,
+private policies and financial guard before accessing the key. The operations worker and
+sandbox never receive the key. Setting a key alone does not activate paid calls or coding.
 
 CLI operations: provider_cli.py status, quote, plan. Each requires --db and --policy. plan
 also requires --key-file, --task-file (private text, mode 0600), and --request-id. It accepts
@@ -91,6 +92,6 @@ not paid API calls. Live billing and actual model behavior remain unverified unt
 
 The trusted dispatcher, operator CLI and operations worker currently share the VPS Linux user.
 Keeping keys out of their environments is logical separation, not an OS permission boundary
-between same-UID processes. Before general agent tools receive broader host access, the future
+between same-UID processes. Before general agent tools receive broader host access, the
 credential broker needs an independently reviewed OS access boundary. The existing untrusted
 Python test sandbox does not mount host home/configuration directories.
