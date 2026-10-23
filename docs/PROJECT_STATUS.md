@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `5fd90ddf0231b9db27f3fd9198c01ac70b7787b5`, draft
-[PR #29](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/29).
+Application: `c5a0ea8551582f0cb876f2754d1e0223eebf28d0`, draft
+[PR #30](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/30), stacked on PR #29.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
 one Telegram dispatcher and one operations worker. No separate systemd service was created.
@@ -16,16 +16,48 @@ The typed short-lived broker and durable generation/test jobs are installed. The
 bundle uses fixed offline source, not a model. Provider policy and broker paid policy are both
 disabled. No real model key is installed; no real API request, hold or spend was recorded.
 Private key transport preflight is verified; see [PRIVATE_MODEL_SETUP.md](PRIVATE_MODEL_SETUP.md).
-The owner setup request is persisted as notification 36 with Telegram receipt 203; reuse event
-`developer-private-key-setup-v1` rather than sending duplicate key requests.
+The owner setup request was delivered as notification 36 / Telegram203. It and the older
+runtime setup request were resolved as **deferred**, with the owner's reason retained in
+settings and audit. This does not mean a key was provisioned. Do not recreate these requests.
 
 Owner update 2026-10-23: **continue without API-key setup for now**. Do not request or install
-a key, enable paid calls, or repeat the setup notification. Record provider_setup_deferred=true
-on the VPS and resolve existing setup requests as deferred, not completed key provisioning.
+a key, enable paid calls, or repeat the setup notification. provider_setup_deferred=true is
+persisted on the VPS; existing setup requests were resolved as deferred, not completed provisioning.
 Private setup may resume only when the owner returns to it; then review the helper's pinned
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [artifact recovery update](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39908603525)
+passed all 302 tests on the VPS with zero skipped in its sandbox-enabled pass, including ten
+real sandbox integrations; 18 transport tests passed. Exact-source CI runs
+[39908362274](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/39908362274)
+and [39908368423](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/39908368423)
+passed. An actual Bubblewrap recipe ran on an independently restored DB copy, an artificial
+stop was injected after durable publication before SQLite insertion, and retry2 recovered the
+same report without running the sandbox again. A separate failure case validates directory
+sync before orphan registration. The production worker/database were not crashed for this test.
+
+The live pipeline retained tested artifact5 (test job55, Telegram receipt215), with four
+candidate tests and seven independent acceptance tests. A live read/validation probe reused
+that exact private artifact for a later-attempt identity without executing code or inserting
+another artifact. The final directory-sync update reused the earlier demo event rather than
+creating another generation. The Plan4.0 now displays completed recovery verification.
+Activation receipt217 is persisted. Worker PID1215646 and sole dispatcher PID1216004 were
+verified; Inventory remained PID67760 with matching source/configuration metadata. Both paid
+policies remain disabled, model key untouched, real API requests/holds/spend zero.
+Verified backup: `/home/maksim/.ultimate-review-data/backups/before-uac4-1792735089650217999.sqlite3`.
+
+[Independent verification after the final runner exited](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39908858316)
+also passed: exact release, same worker/poller PIDs, retained artifact5/receipt215, activation217,
+owner deferral with no pending key requests, zero paid API requests, NOVA HTTP200 and unchanged
+Inventory. The application commit above is deployed; the later documentation checkpoint is not
+claimed as a separate runtime deployment.
+
+The VPS NOVA monitor's next sample recovered to HTTP200, confirming recovery of its stored
+health after the earlier timeout. No NOVA code, service, deployment or configuration changed.
+
+Earlier independent-acceptance and roadmap observations follow as historical evidence:
 
 Latest [independent acceptance deployment](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39905953902)
 passed all 290 source tests on the VPS, including nine real sandbox integrations with zero
@@ -119,10 +151,10 @@ URL is still unknown; do not invent one or claim the chat is subscribed to Teleg
 
 ## Required progress updates
 
-Prepared next increment: [durable artifact recovery](ARTIFACT_RECOVERY.md), covering the
+Completed increment: [durable artifact recovery](ARTIFACT_RECOVERY.md), covering the
 rename-to-SQLite gap, later retry attempts, changed/missing evidence, finite-attempt exhaustion
-alerts and the owner's API deferral. Local tests include an actual Bubblewrap report recovered
-without re-running tests. Server evidence will be recorded after deployment.
+alerts and the owner's API deferral. Local and VPS tests include an actual Bubblewrap report
+recovered without re-running tests. Server evidence is recorded above.
 
 Completed increment: [independent demo acceptance](INDEPENDENT_ACCEPTANCE.md), with a
 separate reviewed seven-test suite, three real mutation-rejection checks and failure/timeout
@@ -150,8 +182,8 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | Stage | State and next acceptance gate |
 | --- | --- |
 | 1. Owner notifications | Live delivery, durable receipts/retries/inbox; continue connecting real agent events. |
-| 2. Scheduler/queue | Live durable jobs, leases, pause/recovery and serialized worker. |
-| 3. API / $30 | Priced transport and holds implemented; private key, actual model/usage receipt and enabled configuration pending. |
+| 2. Scheduler/queue | Live jobs, leases, pause, serialized worker and verified complete-artifact crash recovery. |
+| 3. API / $30 | Transport/holds implemented; key setup explicitly deferred by owner; paid policies disabled. |
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
 | 5. Tester | Network-free tests and independent seven-test demo contract live; custom contracts and wider stacks pending. |
 | 6. Monitoring | NOVA availability and local source inspections scheduled; additional verified targets pending. |
@@ -179,10 +211,10 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_acceptance_rollback`, with the recorded old app
-`6c6df74997bcdb283e47ac664e26f9d778dd315e` and state
-`.ultimate-review-data/live/uac4-independent-acceptance-rollout.json`. It validates exact current code
+Current UAC rollback: `uac4_recovery_rollback`, with the recorded old app
+`a2ed09169033b4a14692cfb3d500b7a7bae4ab7f` and state
+`.ultimate-review-data/live/uac4-artifact-recovery-rollout.json`. It validates exact current code
 and recorded version transition, restores only UAC code, restarts only its worker/dispatcher and
-retains the task journal and artifacts. No policy/credential change is part of this update or
+retains the task journal, artifacts and the owner's API deferral. No policy/credential change is part of this update or
 rollback. Do not replace live accounting/history with an older backup. Reassess this rollback
 gate after any later activation or policy change.
