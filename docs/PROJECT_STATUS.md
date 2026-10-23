@@ -44,20 +44,33 @@ The owner setup request is persisted as notification 36 with Telegram receipt 20
 ## Development schedule
 
 The owner requested hourly continuation and a first start after the usage limit replenishes.
-A platform automation titled “ULTIMATE · продолжение проекта” is enabled with hourly
-condition checks and personal timezone Asia/Tashkent. Creation was confirmed on 2026-10-23;
-no execution or next-run timestamp was reported at setup. Do not infer a successful scheduled
-run from creation alone. The platform's ChatGPT/Codex quota/reset time is not exposed to the
-project or VPS. Hourly availability checks cannot guarantee execution at the exact reset moment.
-The owner was asked whether they meant platform quota or API balance; the distinction remains
-unresolved at this checkpoint. Neither a quota reset nor this automation enables paid API calls.
+A platform automation titled “ULTIMATE · продолжение проекта” was created and subsequently
+disabled at the owner's explicit request on 2026-10-23. Disabled state was confirmed by the
+platform. Do not re-enable it or create another development schedule. No scheduled execution
+was confirmed before cancellation. The platform's ChatGPT/Codex quota/reset time is not exposed
+to the project or VPS. A quota reset does not enable paid API calls.
 
-Each development run must inspect this checkpoint, open PRs, CI and current runtime before
+Each owner-authorized development run must inspect this checkpoint, open PRs, CI and current runtime before
 choosing a small verifiable unfinished step. Avoid competing deployments and duplicate work;
 record changes, evidence, blocker and next step here. Never work around quota using paid APIs.
-The platform schedule is separate from the existing VPS queue/monitor supervisor. It does not
+The canceled platform schedule is separate from the existing VPS queue/monitor supervisor. It does not
 give the VPS automatic access to new messages in this conversation. The private return-chat
 URL is still unknown; do not invent one or claim the chat is subscribed to Telegram.
+
+## Required progress updates
+
+The owner explicitly requested on 2026-10-23 that completed work be marked “выполнено” in the
+Telegram Plan 4.0 after every task. Keep this checkpoint and the runtime roadmap consistent
+after each verified increment. Mark an entire stage done only when its acceptance criteria
+are satisfied. Record partial verified work without treating a draft, prepared code, fake
+provider test or a delivery receipt as a complete development team, publication or owner approval.
+
+The prepared Plan 4.0 change reads committed task outcomes, tested-artifact counts, Telegram
+receipts and measured spans from the existing journal whenever the owner opens the plan.
+There is no synchronization write that could lose a completion after a crash, no model call,
+and no new scheduler. Completed stages display “✅ выполнено”; ongoing stages retain their
+state and show their completed parts. Previously sent Telegram messages remain snapshots;
+press Plan 4.0 again for current state. Rollout confirmation will be recorded below.
 
 ## Roadmap and next work
 

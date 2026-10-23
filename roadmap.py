@@ -59,5 +59,59 @@ def mark(conn,ident,state,evidence):
 
 
 def describe(conn):
-    names={"planned":"запланировано","active":"в работе","blocked":"есть препятствие","done":"проверено"}
-    return "ULTIMATE 4.0 · план\n"+"\n".join(f"{ident}. {title} — {names.get(state,state)}" for ident,title,state in conn.execute("SELECT id,title,state FROM uac_roadmap ORDER BY id"))
+    names={"planned":"запланировано","active":"в работе","blocked":"есть препятствие","done":"✅ выполнено"}
+    details=completed_work(conn)
+    lines=['ULTIMATE 4.0 · план']
+    for ident,title,state in conn.execute('SELECT id,title,state FROM uac_roadmap ORDER BY id'):
+        lines.append(f'{ident}. {title} — {names.get(state,state)}')
+        if ident in details: lines.append('   '+details[ident])
+    lines.append('\nСтатусы работ обновляются из журнала при открытии плана. Готовая часть не завершает весь этап.')
+    return '\n'.join(lines)
+
+
+def completed_work(conn):
+    """Read persisted outcomes, without promoting a partial roadmap stage to done.
+
+    This is a live projection of the queue/artifact journal, so a committed job completion
+    needs no second write or fragile synchronization hook. No API/model inference is used.
+    """
+    tables={row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    details={}
+    if 'owner_notifications' in tables:
+        count=conn.execute('SELECT count(*) FROM owner_notifications WHERE delivered_at IS NOT NULL AND telegram_message_id IS NOT NULL').fetchone()[0]
+        if count: details[1]=f'✅ Доставлено уведомлений: {count}.'
+    if 'code_artifacts' in tables:
+        total,passed=conn.execute("SELECT count(*),COALESCE(sum(test_status='passed'),0) FROM code_artifacts").fetchone()
+        if total: details[4]=f'✅ Сохранено кодовых черновиков: {total}.'
+        if passed: details[5]=f'✅ Черновиков с пройденными тестами: {passed}.'
+    if 'agent_jobs' in tables:
+        counts={(kind,state):count for kind,state,count in conn.execute('SELECT kind,state,count(*) FROM agent_jobs GROUP BY kind,state')}
+        complete=sum(count for (kind,state),count in counts.items() if state=='succeeded')
+        pending=sum(count for (kind,state),count in counts.items() if state=='awaiting_owner')
+        details[2]=f'✅ Выполнено заданий: {complete}. Ожидают решения: {pending}.'
+        checks=counts.get(('check_site','succeeded'),0)
+        if checks: details[6]=f'✅ Выполнено проверок доступности: {checks}.'
+        reports=counts.get(('daily_report','succeeded'),0)
+        if reports: details[11]=f'✅ Сформировано суточных отчётов: {reports}.'
+        last=conn.execute('SELECT id,kind,state,result FROM agent_jobs ORDER BY updated_at DESC,id DESC LIMIT 1').fetchone()
+        if last:
+            ident,kind,state,raw=last
+            labels={'succeeded':'выполнено','awaiting_owner':'ожидает решения','failed':'ошибка','cancelled':'отменено','running':'выполняется','queued':'в очереди'}
+            label=labels.get(state,state)
+            try: result=json.loads(raw) if raw else {}
+            except (TypeError,ValueError): result={}
+            if not isinstance(result,dict): result={}
+            if state=='awaiting_owner' and result.get('artifact_id') and result.get('test_status')=='passed':
+                label='тесты выполнены; ожидает согласования'
+            elif result.get('blocked'):
+                label='заблокировано; ожидает решения'
+            stage={'check_site':6,'inspect_repository':6,'review_change':4,'test_release':5,'daily_report':11}.get(kind)
+            if stage:
+                details[stage]=(details.get(stage,'')+' '+f'Последняя работа #{ident}: {label}.').strip()
+    if 'agent_work_spans' in tables:
+        count=conn.execute('SELECT count(*) FROM agent_work_spans').fetchone()[0]
+        if count: details[11]=(details.get(11,'')+f' ✅ Записано интервалов работы: {count}.').strip()
+    if 'project_memory' in tables:
+        count=conn.execute("SELECT count(*) FROM project_memory WHERE project!='policy'").fetchone()[0]
+        if count: details[12]=f'✅ Контекстов проектов сохранено: {count}.'
+    return details
