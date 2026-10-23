@@ -1,12 +1,12 @@
 # ULTIMATE AI CONTROL 4.0 — current checkpoint
 
-Updated 2026-10-23 UTC. This is the resume point for later scheduled development. Historical
+Updated 2026-10-23 UTC. This is the resume point for later owner-authorized development. Historical
 deployment records retain their original observations; this file identifies the latest state.
 
 ## Installed state
 
-Application: `6c6df74997bcdb283e47ac664e26f9d778dd315e`, draft
-[PR #28](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/28).
+Application: `5fd90ddf0231b9db27f3fd9198c01ac70b7787b5`, draft
+[PR #29](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/29).
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
 one Telegram dispatcher and one operations worker. No separate systemd service was created.
@@ -20,6 +20,39 @@ The owner setup request is persisted as notification 36 with Telegram receipt 20
 `developer-private-key-setup-v1` rather than sending duplicate key requests.
 
 ## Evidence
+
+Latest [independent acceptance deployment](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39905953902)
+passed all 290 source tests on the VPS, including nine real sandbox integrations with zero
+skipped in that pass, and 17 transport tests. Source CI runs
+[39905738255](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/39905738255)
+and [39905919549](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/39905919549)
+succeeded. Fresh generation job 51 created test job 52, which ran four candidate tests and a
+separate seven-test first-party acceptance suite. Artifact 4 passed both and awaits owner
+review. Telegram accepted artifact message 210 and activation message 211. The live plan
+shows four passed-test artifacts, one with independent acceptance; legacy artifacts are not
+retroactively assigned new verification. This remains a fixed offline demo with no real LLM.
+
+Candidate SHA-256: `d5228c581931a20bd7bc984d74e3c6e15804ad9b1af404bffedfa5bb10d56e0f`.
+Acceptance harness SHA-256: `8cffda1476120f659477edd388a8e49cfec71f6f73b584bde5cc38d3a8be96cc`.
+Worker PID 1184613, sole dispatcher PID 1185015. Inventory remained PID 67760 with matching
+source/configuration metadata; paid policies stayed disabled and actual API requests remained
+zero. Backup/restore was checked at
+`/home/maksim/.ultimate-review-data/backups/before-uac4-1792733389884837718.sqlite3`.
+
+[Independent verification after runner cleanup](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39906291903)
+passed with the same worker/poller PIDs, exact release, artifact receipt 210, unchanged
+Inventory and zero API requests. The current-runtime
+[private key check-only run](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39906291795)
+passed four helper tests; secret installation was skipped, key absent and paid policies disabled.
+
+During this rollout the existing NOVA monitor recorded a TimeoutError. Separate bounded GET
+requests from the development environment then returned HTTP 200 for both novaweb.uz/ and
+/health in about two seconds. This confirms those external probes, not recovery of the VPS
+monitor's stored state. Its existing 15-minute check and transition notification remain active;
+verify the next VPS sample before resolving its alarm. No NOVA source, service or deployment
+was changed.
+
+Earlier roadmap and broker observations follow as historical evidence:
 
 Latest [roadmap update](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39904617064)
 passed all 283 source tests on the VPS including eight real sandbox integrations with zero
@@ -80,10 +113,10 @@ URL is still unknown; do not invent one or claim the chat is subscribed to Teleg
 
 ## Required progress updates
 
-Next prepared increment: [independent demo acceptance](INDEPENDENT_ACCEPTANCE.md), with a
+Completed increment: [independent demo acceptance](INDEPENDENT_ACCEPTANCE.md), with a
 separate reviewed seven-test suite, three real mutation-rejection checks and failure/timeout
-gates. All 290 source tests passed locally including nine real sandbox integration tests.
-Server rollout evidence and installed commit will be updated after actual verification.
+gates. All 290 source tests passed locally and on the VPS including nine real sandbox
+integration tests. Stage 5 remains active because custom contracts and wider stacks are pending.
 
 The owner explicitly requested on 2026-10-23 that completed work be marked “выполнено” in the
 Telegram Plan 4.0 after every task. Keep this checkpoint and the runtime roadmap consistent
@@ -109,7 +142,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 2. Scheduler/queue | Live durable jobs, leases, pause/recovery and serialized worker. |
 | 3. API / $30 | Priced transport and holds implemented; private key, actual model/usage receipt and enabled configuration pending. |
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
-| 5. Tester | Network-free Python component tests live; independent acceptance tests and wider stacks pending. |
+| 5. Tester | Network-free tests and independent seven-test demo contract live; custom contracts and wider stacks pending. |
 | 6. Monitoring | NOVA availability and local source inspections scheduled; additional verified targets pending. |
 | 7. Multiple projects | Memory imported; repository identities/permissions must be verified before access. |
 | 8. Draft PRs | Private artifacts and human-created draft PRs exist; autonomous scoped patch-to-PR flow pending. |
@@ -124,7 +157,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 
 Next priority: complete [private model setup](PRIVATE_MODEL_SETUP.md), then a single bounded
 real generation → exact-bundle tests → owner notification with actual financial receipt.
-If key/account setup is blocked, improve independent acceptance validation and crash recovery
+If key/account setup is blocked, improve custom acceptance contracts and crash recovery
 using artificial responses, without representing those tests as actual model access.
 
 ## Boundaries and rollback
@@ -134,9 +167,9 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_roadmap_rollback`, with the recorded old app
-`765800d4f573934959a7854a355a7325420365fe` and state
-`.ultimate-review-data/live/uac4-roadmap-progress-rollout.json`. It validates exact current code
+Current UAC rollback: `uac4_acceptance_rollback`, with the recorded old app
+`6c6df74997bcdb283e47ac664e26f9d778dd315e` and state
+`.ultimate-review-data/live/uac4-independent-acceptance-rollout.json`. It validates exact current code
 and recorded version transition, restores only UAC code, restarts only its worker/dispatcher and
 retains the task journal and artifacts. No policy/credential change is part of this update or
 rollback. Do not replace live accounting/history with an older backup. Reassess this rollback

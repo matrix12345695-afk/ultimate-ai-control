@@ -20,7 +20,7 @@ Transport branch: inventory-bot/server-bridge-v1. Initial helper/workflow commit
   `.uac-provider/key-install-request.json`, exact event-commit checkout, read-only repository
   permission and the existing shared runner concurrency group. Only the owner's pushes run it.
 - The default request is `check_only`, refreshed to installed app
-  `6c6df74997bcdb283e47ac664e26f9d778dd315e` after the roadmap update. This check receives no model secret, reads only
+  `5fd90ddf0231b9db27f3fd9198c01ac70b7787b5` after the independent acceptance update. This check receives no model secret, reads only
   private policy files and key metadata, and creates nothing.
 - The secret is injected into only the explicit installation step, which is skipped for
   `check_only`. It is not added to the existing Inventory workflow or any worker environment.
@@ -48,6 +48,10 @@ After the roadmap runtime update, a fresh
 [check-only run](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39904885830)
 also passed four helper tests and the current-runtime preflight. The install step remained
 skipped, `key_present=false` and `paid_policies_enabled=false`.
+
+The independent acceptance runtime also passed a fresh
+[check-only run](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39906291795):
+four helper tests passed, secret installation skipped, key absent, paid policies disabled.
 
 The concrete owner request was delivered through the existing ULTIMATE dispatcher:
 notification 36, Telegram message 203, event `developer-private-key-setup-v1`.
