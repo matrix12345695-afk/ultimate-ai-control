@@ -79,6 +79,8 @@ class AcceptanceChecksTests(unittest.TestCase):
                         offline_developer.prepare_files(conn,job,root/'artifacts',root/'policy',broker.DEMO_FILES,engine='offline_broker_demo')
                     saved['independent_acceptance']['harness_sha256']='0'*64
                     conn.execute('UPDATE code_artifacts SET test_report=?',(json.dumps(saved),));conn.commit()
+                    artifact=Path(conn.execute('SELECT path FROM code_artifacts').fetchone()[0])
+                    (artifact/'test-report.json').write_text(json.dumps(saved))
                     with self.assertRaisesRegex(ValueError,'harness changed'):
                         offline_developer.prepare_files(conn,job,root/'artifacts',root/'policy',broker.DEMO_FILES,
                             engine='offline_broker_demo',acceptance_profile=acceptance.PROFILE)

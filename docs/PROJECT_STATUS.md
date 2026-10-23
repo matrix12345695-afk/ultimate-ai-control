@@ -19,6 +19,12 @@ Private key transport preflight is verified; see [PRIVATE_MODEL_SETUP.md](PRIVAT
 The owner setup request is persisted as notification 36 with Telegram receipt 203; reuse event
 `developer-private-key-setup-v1` rather than sending duplicate key requests.
 
+Owner update 2026-10-23: **continue without API-key setup for now**. Do not request or install
+a key, enable paid calls, or repeat the setup notification. Record provider_setup_deferred=true
+on the VPS and resolve existing setup requests as deferred, not completed key provisioning.
+Private setup may resume only when the owner returns to it; then review the helper's pinned
+runtime before attempting installation. The hourly development automation remains disabled.
+
 ## Evidence
 
 Latest [independent acceptance deployment](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39905953902)
@@ -113,6 +119,11 @@ URL is still unknown; do not invent one or claim the chat is subscribed to Teleg
 
 ## Required progress updates
 
+Prepared next increment: [durable artifact recovery](ARTIFACT_RECOVERY.md), covering the
+rename-to-SQLite gap, later retry attempts, changed/missing evidence, finite-attempt exhaustion
+alerts and the owner's API deferral. Local tests include an actual Bubblewrap report recovered
+without re-running tests. Server evidence will be recorded after deployment.
+
 Completed increment: [independent demo acceptance](INDEPENDENT_ACCEPTANCE.md), with a
 separate reviewed seven-test suite, three real mutation-rejection checks and failure/timeout
 gates. All 290 source tests passed locally and on the VPS including nine real sandbox
@@ -155,10 +166,11 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 15. Autonomous cycle | Operations run on VPS; general development, approvals/recovery and measured end-to-end acceptance pending. |
 | 16. NOVA commerce | Requirements retained; no NOVA production changes authorized by this checkpoint. |
 
-Next priority: complete [private model setup](PRIVATE_MODEL_SETUP.md), then a single bounded
-real generation → exact-bundle tests → owner notification with actual financial receipt.
-If key/account setup is blocked, improve custom acceptance contracts and crash recovery
-using artificial responses, without representing those tests as actual model access.
+Next priority: improve recovery, custom acceptance contracts, memory and monitoring without
+model access. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
+After the owner resumes it, a single bounded real generation → exact-bundle tests → owner
+notification with an actual financial receipt will be required. Artificial-response tests
+must never be represented as actual model access.
 
 ## Boundaries and rollback
 

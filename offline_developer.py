@@ -8,6 +8,7 @@ import time
 from code_recipes_v48 import RECIPES,build_files
 from isolated_python import run_bundle,manifest,validate_files
 import acceptance_checks
+import artifact_recovery
 
 
 def initialize(conn):
@@ -35,18 +36,17 @@ def prepare_files(conn,job,artifact_root,policy_path,files,*,engine,provenance=N
     if job['project']!='control' or engine not in ('deterministic_recipe','offline_broker_demo','openai_broker'):
         raise PermissionError('draft source is not enabled')
     if type(job.get('attempt')) is not int or not 1<=job['attempt']<=5: raise ValueError('invalid job attempt')
+    if type(job.get('id')) is not int or job['id']<=0: raise ValueError('invalid job identity')
     if acceptance_profile is not None and (engine!='offline_broker_demo' or acceptance_profile!=acceptance_checks.PROFILE):
         raise ValueError('acceptance profile is enabled only for the reviewed offline demo')
-    existing=conn.execute('SELECT id,source_digest,test_status,engine,test_report FROM code_artifacts WHERE job_id=? AND attempt=?',(job['id'],job['attempt'])).fetchone()
-    if existing:
-        if existing[1]!=manifest(files)[1] or existing[3]!=engine: raise ValueError('artifact source changed')
-        checks=json.loads(existing[4]).get('independent_acceptance',{})
-        if checks.get('profile')!=acceptance_profile: raise ValueError('artifact acceptance contract changed')
-        if acceptance_profile and checks.get('harness_sha256')!=acceptance_checks.HARNESS_SHA256:
-            raise ValueError('artifact acceptance harness changed')
-        return {'artifact_id':existing[0],'source_digest':existing[1],'test_status':existing[2],'engine':engine,'code_draft_created':True,'published':False,
-                'independent_acceptance':checks.get('status','not_configured')}
     entries,digest=manifest(files)
+    root=Path(artifact_root).absolute()
+    if 'inventory-bot' in root.resolve().parts: raise PermissionError('invalid artifact root')
+    root.mkdir(parents=True,exist_ok=True,mode=0o700)
+    artifact_recovery.private_directory(root)
+    existing=artifact_recovery.restore(conn,job,root,files,engine,acceptance_profile,provenance)
+    if existing: return existing
+    if len(list(root.iterdir()))>=100: raise ValueError('artifact retention cap reached; reviewed cleanup required')
     # The reviewed demo gets two eight-second runs in separate namespaces, within the
     # worker's existing 30-second tick deadline. General bundles keep their existing limit.
     report=runner(files,policy_path,timeout=8) if acceptance_profile else runner(files,policy_path)
@@ -61,32 +61,29 @@ def prepare_files(conn,job,artifact_root,policy_path,files,*,engine,provenance=N
     if acceptance_profile and checks['status']!='passed': report['status']='failed'
     report['elapsed_seconds']+=checks.get('elapsed_seconds',0)
     if provenance is not None: report=dict(report,provenance=provenance)
-    root=Path(artifact_root)
-    root.mkdir(parents=True,exist_ok=True,mode=0o700)
-    if root.is_symlink() or 'inventory-bot' in root.resolve().parts: raise PermissionError("invalid artifact root")
-    if len(list(root.iterdir()))>=100: raise ValueError("artifact retention cap reached; reviewed cleanup required")
     target=root/('job-'+str(job['id'])+'-attempt-'+str(job['attempt']))
-    if target.exists(): raise ValueError("artifact directory already exists; manual recovery required")
+    if target.exists() or target.is_symlink(): raise artifact_recovery.ArtifactRecoveryBlocked('artifact directory appeared during execution')
+    created=time.time()
+    report=dict(report,artifact_identity=dict(format='uac-artifact-v1',job_id=job['id'],attempt=job['attempt'],project='control',engine=engine,source_digest=digest),artifact_created_at=created)
     with tempfile.TemporaryDirectory(prefix='.artifact-',dir=root) as folder:
         stage=Path(folder)/'bundle'
         stage.mkdir(mode=0o700)
         for name,body in files.items():
             p=stage/name
             p.parent.mkdir(parents=True,exist_ok=True,mode=0o700)
-            p.write_text(body)
-            p.chmod(0o600)
+            artifact_recovery.write_private(p,body.encode())
         for name,data in (('manifest.json',entries),('test-report.json',report)):
             p=stage/name
-            p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
-            p.chmod(0o600)
+            artifact_recovery.write_private(p,(json.dumps(data,ensure_ascii=False,indent=2,allow_nan=False)+'\n').encode())
+        for directory in sorted((p for p in stage.rglob('*') if p.is_dir()),key=lambda p:len(p.parts),reverse=True):
+            artifact_recovery.sync_directory(directory)
+        artifact_recovery.sync_directory(stage)
         stage.rename(target)
+        artifact_recovery.sync_directory(root)
     cur=conn.execute("INSERT INTO code_artifacts(job_id,attempt,project,engine,source_digest,manifest,test_status,test_report,path,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)",
-                     (job['id'],job['attempt'],'control',engine,digest,json.dumps(entries),report['status'],json.dumps(report,ensure_ascii=False),str(target),time.time()))
+                     (job['id'],job['attempt'],'control',engine,digest,json.dumps(entries),report['status'],json.dumps(report,ensure_ascii=False),str(target),created))
     conn.commit()
-    return {'artifact_id':cur.lastrowid,'source_digest':digest,'test_status':report['status'],
-            'engine':engine,'code_draft_created':True,'published':False,'independent_acceptance':checks['status'],
-            'test_elapsed_seconds':report['elapsed_seconds'],'backend':report['backend'],
-            'writable_tmp':report['writable_tmp'],'files':entries}
+    return artifact_recovery.outcome(cur.lastrowid,engine,digest,entries,report)
 
 
 def describe(conn,ident):

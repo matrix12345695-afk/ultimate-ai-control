@@ -95,6 +95,8 @@ def completed_work(conn):
         complete=sum(count for (kind,state),count in counts.items() if state=='succeeded')
         pending=sum(count for (kind,state),count in counts.items() if state=='awaiting_owner')
         details[2]=f'✅ Выполнено заданий: {complete}. Ожидают решения: {pending}.'
+        if setting(conn,'artifact_recovery_verified_release'):
+            details[2]+=' ✅ Восстановление сохранённых результатов проверено.'
         checks=counts.get(('check_site','succeeded'),0)
         if checks: details[6]=f'✅ Выполнено проверок доступности: {checks}.'
         reports=counts.get(('daily_report','succeeded'),0)
