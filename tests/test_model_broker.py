@@ -169,7 +169,7 @@ class BrokerTests(unittest.TestCase):
     def test_failed_draft_tests_block_owner_ready_state(self):
         job,child,bundle=self.stage()
         original=developer_pipeline.test_bundle
-        def failed(files,policy):
+        def failed(files,policy,**kwargs):
             return {'status':'failed','source_digest':manifest(files)[1],'elapsed_seconds':0.1,'backend':'fake-test-only','writable_tmp':False,'output':'FAIL'}
         with patch.object(developer_pipeline,'test_bundle',side_effect=lambda c,j,f:original(c,j,f,runner=failed)):
             result=queue_worker.run_once(self.db)
@@ -225,6 +225,8 @@ class RealDeveloperPipelineTests(unittest.TestCase):
                 row=conn.execute('SELECT engine,test_status,test_report,path FROM code_artifacts').fetchone()
                 self.assertEqual(row[:2],('offline_broker_demo','passed'))
                 report=json.loads(row[2]);self.assertIn('Ran 4 tests',report['output'])
+                self.assertEqual(report['independent_acceptance']['status'],'passed')
+                self.assertIn('Ran 7 tests',report['independent_acceptance']['output'])
                 self.assertEqual(report['provenance']['generation_job_id'],ident)
                 self.assertEqual(conn.execute('SELECT kind FROM owner_notifications').fetchone()[0],'decision')
                 self.assertEqual(conn.execute('SELECT count(*) FROM provider_costs').fetchone()[0],0)

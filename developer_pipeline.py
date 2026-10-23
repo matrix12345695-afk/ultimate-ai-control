@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import offline_developer
 import model_broker
+import acceptance_checks
 
 
 def test_bundle(conn,job,folder,runner=None):
@@ -21,4 +22,5 @@ def test_bundle(conn,job,folder,runner=None):
     provenance={k:bundle[k] for k in ('generation_job_id','provider_request_key','model','generation_elapsed_seconds')}
     kwargs={'runner':runner} if runner else {}
     return offline_developer.prepare_files(conn,job,Path(folder)/'artifacts',Path(folder)/'sandbox-policy.json',
-        bundle['files'],engine=bundle['engine'],provenance=provenance,**kwargs)
+        bundle['files'],engine=bundle['engine'],provenance=provenance,
+        acceptance_profile=acceptance_checks.PROFILE if bundle['engine']=='offline_broker_demo' else None,**kwargs)

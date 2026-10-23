@@ -84,6 +84,12 @@ def completed_work(conn):
         total,passed=conn.execute("SELECT count(*),COALESCE(sum(test_status='passed'),0) FROM code_artifacts").fetchone()
         if total: details[4]=f'✅ Сохранено кодовых черновиков: {total}.'
         if passed: details[5]=f'✅ Черновиков с пройденными тестами: {passed}.'
+        independently_checked=0
+        for raw, in conn.execute("SELECT test_report FROM code_artifacts WHERE test_status='passed'"):
+            try: checks=json.loads(raw).get('independent_acceptance',{})
+            except (TypeError,ValueError,AttributeError): continue
+            if isinstance(checks,dict) and checks.get('status')=='passed': independently_checked+=1
+        if independently_checked: details[5]+=f' Независимую приёмку прошли: {independently_checked}.'
     if 'agent_jobs' in tables:
         counts={(kind,state):count for kind,state,count in conn.execute('SELECT kind,state,count(*) FROM agent_jobs GROUP BY kind,state')}
         complete=sum(count for (kind,state),count in counts.items() if state=='succeeded')

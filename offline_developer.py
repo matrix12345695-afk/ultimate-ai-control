@@ -7,6 +7,7 @@ import tempfile
 import time
 from code_recipes_v48 import RECIPES,build_files
 from isolated_python import run_bundle,manifest,validate_files
+import acceptance_checks
 
 
 def initialize(conn):
@@ -30,17 +31,35 @@ def prepare(conn,job,artifact_root,policy_path,runner=run_bundle):
     return prepare_files(conn,job,artifact_root,policy_path,files,engine='deterministic_recipe',runner=runner)
 
 
-def prepare_files(conn,job,artifact_root,policy_path,files,*,engine,provenance=None,runner=run_bundle):
+def prepare_files(conn,job,artifact_root,policy_path,files,*,engine,provenance=None,runner=run_bundle,acceptance_profile=None):
     if job['project']!='control' or engine not in ('deterministic_recipe','offline_broker_demo','openai_broker'):
         raise PermissionError('draft source is not enabled')
     if type(job.get('attempt')) is not int or not 1<=job['attempt']<=5: raise ValueError('invalid job attempt')
-    existing=conn.execute('SELECT id,source_digest,test_status,engine FROM code_artifacts WHERE job_id=? AND attempt=?',(job['id'],job['attempt'])).fetchone()
+    if acceptance_profile is not None and (engine!='offline_broker_demo' or acceptance_profile!=acceptance_checks.PROFILE):
+        raise ValueError('acceptance profile is enabled only for the reviewed offline demo')
+    existing=conn.execute('SELECT id,source_digest,test_status,engine,test_report FROM code_artifacts WHERE job_id=? AND attempt=?',(job['id'],job['attempt'])).fetchone()
     if existing:
         if existing[1]!=manifest(files)[1] or existing[3]!=engine: raise ValueError('artifact source changed')
-        return {'artifact_id':existing[0],'source_digest':existing[1],'test_status':existing[2],'engine':engine,'code_draft_created':True,'published':False}
+        checks=json.loads(existing[4]).get('independent_acceptance',{})
+        if checks.get('profile')!=acceptance_profile: raise ValueError('artifact acceptance contract changed')
+        if acceptance_profile and checks.get('harness_sha256')!=acceptance_checks.HARNESS_SHA256:
+            raise ValueError('artifact acceptance harness changed')
+        return {'artifact_id':existing[0],'source_digest':existing[1],'test_status':existing[2],'engine':engine,'code_draft_created':True,'published':False,
+                'independent_acceptance':checks.get('status','not_configured')}
     entries,digest=manifest(files)
-    report=runner(files,policy_path)
+    # The reviewed demo gets two eight-second runs in separate namespaces, within the
+    # worker's existing 30-second tick deadline. General bundles keep their existing limit.
+    report=runner(files,policy_path,timeout=8) if acceptance_profile else runner(files,policy_path)
     if report.get('source_digest')!=digest: raise ValueError("test report source digest mismatch")
+    own_status=report['status']
+    checks={'status':'not_configured','profile':None}
+    if acceptance_profile:
+        checks=(acceptance_checks.check(files,policy_path,acceptance_profile,runner=runner) if own_status=='passed'
+                else {'status':'not_run','profile':acceptance_profile,'harness_sha256':acceptance_checks.HARNESS_SHA256,
+                      'candidate_source_digest':digest,'reason':'candidate_tests_failed'})
+    report=dict(report,candidate_test_status=own_status,independent_acceptance=checks)
+    if acceptance_profile and checks['status']!='passed': report['status']='failed'
+    report['elapsed_seconds']+=checks.get('elapsed_seconds',0)
     if provenance is not None: report=dict(report,provenance=provenance)
     root=Path(artifact_root)
     root.mkdir(parents=True,exist_ok=True,mode=0o700)
@@ -65,7 +84,7 @@ def prepare_files(conn,job,artifact_root,policy_path,files,*,engine,provenance=N
                      (job['id'],job['attempt'],'control',engine,digest,json.dumps(entries),report['status'],json.dumps(report,ensure_ascii=False),str(target),time.time()))
     conn.commit()
     return {'artifact_id':cur.lastrowid,'source_digest':digest,'test_status':report['status'],
-            'engine':engine,'code_draft_created':True,'published':False,
+            'engine':engine,'code_draft_created':True,'published':False,'independent_acceptance':checks['status'],
             'test_elapsed_seconds':report['elapsed_seconds'],'backend':report['backend'],
             'writable_tmp':report['writable_tmp'],'files':entries}
 
@@ -77,6 +96,7 @@ def describe(conn,ident):
     label='OpenAI: результат требует проверки' if row[1]=='openai_broker' else 'без LLM'
     return (f'Кодовый черновик #{ident} · {row[0]}\nДвижок: {row[1]} ({label})\n'
             f'SHA-256: {row[2]}\nТесты: {row[4]} · {report.get("elapsed_seconds",0):.3f} сек.\n'
+            f'Независимая приёмка: {report.get("independent_acceptance",{}).get("status","not_configured")}\n'
             f'Изоляция: {report.get("backend")} · сеть отключена\n'
             +'\n'.join(item['path'] for item in json.loads(row[3]))
             +'\nПубликация не выполнялась. Полный отчёт и исходники сохранены отдельно.')[:3900]

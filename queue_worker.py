@@ -187,7 +187,7 @@ def run_once(path,root=ROOT,site_checker=check_site):
                 label='OpenAI через отдельный посредник' if engine=='openai_broker' else ('демонстрация посредника без LLM' if engine=='offline_broker_demo' else 'детерминированный рецепт без LLM')
                 send_event(conn,'decision' if result['test_status']=='passed' else 'critical',
                            'Кодовый черновик проверен' if result['test_status']=='passed' else 'Проверка кодового черновика не прошла',
-                           f"Артефакт #{result['artifact_id']}, SHA-256 {result['source_digest']}. Тесты: {result['test_status']}. Просмотр: /artifact {result['artifact_id']}. Движок: {label}. Исходники и отчёт сохранены; публикации не было.",
+                           f"Артефакт #{result['artifact_id']}, SHA-256 {result['source_digest']}. Тесты: {result['test_status']}. Независимая приёмка: {result.get('independent_acceptance','not_configured')}. Просмотр: /artifact {result['artifact_id']}. Движок: {label}. Исходники и отчёт сохранены; публикации не было.",
                            'artifact-'+str(job['id'])+'-'+result['source_digest'],job['id'])
             elif job["kind"]=="check_site":
                 old=conn.execute("SELECT healthy FROM agent_health WHERE target=?",(result["target"],)).fetchone()

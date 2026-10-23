@@ -80,6 +80,11 @@ URL is still unknown; do not invent one or claim the chat is subscribed to Teleg
 
 ## Required progress updates
 
+Next prepared increment: [independent demo acceptance](INDEPENDENT_ACCEPTANCE.md), with a
+separate reviewed seven-test suite, three real mutation-rejection checks and failure/timeout
+gates. All 290 source tests passed locally including nine real sandbox integration tests.
+Server rollout evidence and installed commit will be updated after actual verification.
+
 The owner explicitly requested on 2026-10-23 that completed work be marked “выполнено” in the
 Telegram Plan 4.0 after every task. Keep this checkpoint and the runtime roadmap consistent
 after each verified increment. Mark an entire stage done only when its acceptance criteria
