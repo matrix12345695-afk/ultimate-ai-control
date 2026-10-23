@@ -1,5 +1,11 @@
 # Private ULTIMATE model configuration
 
+**Deferred by the owner on 2026-10-23.** Continue development without API-key setup. Do not
+send another setup request or install/enable credentials until the owner returns to this step.
+The instructions below are retained for that future operation. The last reviewed setup
+helper/request pin is 5fd90ddf0231b9db27f3fd9198c01ac70b7787b5; after later app updates it
+must fail closed until explicitly reviewed against the then-current runtime.
+
 Observed 2026-10-23 UTC. The model is not active. An existing ChatGPT subscription or
 replenished Codex usage allowance does not provision OpenAI API credentials or account credit.
 
@@ -19,7 +25,7 @@ Transport branch: inventory-bot/server-bridge-v1. Initial helper/workflow commit
 - `.github/workflows/uac-private-model-key.yml` has a separate path trigger on
   `.uac-provider/key-install-request.json`, exact event-commit checkout, read-only repository
   permission and the existing shared runner concurrency group. Only the owner's pushes run it.
-- The default request is `check_only`, refreshed to installed app
+- The default request is `check_only`, last reviewed against app
   `5fd90ddf0231b9db27f3fd9198c01ac70b7787b5` after the independent acceptance update. This check receives no model secret, reads only
   private policy files and key metadata, and creates nothing.
 - The secret is injected into only the explicit installation step, which is skipped for

@@ -73,6 +73,21 @@ class BrokerTests(unittest.TestCase):
         self.assertEqual(self.conn.execute('SELECT count(*) FROM developer_bundles').fetchone()[0],1)
         self.assertEqual(self.conn.execute('SELECT count(*) FROM provider_costs').fetchone()[0],0)
 
+    def test_expired_generation_lease_reuses_metered_capsule_without_another_call(self):
+        self.enable_fake_provider();job,request=self.job(demo=False)
+        sent=[]
+        def transport(*args): sent.append(1);return self.response()
+        first=broker.process(self.conn,self.root,request,transport=transport)
+        self.conn.execute('UPDATE agent_jobs SET lease_until=0 WHERE id=?',(job['id'],));self.conn.commit()
+        retry=queue.claim(self.conn,'operations-1',queue.KINDS,lease_seconds=60)
+        self.assertEqual(retry['id'],job['id']);self.assertEqual(retry['attempt'],2)
+        with patch.object(api,'generate',side_effect=AssertionError('completed generation must not repeat')):
+            second=broker.process(self.conn,self.root,dict(request,lease_token=retry['lease_token']))
+        self.assertEqual(second['source_digest'],first['source_digest'])
+        self.assertEqual(sent,[1])
+        self.assertEqual(self.conn.execute('SELECT count(*) FROM developer_bundles').fetchone()[0],1)
+        self.assertEqual(self.conn.execute('SELECT count(*) FROM provider_costs').fetchone()[0],1)
+
     def test_unauthorized_foreign_expired_and_paused_jobs_never_read_credentials(self):
         job,request=self.job()
         for changed in ({**request,'lease_token':'wrong'},{**request,'job_id':999},{**request,'endpoint':'https://evil.invalid/'}):

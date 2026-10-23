@@ -20,6 +20,7 @@ import scheduler
 import roadmap
 import budget_gate
 import offline_developer
+from artifact_recovery import ArtifactRecoveryBlocked
 import metered_provider
 import model_broker
 import broker_client
@@ -136,6 +137,11 @@ def run_once(path,root=ROOT,site_checker=check_site):
         conn.execute("INSERT INTO agent_worker_status VALUES(?,?,?,?) ON CONFLICT(worker) DO UPDATE SET heartbeat=excluded.heartbeat,state=excluded.state,detail=excluded.detail",(WORKER,time.time(),"idle",""))
         conn.commit()
         job=queue.claim(conn,WORKER,queue.KINDS,lease_seconds=60)
+        expired=conn.execute("SELECT id FROM agent_jobs WHERE state='failed' AND last_error='lease_expired' ORDER BY id DESC LIMIT 20").fetchall()
+        for ident, in expired:
+            send_event(conn,'critical','Исполнитель не завершил задание',
+                       f'Задание #{ident} исчерпало попытки после остановки исполнителя. Сохранённые данные оставлены для проверки; автоматического повторного запуска нет.',
+                       'job-lease-exhausted-'+str(ident),ident)
     if not job: return None
     start=time.time()
     tick=time.monotonic()
@@ -178,7 +184,7 @@ def run_once(path,root=ROOT,site_checker=check_site):
         # Record only the measured handler interval. Time waiting in the queue is not work.
         with connect(path) as conn:
             queue.add_work_span(conn,job["id"],job["lease_token"],category(job),start,end,now=max(time.time(),end))
-            if waiting and result.get('blocked'):
+            if waiting and result.get('blocked') and roadmap.setting(conn,'provider_setup_deferred')!='true':
                 send_event(conn,"decision","Нужен исполнитель для текстовых задач",
                            "Задачи сохранены. Платный провайдер с API-ключом и изолированный AI-разработчик ещё не подключены. Ключ нужно настраивать приватно на VPS. Мониторинг и независимые проверки продолжаются.",
                            "runtime-needs-ai-executor-v4",job["id"])
@@ -187,7 +193,7 @@ def run_once(path,root=ROOT,site_checker=check_site):
                 label='OpenAI через отдельный посредник' if engine=='openai_broker' else ('демонстрация посредника без LLM' if engine=='offline_broker_demo' else 'детерминированный рецепт без LLM')
                 send_event(conn,'decision' if result['test_status']=='passed' else 'critical',
                            'Кодовый черновик проверен' if result['test_status']=='passed' else 'Проверка кодового черновика не прошла',
-                           f"Артефакт #{result['artifact_id']}, SHA-256 {result['source_digest']}. Тесты: {result['test_status']}. Независимая приёмка: {result.get('independent_acceptance','not_configured')}. Просмотр: /artifact {result['artifact_id']}. Движок: {label}. Исходники и отчёт сохранены; публикации не было.",
+                           f"Артефакт #{result['artifact_id']}, SHA-256 {result['source_digest']}. Тесты: {result['test_status']}. Независимая приёмка: {result.get('independent_acceptance','not_configured')}. Просмотр: /artifact {result['artifact_id']}. Движок: {label}. "+('Восстановлен сохранённый результат; тесты повторно не запускались. ' if result.get('tests_reused') else '')+'Публикации не было.',
                            'artifact-'+str(job['id'])+'-'+result['source_digest'],job['id'])
             elif job["kind"]=="check_site":
                 old=conn.execute("SELECT healthy FROM agent_health WHERE target=?",(result["target"],)).fetchone()
@@ -222,10 +228,10 @@ def run_once(path,root=ROOT,site_checker=check_site):
             conn.execute("UPDATE agent_worker_status SET heartbeat=?,state=?,detail=? WHERE worker=?",(time.time(),"waiting_owner" if waiting else "idle",str(job["id"]),WORKER))
             conn.commit()
         return {"id":job["id"],"state":"awaiting_owner" if waiting else "succeeded"}
-    except (SandboxUnavailable,FileNotFoundError,model_broker.BrokerFailed) as exc:
+    except (SandboxUnavailable,FileNotFoundError,model_broker.BrokerFailed,ArtifactRecoveryBlocked) as exc:
         with connect(path) as conn:
             record_failed_interval(conn,job,start,tick)
-            reason=str(exc) if isinstance(exc,model_broker.BrokerFailed) else type(exc).__name__
+            reason=str(exc) if isinstance(exc,(model_broker.BrokerFailed,ArtifactRecoveryBlocked)) else type(exc).__name__
             send_event(conn,'critical','Посредник или изолированный исполнитель остановлен',reason,
                        'sandbox-unavailable-'+str(job['id']),job['id'])
             queue.fail(conn,job['id'],job['lease_token'],type(exc).__name__,retryable=False)
