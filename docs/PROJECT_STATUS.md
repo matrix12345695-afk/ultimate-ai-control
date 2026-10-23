@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `c5a0ea8551582f0cb876f2754d1e0223eebf28d0`, draft
-[PR #30](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/30), stacked on PR #29.
+Application: `8a955c038c0b710e252f063adbc005059e631acb`, draft
+[PR #31](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/31), stacked on PR #30.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
 one Telegram dispatcher and one operations worker. No separate systemd service was created.
@@ -27,6 +27,32 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [monitoring incident rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39915156776)
+passed all 311 source tests on the VPS, with ten real sandbox integrations and zero skips in
+the sandbox-enabled pass, plus 19 transport tests. Exact-source CI runs
+[39910990095](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/39910990095)
+and [39911623524](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/39911623524)
+passed. On an independently restored DB copy an artificial outage and an injected transaction
+failure verified rollback, recovery and unrelated-decision preservation. No synthetic outage
+was written to the production database.
+
+Real queued check62 obtained NOVA HTTP200 and closed 12 proven older availability alarms.
+Telegram accepted activation232 and recovery233; their delivery receipts are persisted, not
+owner-read confirmations. `/monitor4`, its menu button and Plan4.0 expose the saved results.
+Worker PID1283255, sole dispatcher PID1283609 and Inventory PID67760 were verified. Inventory
+source fingerprints and configuration metadata were unchanged. Paid policies remained disabled;
+provider setup remained deferred and actual API requests/holds/spend stayed zero.
+Verified backup: `/home/maksim/.ultimate-review-data/backups/before-uac4-1792738954559458835.sqlite3`.
+
+[Independent verification after runner cleanup](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39915382746)
+also passed for the exact installed release, same worker/dispatcher, check62 and recovery233.
+Artifact5 and its independent acceptance evidence remain valid. The first transport attempt
+stopped before activation because the helper path was wrong; only the isolated staging path
+was corrected before the successful rollout. Documentation commits after the installed source
+are checkpoints, not separate runtime deployments.
+
+Earlier artifact-recovery observations follow as historical evidence:
 
 Latest [artifact recovery update](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39908603525)
 passed all 302 tests on the VPS with zero skipped in its sandbox-enabled pass, including ten
@@ -151,6 +177,25 @@ URL is still unknown; do not invent one or claim the chat is subscribed to Teleg
 
 ## Required progress updates
 
+Owner update 2026-10-23: continue independent authorized work, and retain actions requiring
+the owner so they can be handled later. Do not repeatedly interrupt development for deferred
+setup. Record a concrete action and its reason; a deferred action is not completed or approved.
+Current owner follow-ups:
+
+- API setup: explicitly deferred. Resume only when the owner returns to it; never ask for a
+  secret in Telegram or this chat. Paid generation remains disabled in the meantime.
+- Return-chat link: optional and still unknown. The owner can later use `/chat_bind` with the
+  actual private conversation URL; its absence does not block independent VPS operations.
+- Publications: each future release requires its own project/version/digest approval after
+  tests and a reviewable result exist. No blanket approval or action is needed now.
+
+These follow-ups do not authorize payments, policy changes, or Inventory modifications.
+
+Completed increment: [availability incident lifecycle](HEALTH_INCIDENTS.md), atomic with
+job completion and the health snapshot. It recognizes scoped legacy alarms, closes only
+eligible older alerts after a newer successful check, preserves other owner decisions and
+adds /monitor4. Server rollout and independent verification evidence are recorded above.
+
 Completed increment: [durable artifact recovery](ARTIFACT_RECOVERY.md), covering the
 rename-to-SQLite gap, later retry attempts, changed/missing evidence, finite-attempt exhaustion
 alerts and the owner's API deferral. Local and VPS tests include an actual Bubblewrap report
@@ -186,7 +231,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 3. API / $30 | Transport/holds implemented; key setup explicitly deferred by owner; paid policies disabled. |
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
 | 5. Tester | Network-free tests and independent seven-test demo contract live; custom contracts and wider stacks pending. |
-| 6. Monitoring | NOVA availability and local source inspections scheduled; additional verified targets pending. |
+| 6. Monitoring | NOVA availability, scoped incident recovery and local source inspections live; functional/API checks and more verified targets pending. |
 | 7. Multiple projects | Memory imported; repository identities/permissions must be verified before access. |
 | 8. Draft PRs | Private artifacts and human-created draft PRs exist; autonomous scoped patch-to-PR flow pending. |
 | 9. Publication approval | Required by policy; authenticated project/version/digest approval and rollback gates pending. |
@@ -198,7 +243,8 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 15. Autonomous cycle | Operations run on VPS; general development, approvals/recovery and measured end-to-end acceptance pending. |
 | 16. NOVA commerce | Requirements retained; no NOVA production changes authorized by this checkpoint. |
 
-Next priority: improve recovery, custom acceptance contracts, memory and monitoring without
+Next priority: a persistent view of deferred owner follow-ups, custom acceptance contracts,
+memory and monitoring without
 model access. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
 After the owner resumes it, a single bounded real generation → exact-bundle tests → owner
 notification with an actual financial receipt will be required. Artificial-response tests
@@ -211,10 +257,10 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_recovery_rollback`, with the recorded old app
-`a2ed09169033b4a14692cfb3d500b7a7bae4ab7f` and state
-`.ultimate-review-data/live/uac4-artifact-recovery-rollout.json`. It validates exact current code
+Current UAC rollback: `uac4_health_rollback`, with the recorded old app
+`c5a0ea8551582f0cb876f2754d1e0223eebf28d0` and state
+`.ultimate-review-data/live/uac4-health-incidents-rollout.json`. It validates exact current code
 and recorded version transition, restores only UAC code, restarts only its worker/dispatcher and
-retains the task journal, artifacts and the owner's API deferral. No policy/credential change is part of this update or
+retains the task journal, incident history, valid resolutions, artifacts and the owner's API deferral. No policy/credential change is part of this update or
 rollback. Do not replace live accounting/history with an older backup. Reassess this rollback
 gate after any later activation or policy change.

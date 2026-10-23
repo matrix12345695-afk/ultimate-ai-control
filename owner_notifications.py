@@ -27,10 +27,12 @@ def initialize(conn):
     conn.commit()
     initialize_delivery(conn)
 
-def create(conn, project, kind, title, reason, next_action, task_id=None, event_key=None):
+def create(conn, project, kind, title, reason, next_action, task_id=None, event_key=None, *, commit=True):
     """Store a bounded, human-readable request for the owner."""
     if kind not in KINDS:
         raise ValueError("unknown notification kind")
+    if type(commit) is not bool or (not commit and not conn.in_transaction):
+        raise ValueError('notification transaction required')
     values = (project, title, reason, next_action)
     if any(not isinstance(v, str) or not v.strip() or len(v) > 500 for v in values):
         raise ValueError("invalid notification fields")
@@ -49,7 +51,7 @@ def create(conn, project, kind, title, reason, next_action, task_id=None, event_
         (project, task_id, kind, title, reason, next_action,
          datetime.now(timezone.utc).isoformat(), event_key),
     )
-    conn.commit()
+    if commit: conn.commit()
     if not row.rowcount and event_key is not None:
         return conn.execute("SELECT id FROM owner_notifications WHERE event_key=?", (event_key,)).fetchone()[0]
     return row.lastrowid
