@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `8a955c038c0b710e252f063adbc005059e631acb`, draft
-[PR #31](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/31), stacked on PR #30.
+Application: `c541aaec14f5bb5b03417bd00cce037471ddd0ac`, draft
+[PR #32](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/32), stacked on PR #31.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
 one Telegram dispatcher and one operations worker. No separate systemd service was created.
@@ -27,6 +27,31 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [owner-follow-up rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39916216925)
+passed all 318 source tests on the VPS, including ten real sandbox integrations with zero
+skips in that pass, plus 20 transport tests. Exact-source CI runs
+[39915976109](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/39915976109)
+and [39915983107](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/39915983107)
+passed. Consistent restored-copy probes proved that pagination reaches every pending actionable
+request and that viewing pages/details changes no inbox, job or setting record. Live commands
+and the Plan4.0 component were also verified. Six active owner requests were observed; the API
+deferral is retained separately. owner_followups_later=true and the owner's instruction are
+persisted in settings/audit. No new decision or critical request was created for deferred setup.
+
+Telegram accepted activation234. Worker PID1294476, sole dispatcher PID1294879 and Inventory
+PID67760 were verified; Inventory source/configuration metadata remained unchanged. The saved
+NOVA sample was HTTP200 with zero open availability incidents and 12 recovered alarms.
+Paid policies stayed disabled, provider setup stayed deferred and actual API requests/holds/spend
+stayed zero. Backup: `/home/maksim/.ultimate-review-data/backups/before-uac4-1792739562982258956.sqlite3`.
+[Independent verification after runner cleanup](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39916497814)
+passed with the same worker/dispatcher PIDs, exact installed source, activation234, six
+actionable owner requests, retained API deferral and unchanged Inventory. Both copy-backed
+read-only checks and live commands/Plan4.0 passed. All workflow and cleanup steps succeeded.
+The application commit above is installed; subsequent documentation commits only save this
+checkpoint and the preliminary repository audit.
+
+Earlier monitoring-recovery observations follow as historical evidence:
 
 Latest [monitoring incident rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39915156776)
 passed all 311 source tests on the VPS, with ten real sandbox integrations and zero skips in
@@ -191,9 +216,10 @@ Current owner follow-ups:
 
 These follow-ups do not authorize payments, policy changes, or Inventory modifications.
 
-Prepared next increment: [owner follow-up view](OWNER_FOLLOWUPS.md), a read-only paginated
+Completed increment: [owner follow-up view](OWNER_FOLLOWUPS.md), a read-only paginated
 list of critical/decision requests with full details and deferred setup context. Server rollout
-and live command verification are pending. No automatic reminder or new schedule is added.
+and live command verification passed. No automatic reminder or new schedule is added. The new
+keyboard is returned after `/start`; `/owner_later` and `/owner_item ID` work directly.
 
 Completed increment: [availability incident lifecycle](HEALTH_INCIDENTS.md), atomic with
 job completion and the health snapshot. It recognizes scoped legacy alarms, closes only
@@ -236,18 +262,23 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
 | 5. Tester | Network-free tests and independent seven-test demo contract live; custom contracts and wider stacks pending. |
 | 6. Monitoring | NOVA availability, scoped incident recovery and local source inspections live; functional/API checks and more verified targets pending. |
-| 7. Multiple projects | Memory imported; repository identities/permissions must be verified before access. |
+| 7. Multiple projects | Memory imported and initial read-only repository audit recorded; runtime identities/scopes and execution still pending. |
 | 8. Draft PRs | Private artifacts and human-created draft PRs exist; autonomous scoped patch-to-PR flow pending. |
 | 9. Publication approval | Required by policy; authenticated project/version/digest approval and rollback gates pending. |
 | 10. Voice | Pending transcription choice, budget accounting and task confirmation. |
 | 11. Analytics | Measured work spans and basic reports exist; full agent/project costs and waiting-time analysis pending. |
-| 12. Memory | Project rules/decisions persisted; evidence-linked lifecycle and retrieval improvements pending. |
+| 12. Memory | Project rules/decisions and owner follow-up view persisted; broader evidence-linked lifecycle/retrieval pending. |
 | 13. Design/browser | Pending isolated browser execution and visual/mobile acceptance. |
 | 14. Open source | Initial research exists; choose only after license/security/dependency/resource review. |
 | 15. Autonomous cycle | Operations run on VPS; general development, approvals/recovery and measured end-to-end acceptance pending. |
 | 16. NOVA commerce | Requirements retained; no NOVA production changes authorized by this checkpoint. |
 
-Next priority: a persistent view of deferred owner follow-ups, custom acceptance contracts,
+Initial [repository audit](PROJECT_REPOSITORY_AUDIT.md) found the NOVA Node.js project and
+the four-file Kinder Android scaffold, separately from an older Python Kinder candidate.
+No inspected project was modified, installed, deployed or granted worker access. Unknown
+project mappings remain unassigned; Inventory remains denied. Stage 7 is not complete.
+
+Next priority: reviewed repository identities/read scopes, custom acceptance contracts,
 memory and monitoring without
 model access. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
 After the owner resumes it, a single bounded real generation → exact-bundle tests → owner
@@ -261,9 +292,9 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_health_rollback`, with the recorded old app
-`c5a0ea8551582f0cb876f2754d1e0223eebf28d0` and state
-`.ultimate-review-data/live/uac4-health-incidents-rollout.json`. It validates exact current code
+Current UAC rollback: `uac4_followups_rollback`, with the recorded old app
+`8a955c038c0b710e252f063adbc005059e631acb` and state
+`.ultimate-review-data/live/uac4-owner-followups-rollout.json`. It validates exact current code
 and recorded version transition, restores only UAC code, restarts only its worker/dispatcher and
 retains the task journal, incident history, valid resolutions, artifacts and the owner's API deferral. No policy/credential change is part of this update or
 rollback. Do not replace live accounting/history with an older backup. Reassess this rollback
