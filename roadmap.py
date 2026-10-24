@@ -141,4 +141,6 @@ def completed_work(conn):
         registered=project_registry.verified(conn)
         if registered:
             details[7]=f'✅ Репозиториев с проверенными файлами и хешами: {len(registered)}. Доступ только для чтения; исполнение и публикация не включены.'
+    if 'project_test_runs' in tables and setting(conn,'nova_tests_verified_release'):
+        details[5]=(details.get(5,'')+' ✅ Закреплённые тесты NOVA без PostgreSQL и браузера подключены.').strip()
     return details

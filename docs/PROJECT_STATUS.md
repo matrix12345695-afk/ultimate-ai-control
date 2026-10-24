@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `640988e0b4c92aaca9a6740b29ebd1bf4a5c76a1`, draft
-[PR #37](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/37), stacked on PR #36.
+Application: `851bfbc01e5c8e736a4543ab549b1797d4d294c4`, draft
+[PR #38](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/38), stacked on PR #37.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
 one Telegram dispatcher and one operations worker. No separate systemd service was created.
@@ -27,6 +27,53 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [pinned NOVA test rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40091932006)
+passed all382 source tests on the VPS, including the12 original real Python sandbox cases
+and3 real Node sandbox cases (six isolated Node executions), with zero skips in that pass,
+plus33 transport tests. Exact-source CI runs
+[40091672787](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40091672787)
+and [40091675945](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40091675945)
+passed. The restored-copy probe also executed the real24-test subset and adopted the exact
+saved report on retry with a runner that would fail if called. Original project rules/inbox
+remained unchanged; artificial copy events stayed out of production.
+
+The existing root-owned Node v24.21.0/compiler were reused. An own NAPI TSYNC guard was built
+from reviewed first-party C; no npm packages, system upgrade or new supervisor were installed.
+Only23 pinned public source files entered a separate private cache. Source manifest:
+`ea67901588811ea194d773e3cc0b0c3248da45003f7be5c3f340be4e6103f7e6`.
+Node SHA-256 `7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c`;
+compiled guard SHA-256 `484e404fb368be43bf4c0dba4f3fa2feaa307df1deb209662f5dbc8c7d9375e9`.
+The worker retains384MiB soft address space and has768MiB hard space for the bounded Node
+child; Python children remain320MiB. Concurrency stays one. Node uses one CPU,8-second CPU/wall
+limits, read-only root/tmp, no network/processes or new threads after guarded initialization.
+Startup threads are not described as absent. No fallback executes project code on the host.
+
+Real queue job197 passed24/24 tests from10 original test files, with zero failures, skips,
+cancelled or todo. These cover pure functions, mocked readiness/reminders and source/markup
+assertions. They are not PostgreSQL integration, full npm test, browser tests or verification
+of the deployed site version. No pg dependency, server.js/crm.js module, live database or
+external sender was used. The source profile remains pinned to NOVA commit
+`1a23239a0a9c7d79905c91505a8741d8350d7e75`. NOVA source, hosting, data and credentials were unchanged.
+/test_nova and the NOVA WEB button queue only that fixed scope; /nova_tests shows its persisted
+report. Source-linked memory entry197 refers to the real run;197 total observations were
+verified at that time. The tester stage stays active and shows this completed component.
+No new schedule or development automation was created.
+
+Telegram accepted activation327 and actual test report328. Worker PID3075811, sole dispatcher
+PID3076147 and Inventory PID67760 were verified; Inventory source/configuration metadata matched.
+Actual paid requests/holds/spend remained zero; paid policies stayed disabled and owner API setup
+deferred. Existing artifact reports and project-rule rows were preserved. Backup:
+`/home/maksim/.ultimate-review-data/backups/before-uac4-1792843107392652155.sqlite3`.
+[Independent verification after runner cleanup](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40092227502)
+passed for the exact installed source, same worker/dispatcher PIDs, unchanged job197/report,
+24/24 counts, persisted receipt328, source-linked memory197 and both enforced worker resource
+limits. Saved report recovery did not rerun Node tests. All earlier UAC checks, deferred API
+setup and unchanged Inventory passed again. Subsequent documentation commits save this checkpoint
+and are not another runtime deployment. See [NOVA_ISOLATED_TESTS.md](NOVA_ISOLATED_TESTS.md)
+for the exact execution boundaries.
+
+Earlier evidence-memory observations follow as historical evidence:
 
 Latest [evidence-memory rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40089769620)
 passed all371 source tests on the VPS, including twelve real sandbox integrations with zero
@@ -445,7 +492,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 2. Scheduler/queue | Live jobs, leases, pause, serialized worker and verified complete-artifact crash recovery. |
 | 3. API / $30 | Transport/holds implemented; key setup explicitly deferred by owner; paid policies disabled. |
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
-| 5. Tester | Separate demo/path/Git-SHA acceptance profiles and harness-bound recovery live; broader task-specific contracts and wider stacks pending. |
+| 5. Tester | Python contract checks plus24 exact pinned NOVA tests in guarded read-only Node live; PostgreSQL/full npm/browser testing and broader contracts pending. |
 | 6. Monitoring | Separate NOVA page and API/PostgreSQL-readiness checks with scoped recovery live; full business/resource checks and more verified targets pending. |
 | 7. Multiple projects | NOVA/Kinder pinned read scopes and real queue observations live; other mappings, isolated execution and change preparation pending. |
 | 8. Draft PRs | Private artifacts and human-created draft PRs exist; autonomous scoped patch-to-PR flow pending. |
@@ -464,10 +511,10 @@ The original audit itself granted no access; the current registry permits only i
 public source reads. No inspected project was modified, installed or deployed. Unknown
 project mappings remain unassigned; Inventory remains denied. Stage 7 is not complete.
 
-Next priority: isolated tests of the actual pinned NOVA project, with independently reviewed
-Node.js execution/resource boundaries and exact-source evidence. Current repository observations
-are reads only; do not treat them as executed tests. Then prepare scoped draft PR and exact
-project/version/digest owner approval gates, without model access. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
+Next priorities: scoped draft-PR preparation and exact project/version/digest owner approval
+gates, without model access. Extend NOVA coverage only with a separately isolated disposable
+PostgreSQL/pg setup and browser profile; current24-test subset does not satisfy either gate.
+Pinned repository-registry observations remain reads; executed subset reports are separate. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
 After the owner resumes it, a single bounded real generation → exact-bundle tests → owner
 notification with an actual financial receipt will be required. Artificial-response tests
 must never be represented as actual model access.
@@ -479,9 +526,13 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_memory_rollback`, with the recorded old app
-`3ee49facd32e61068de1d98da1237e5b97f46d33` and state
-`.ultimate-review-data/live/uac4-evidence-memory-rollout.json`. It validates exact current code
+Current UAC rollback: `uac4_nova_tests_rollback`, with the recorded old app
+`640988e0b4c92aaca9a6740b29ebd1bf4a5c76a1` and state
+`.ultimate-review-data/live/uac4-nova-tests-rollout.json`. It first pauses/drains only UAC, replaces
+the dispatcher, cancels only unsupported queued NOVA subset jobs with audit and preserves any
+owner pause before resuming. The old worker restores its original resource ceiling. Source cache,
+Node policy, test reports and memory are retained without more execution. Older memory code may
+require the newer reader to verify the new project-test reference type. It validates exact current code
 and recorded version transition, restores only UAC code, restarts only its worker/dispatcher and
 retains the task journal, incident history, valid resolutions, artifacts and the owner's API deferral. No policy/credential change is part of this update or
 rollback. Do not replace live accounting/history with an older backup. Reassess this rollback
