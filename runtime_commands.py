@@ -7,6 +7,7 @@ import health_incidents
 import owner_followups
 import project_registry
 import work_analytics
+import readiness_monitor
 import chat_binding
 import budget_gate
 import offline_developer
@@ -33,10 +34,15 @@ def handle(text,connect,source_key=None):
     known.update(('/owner_later','/owner_item'))
     known.update(('/projects4','/repo_check'))
     known.update(('/analytics4','/weekly','/cost4'))
+    known.add('/readiness4')
     if op not in known: return None
     with connect() as conn:
         try:
             if op=='/monitor4': return health_incidents.describe(conn)
+            if op=='/readiness4':
+                if len(args)!=1: return 'Использование: /readiness4'
+                ident=queue.enqueue(conn,'nova','check_site',{'target':readiness_monitor.TARGET},event_key=source_key)
+                return f'Проверка API и готовности хранилища NOVA WEB #{ident} в очереди. Только GET /health, без записи в приложение. Результат: /job {ident} и /monitor4.'
             if op in ('/analytics4','/weekly','/daily'):
                 if op=='/analytics4' and (len(args)>2 or (len(args)==2 and args[1] not in ('24h','7d'))):
                     return 'Использование: /analytics4 24h или /analytics4 7d'
