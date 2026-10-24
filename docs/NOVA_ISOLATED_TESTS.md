@@ -47,5 +47,9 @@ Local validation:382 source tests including12 original Python sandbox cases and3
 cases (six real Node executions). These prove fixed-source success, failure of deliberately
 broken readiness, blocked host files/writes/network/processes/new threads, wall timeout and
 output limit. Unit cases verify scope, exact pins, skipped/malformed TAP, persisted recovery,
-tamper detection, memory binding, fixed Telegram requests and resource limits. VPS activation
-and receipt evidence will be recorded in PROJECT_STATUS.md after actual validation.
+tamper detection, memory binding, fixed Telegram requests and resource limits. VPS rollout40091932006 and independent verification40092227502 passed. Real queue job197
+passed24/24 with no skips, produced source-linked memory197 and Telegram report328; activation
+receipt327 is also persisted. All382 source tests (including the15 real sandbox cases) and
+33 transport tests passed on the VPS. Backup/restore, replay without another Node execution,
+resource limits, original project rules/artifact reports, disabled paid API and unchanged
+Inventory were verified. Paths and source-only rollback: [PROJECT_STATUS.md](PROJECT_STATUS.md).
