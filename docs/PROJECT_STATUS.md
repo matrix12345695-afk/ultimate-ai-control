@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `851bfbc01e5c8e736a4543ab549b1797d4d294c4`, draft
-[PR #38](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/38), stacked on PR #37.
+Application: `fa0403e73541364aabd358c6fa896be60aaaade6`, draft
+[PR #39](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/39), stacked on PR #38.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
 one Telegram dispatcher and one operations worker. No separate systemd service was created.
@@ -27,6 +27,57 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [artifact Draft PR rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40094272024)
+passed all395 source tests on the VPS, including15 real Python/Node sandbox cases with zero
+skips in that pass, plus35 transport tests. Exact-source CI runs
+[40094165835](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40094165835)
+and [40094169182](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40094169182)
+passed. The existing GitHub App actually authenticated and returned the expected repository
+identity. No key was provisioned, copied or printed. A restored-copy probe read the actual
+artifact6, simulated uncertain GitHub creation with a fake network, reconciled without a duplicate,
+and tested an artificial owner approval/other-head/project rejection only on that copy. None
+of those fake PRs or approval decisions reached production.
+
+Real VPS queue job206 created [Draft PR40](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/40)
+using the existing ultimate-ai-control-review[bot] GitHub App. The branch is
+`ai-review/artifact-6-f896464ca9cbe465`; head `60dd3b13a53cdceb45bc2a11b90a59186bc7dad5`,
+base `cb1536d55ed00190782470a74803cc67daf47151`. Exactly two new files match the original
+artifact6 recipe bytes and independent-acceptance source/report/harness. No active application
+module, other project or Inventory file was changed. No merge, deployment or publication was
+performed. [Exact-head pull-request CI40094408053](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40094408053)
+succeeded, attempt1. Push CI40094405885 also succeeded but is not substituted for PR CI.
+This PR was created by the VPS broker, distinct from the development PR39 created in this chat.
+
+Telegram accepted activation344 and PR report345. Evidence-linked memory207 refers to the real
+PR/CI result. Worker PID3111779, sole dispatcher PID3112145 and Inventory PID67760 were verified;
+Inventory source/configuration metadata matched. Existing rules, test artifacts and API deferral
+were retained; actual paid calls/holds/spend stayed zero. A further recipe artifact8 existed at
+verification time and was observed without replacement. No new daemon or schedule was created.
+Backup: `/home/maksim/.ultimate-review-data/backups/before-uac4-1792845149541339599.sqlite3`.
+
+The own600 artifact-pr-policy.json permits only two control recipes, draft-only. Credentials
+remain in a short-lived broker; worker/candidate environments do not receive them. Progress,
+finite retry and deterministic branch reconciliation handle interrupted creation. Requests are
+limited to three new drafts per UTC day. /artifact_pr ID, /artifact_prs, /artifact_pr_status ID
+and GET-only /artifact_pr_refresh ID are installed. /artifact_release ID can explicitly prepare
+a pending owner decision bound to exact project/repository/base/head/artifact/report/CI, with
+15-minute verification freshness and60-minute decision expiry. Renewal preserves old decisions.
+No production candidate or approval was created by installation. A future publisher must do a
+new live check immediately before acting; no publisher/merge adapter is enabled here. Stages8/9
+remain active, showing their completed components. Main branch protection was not readable with
+the chat connector; it is not claimed as verified.
+
+[Independent verification after cleanup](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40115551837)
+passed at17:19 UTC, more than four hours after activation, with the same worker/dispatcher PIDs,
+unchanged PR40 head/base/diff and exact successful PR CI. Receipt345 and memory207 were retained;
+245 evidence entries were observed from ongoing operations. This is evidence of the VPS operations
+continuing, not model-driven coding. The live approval/candidate counts stayed unchanged/zero,
+respectively; Inventory and disabled paid policies were verified again. Subsequent documentation
+commits save this checkpoint and are not another runtime deployment.
+See [ARTIFACT_DRAFT_PRS.md](ARTIFACT_DRAFT_PRS.md) for boundaries.
+
+Earlier pinned NOVA test observations follow as historical evidence:
 
 Latest [pinned NOVA test rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40091932006)
 passed all382 source tests on the VPS, including the12 original real Python sandbox cases
@@ -495,8 +546,8 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 5. Tester | Python contract checks plus24 exact pinned NOVA tests in guarded read-only Node live; PostgreSQL/full npm/browser testing and broader contracts pending. |
 | 6. Monitoring | Separate NOVA page and API/PostgreSQL-readiness checks with scoped recovery live; full business/resource checks and more verified targets pending. |
 | 7. Multiple projects | NOVA/Kinder pinned read scopes and real queue observations live; other mappings, isolated execution and change preparation pending. |
-| 8. Draft PRs | Private artifacts and human-created draft PRs exist; autonomous scoped patch-to-PR flow pending. |
-| 9. Publication approval | Required by policy; authenticated project/version/digest approval and rollback gates pending. |
+| 8. Draft PRs | VPS broker created and exact-diff/CI verified a real Draft PR from a tested control recipe; broader project/model patches pending. |
+| 9. Publication approval | Explicit exact-version owner approval candidates, expiry/renewal and drift checks implemented; real owner decision and publisher/live rollback gates pending. |
 | 10. Voice | Pending transcription choice, budget accounting and task confirmation. |
 | 11. Analytics | Daily/weekly measured work, role/project/worker grouping, logged task waiting and per-task receipts/holds live; full idle observation and external billing reconciliation pending. |
 | 12. Memory | Rules, owner follow-ups and append-only source-verified job/artifact/repository history live; semantic retrieval, controlled business-rule editing and model learning pending. |
@@ -511,8 +562,9 @@ The original audit itself granted no access; the current registry permits only i
 public source reads. No inspected project was modified, installed or deployed. Unknown
 project mappings remain unassigned; Inventory remains denied. Stage 7 is not complete.
 
-Next priorities: scoped draft-PR preparation and exact project/version/digest owner approval
-gates, without model access. Extend NOVA coverage only with a separately isolated disposable
+Next priorities: prepare a separately reviewed publisher with dry-run/live revalidation and
+rollback gates; no live merge/deployment before owner approval. Improve read-only VPS resource
+monitoring and extend project coverage without model access. Extend NOVA tests only with an isolated disposable
 PostgreSQL/pg setup and browser profile; current24-test subset does not satisfy either gate.
 Pinned repository-registry observations remain reads; executed subset reports are separate. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
 After the owner resumes it, a single bounded real generation → exact-bundle tests → owner
@@ -526,13 +578,14 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_nova_tests_rollback`, with the recorded old app
-`640988e0b4c92aaca9a6740b29ebd1bf4a5c76a1` and state
-`.ultimate-review-data/live/uac4-nova-tests-rollout.json`. It first pauses/drains only UAC, replaces
-the dispatcher, cancels only unsupported queued NOVA subset jobs with audit and preserves any
-owner pause before resuming. The old worker restores its original resource ceiling. Source cache,
-Node policy, test reports and memory are retained without more execution. Older memory code may
-require the newer reader to verify the new project-test reference type. It validates exact current code
+Current UAC rollback: `uac4_artifact_pr_rollback`, old app
+`851bfbc01e5c8e736a4543ab549b1797d4d294c4`, state
+`.ultimate-review-data/live/uac4-artifact-pr-rollout.json`. It pauses/drains only UAC, replaces
+the dispatcher, cancels only unsupported queued artifact-PR jobs with audit, restarts its worker
+and restores only its own temporary pause. Owner pauses are retained. Remote branches/Draft PRs
+and private request/report/approval/memory history are kept without merge, deletion or publication.
+Older memory code may require the newer reader for artifact-PR references. Existing GitHub App
+key/activation and other services are not changed by rollback. It validates exact current code
 and recorded version transition, restores only UAC code, restarts only its worker/dispatcher and
 retains the task journal, incident history, valid resolutions, artifacts and the owner's API deferral. No policy/credential change is part of this update or
 rollback. Do not replace live accounting/history with an older backup. Reassess this rollback

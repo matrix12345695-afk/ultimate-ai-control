@@ -50,5 +50,11 @@ No live approval is made by a rollout or test. Stage8 and9 remain partial beyond
 Validation:395 local source tests, including15 real Python/Node sandbox cases;13 added tests
 cover uncertain creation/replay, source integrity, scope, lease/policy, latest CI, drift,
 GET-only refresh, exact approval binding/expiry, atomic rollback and memory provenance.
-Actual VPS/App access, PR CI and Telegram delivery are recorded in PROJECT_STATUS.md after
-server verification; unit fake responses alone never establish live GitHub access.
+VPS rollout40094272024 and independent verification40115551837 passed. Real App-authenticated
+queue job206 created Draft PR40 at head60dd3b13a53cdceb45bc2a11b90a59186bc7dad5 from artifact6;
+exact-head pull-request CI40094408053 succeeded. Telegram accepted PR report345 and activation344,
+and memory207 binds the real result. All395 source tests (15 real sandbox cases) and35 transport
+tests passed. Existing project rules/reports, deferred API setup, zero paid requests and unchanged
+Inventory were verified. No production candidate, approval, merge or deployment was made.
+The separate rollout development is draft PR39; PR40 was created by the VPS GitHub App.
+Full checkpoint, paths, backup and rollback: [PROJECT_STATUS.md](PROJECT_STATUS.md).
