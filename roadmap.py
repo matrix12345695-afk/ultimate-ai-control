@@ -119,6 +119,8 @@ def completed_work(conn):
     if 'agent_work_spans' in tables:
         count=conn.execute('SELECT count(*) FROM agent_work_spans').fetchone()[0]
         if count: details[11]=(details.get(11,'')+f' ✅ Записано интервалов работы: {count}.').strip()
+        if setting(conn,'work_analytics_verified_release'):
+            details[11]=(details.get(11,'')+' ✅ Отчёты за сутки/неделю, ожидание и учёт квитанций проверены.').strip()
     if 'agent_health_incidents' in tables:
         counts=dict(conn.execute('SELECT state,count(*) FROM agent_health_incidents GROUP BY state'))
         if counts: details[6]=(details.get(6,'')+f' Тревог открыто: {counts.get("open",0)}; восстановлений подтверждено: {counts.get("recovered",0)}.').strip()

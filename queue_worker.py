@@ -27,6 +27,7 @@ import broker_client
 import developer_pipeline
 import health_incidents
 import project_registry
+import work_analytics
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -184,7 +185,8 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
             waiting=result['test_status']=='passed'
         elif job["kind"]=="daily_report":
             with connect(path) as conn:
-                result={"report":queue.report(conn,start-86400,start),"budget":budget_gate.summary(conn)}
+                result={"report":queue.report(conn,start-86400,start),"budget":budget_gate.summary(conn),
+                        "analytics":work_analytics.summary(conn,start-86400,start)}
         else:
             # A free text request is accepted but not falsely marked as implemented.
             waiting=True
