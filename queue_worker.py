@@ -29,6 +29,7 @@ import health_incidents
 import project_registry
 import work_analytics
 import readiness_monitor
+import evidence_memory
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -61,6 +62,7 @@ def initialize(conn):
     metered_provider.initialize(conn)
     model_broker.initialize(conn)
     health_incidents.initialize(conn)
+    evidence_memory.initialize(conn)
 
 
 def send_event(conn,kind,title,reason,event_key,task=None):
@@ -139,6 +141,7 @@ def record_failed_interval(conn,job,start,tick):
 
 def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project_registry.inspect_remote):
     with connect(path) as conn:
+        evidence_memory.sync(conn)
         scheduler.tick(conn)
         conn.execute("INSERT INTO agent_worker_status VALUES(?,?,?,?) ON CONFLICT(worker) DO UPDATE SET heartbeat=excluded.heartbeat,state=excluded.state,detail=excluded.detail",(WORKER,time.time(),"idle",""))
         conn.commit()
