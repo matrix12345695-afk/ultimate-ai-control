@@ -6,6 +6,7 @@ import roadmap
 import health_incidents
 import owner_followups
 import project_registry
+import work_analytics
 import chat_binding
 import budget_gate
 import offline_developer
@@ -31,10 +32,18 @@ def handle(text,connect,source_key=None):
     known.add('/monitor4')
     known.update(('/owner_later','/owner_item'))
     known.update(('/projects4','/repo_check'))
+    known.update(('/analytics4','/weekly','/cost4'))
     if op not in known: return None
     with connect() as conn:
         try:
             if op=='/monitor4': return health_incidents.describe(conn)
+            if op in ('/analytics4','/weekly','/daily'):
+                if op=='/analytics4' and (len(args)>2 or (len(args)==2 and args[1] not in ('24h','7d'))):
+                    return 'Использование: /analytics4 24h или /analytics4 7d'
+                return work_analytics.describe(conn,7 if op=='/weekly' or (len(args)==2 and args[1]=='7d') else 1)
+            if op=='/cost4':
+                if len(args)!=2: return 'Использование: /cost4 <номер задачи>'
+                return work_analytics.job_cost(conn,owner_followups.number(args[1]))
             if op=='/projects4': return project_registry.describe(conn)
             if op=='/repo_check':
                 if len(args)!=2: return 'Использование: /repo_check nova или /repo_check kinder'
@@ -124,11 +133,6 @@ def handle(text,connect,source_key=None):
                 rows=conn.execute("SELECT worker,heartbeat,state,detail FROM agent_worker_status").fetchall()
                 if not rows: return "Исполнитель ещё не зарегистрировался."
                 return "\n".join(f"{w}: {state}, heartbeat {max(0,time.time()-at):.0f} сек. назад, задача {detail or '—'}" for w,at,state,detail in rows)+"\nAI-разработчик, дизайнер и голосовой агент ещё не активированы."
-            if op=="/daily":
-                now=time.time()
-                report=queue.report(conn,now-86400,now)
-                rows=report["measured_seconds"]
-                return "Реальные интервалы за 24 часа:\n"+("\n".join(f"{r['worker']} · {r['project']} · {r['category']}: {r['seconds']:.2f} сек." for r in rows) or "Измерений ещё нет.")+"\nСобытия: "+json.dumps(report["events"],ensure_ascii=False)+"\nНезаписанное время считается неизвестным."
             if op=="/memory":
                 project=args[1] if len(args)==2 else roadmap.setting(conn,"active_project","control")
                 row=conn.execute("SELECT content,source FROM project_memory WHERE project=?",(project,)).fetchone()
