@@ -287,6 +287,12 @@ URL is still unknown; do not invent one or claim the chat is subscribed to Teleg
 
 ## Required progress updates
 
+Prepared increment: [independent recipe acceptance](RECIPE_ACCEPTANCE.md), adding reviewed
+eight-test contracts to both existing offline recipes in separate sandboxes, harness-bound
+recovery and a live catalog. Legacy recipe artifacts retain their original evidence; no
+retroactive acceptance pass is assigned. VPS rollout is pending. This is not arbitrary-task
+acceptance or enabled model generation; no paid call, publication or new schedule is included.
+
 Completed increment: [NOVA application readiness](READINESS_MONITOR.md), a separate bounded
 GET /health JSON contract, independent API/DB-readiness incidents, explicit command and a
 15-minute entry in the existing operations queue. The canceled hourly development automation

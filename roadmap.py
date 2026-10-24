@@ -90,6 +90,8 @@ def completed_work(conn):
             except (TypeError,ValueError,AttributeError): continue
             if isinstance(checks,dict) and checks.get('status')=='passed': independently_checked+=1
         if independently_checked: details[5]+=f' Независимую приёмку прошли: {independently_checked}.'
+        if setting(conn,'recipe_acceptance_verified_release'):
+            details[5]=(details.get(5,'')+' ✅ Независимая приёмка путей и Git SHA подключена.').strip()
     if 'agent_jobs' in tables:
         counts={(kind,state):count for kind,state,count in conn.execute('SELECT kind,state,count(*) FROM agent_jobs GROUP BY kind,state')}
         complete=sum(count for (kind,state),count in counts.items() if state=='succeeded')

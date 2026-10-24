@@ -96,7 +96,7 @@ def restore(conn,job,root,files,engine,profile,provenance):
         checks=report.get('independent_acceptance',{})
         require(isinstance(checks,dict) and checks.get('profile')==profile,'artifact acceptance contract changed')
         if profile:
-            require(checks.get('harness_sha256')==acceptance_checks.HARNESS_SHA256,'artifact acceptance harness changed')
+            require(checks.get('harness_sha256')==acceptance_checks.harness_sha256(profile),'artifact acceptance harness changed')
             require(checks.get('candidate_source_digest')==digest,'artifact acceptance candidate changed')
             if report['status']=='passed': require(checks.get('status')=='passed','artifact acceptance verdict changed')
         require(report.get('provenance')==provenance,'artifact provenance changed')
