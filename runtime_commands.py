@@ -9,6 +9,7 @@ import project_registry
 import work_analytics
 import readiness_monitor
 import acceptance_checks
+import evidence_memory
 import chat_binding
 import budget_gate
 import offline_developer
@@ -37,9 +38,17 @@ def handle(text,connect,source_key=None):
     known.update(('/analytics4','/weekly','/cost4'))
     known.add('/readiness4')
     known.add('/acceptance4')
+    known.update(('/memory_log','/memory_item'))
     if op not in known: return None
     with connect() as conn:
         try:
+            if op=='/memory_log':
+                project=args[1] if len(args)>1 else roadmap.setting(conn,'active_project','control')
+                page=owner_followups.number(args[2]) if len(args)==3 else 1
+                return evidence_memory.summary(conn,project,page)
+            if op=='/memory_item':
+                if len(args)!=2: return 'Использование: /memory_item <номер>'
+                return evidence_memory.detail(conn,owner_followups.number(args[1]))
             if op=='/monitor4': return health_incidents.describe(conn)
             if op=='/acceptance4': return acceptance_checks.describe(conn)
             if op=='/readiness4':
@@ -143,9 +152,10 @@ def handle(text,connect,source_key=None):
                 if not rows: return "Исполнитель ещё не зарегистрировался."
                 return "\n".join(f"{w}: {state}, heartbeat {max(0,time.time()-at):.0f} сек. назад, задача {detail or '—'}" for w,at,state,detail in rows)+"\nAI-разработчик, дизайнер и голосовой агент ещё не активированы."
             if op=="/memory":
+                if len(args)>2: return 'Использование: /memory [проект]'
                 project=args[1] if len(args)==2 else roadmap.setting(conn,"active_project","control")
                 row=conn.execute("SELECT content,source FROM project_memory WHERE project=?",(project,)).fetchone()
-                return (json.dumps(json.loads(row[0]),ensure_ascii=False,indent=2)+"\nИсточник: "+row[1])[:3900] if row else "Память проекта не найдена."
+                return (json.dumps(json.loads(row[0]),ensure_ascii=False,indent=2)+"\nИсточник: "+row[1])[:3400]+'\nПроверяемая история: /memory_log '+project if row else "Память проекта не найдена."
             if op=="/budget4":
                 result=budget_gate.summary(conn)
                 return f"Месячный предел: $30.\nУчтено/зарезервировано: ${result['accounted_usd']:.4f}.\nОстаток: ${result['remaining_usd']:.4f}.\nПлатный провайдер отключён; это локальный реестр, не счёт OpenAI."

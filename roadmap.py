@@ -133,6 +133,9 @@ def completed_work(conn):
         if count: details[12]=f'✅ Контекстов проектов сохранено: {count}.'
         if setting(conn,'owner_followups_verified_release'):
             details[12]=(details.get(12,'')+' ✅ Список отложенных действий владельца проверен.').strip()
+        if 'project_evidence_memory' in tables and setting(conn,'evidence_memory_verified_release'):
+            total=conn.execute('SELECT count(*) FROM project_evidence_memory').fetchone()[0]
+            details[12]=(details.get(12,'')+f' ✅ История с проверяемыми основаниями подключена: {total} записей.').strip()
     if 'agent_jobs' in tables:
         import project_registry
         registered=project_registry.verified(conn)
