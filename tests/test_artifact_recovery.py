@@ -29,7 +29,8 @@ class ArtifactRecoveryTests(unittest.TestCase):
         self.job=dict(id=1,attempt=1,project='control',payload=dict(recipe='safe-paths'))
         self.calls=0
     def tearDown(self): self.conn.close();self.temp.cleanup()
-    def runner(self,files,policy):
+    def runner(self,files,policy,**kwargs):
+        self.assertEqual(kwargs,{'timeout':8})
         self.calls+=1
         return dict(status='passed',source_digest=manifest(files)[1],elapsed_seconds=0.1,backend='fake-test-only',writable_tmp=False,output='artificial test fixture')
     def prepare(self,conn=None,job=None,runner=None):
@@ -48,7 +49,7 @@ class ArtifactRecoveryTests(unittest.TestCase):
         later=self.prepare(job=dict(self.job,attempt=2),runner=Mock(side_effect=AssertionError('tests must not repeat on a new lease')))
         self.assertEqual(recovered['artifact_id'],later['artifact_id'])
         self.assertTrue(later['tests_reused']);self.assertEqual(later['recovered_from_attempt'],1)
-        self.assertEqual(self.calls,1)
+        self.assertEqual(self.calls,2)
         self.assertEqual(self.conn.execute('SELECT attempt,path FROM code_artifacts').fetchone(),(1,str(path)))
         self.assertEqual(len(list((self.root/'artifacts').glob('job-*'))),1)
 
@@ -56,10 +57,10 @@ class ArtifactRecoveryTests(unittest.TestCase):
         first=self.prepare()
         result=self.prepare(job=dict(self.job,attempt=3),runner=Mock(side_effect=AssertionError()))
         self.assertEqual(result['artifact_id'],first['artifact_id'])
-        self.assertEqual(result['test_status'],'passed');self.assertEqual(self.calls,1)
+        self.assertEqual(result['test_status'],'passed');self.assertEqual(self.calls,2)
 
     def test_failed_outcome_remains_failed_on_recovery(self):
-        def failed(files,policy): return dict(self.runner(files,policy),status='failed')
+        def failed(files,policy,**kwargs): return dict(self.runner(files,policy,**kwargs),status='failed')
         first=self.prepare(runner=failed)
         later=self.prepare(job=dict(self.job,attempt=2),runner=Mock(side_effect=AssertionError()))
         self.assertEqual(first['artifact_id'],later['artifact_id'])
@@ -80,7 +81,7 @@ class ArtifactRecoveryTests(unittest.TestCase):
                 self.prepare(job=dict(self.job,attempt=2),runner=Mock(side_effect=AssertionError()))
             if source.exists() or source.is_symlink(): source.unlink()
             self.assertEqual(self.conn.execute('SELECT count(*) FROM code_artifacts').fetchone()[0],0)
-        self.assertEqual(self.calls,1)
+        self.assertEqual(self.calls,2)
 
     def test_foreign_or_missing_identity_and_bad_manifest_refuse_orphan_adoption(self):
         path=self.published_orphan();report=path/'test-report.json';original=json.loads(report.read_text())
@@ -96,7 +97,7 @@ class ArtifactRecoveryTests(unittest.TestCase):
             self.assertEqual(self.conn.execute('SELECT count(*) FROM code_artifacts').fetchone()[0],0)
         report.write_text(json.dumps(original));(path/'manifest.json').write_text('[]')
         with self.assertRaisesRegex(artifact_recovery.ArtifactRecoveryBlocked,'manifest changed'): self.prepare()
-        self.assertEqual(self.calls,1)
+        self.assertEqual(self.calls,2)
 
     def test_db_disk_disagreement_and_changed_source_or_engine_do_not_reexecute(self):
         self.prepare()
@@ -105,7 +106,7 @@ class ArtifactRecoveryTests(unittest.TestCase):
         self.conn.execute("UPDATE code_artifacts SET test_status='passed'");self.conn.commit()
         changed=dict(self.job,payload=dict(recipe='sha-check'))
         with self.assertRaisesRegex(artifact_recovery.ArtifactRecoveryBlocked,'source changed'): self.prepare(job=changed)
-        self.assertEqual(self.calls,1)
+        self.assertEqual(self.calls,2)
 
     def test_unknown_or_future_attempt_directory_is_preserved_and_refused(self):
         root=self.root/'artifacts';root.mkdir(mode=0o700)
@@ -126,7 +127,7 @@ class ArtifactRecoveryTests(unittest.TestCase):
         with patch.object(offline_developer,'prepare',side_effect=prepare):
             self.assertEqual(queue_worker.run_once(self.db),dict(id=ident,state='awaiting_owner'))
         result=json.loads(self.conn.execute('SELECT result FROM agent_jobs WHERE id=?',(ident,)).fetchone()[0])
-        self.assertTrue(result['tests_reused']);self.assertEqual(self.calls,1)
+        self.assertTrue(result['tests_reused']);self.assertEqual(self.calls,2)
         self.assertEqual(self.conn.execute('SELECT attempts FROM agent_jobs WHERE id=?',(ident,)).fetchone()[0],2)
         self.assertEqual(self.conn.execute('SELECT count(*) FROM code_artifacts').fetchone()[0],1)
         self.assertEqual(self.conn.execute('SELECT count(*) FROM owner_notifications').fetchone()[0],1)

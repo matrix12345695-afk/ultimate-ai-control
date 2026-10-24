@@ -8,6 +8,7 @@ import owner_followups
 import project_registry
 import work_analytics
 import readiness_monitor
+import acceptance_checks
 import chat_binding
 import budget_gate
 import offline_developer
@@ -35,10 +36,12 @@ def handle(text,connect,source_key=None):
     known.update(('/projects4','/repo_check'))
     known.update(('/analytics4','/weekly','/cost4'))
     known.add('/readiness4')
+    known.add('/acceptance4')
     if op not in known: return None
     with connect() as conn:
         try:
             if op=='/monitor4': return health_incidents.describe(conn)
+            if op=='/acceptance4': return acceptance_checks.describe(conn)
             if op=='/readiness4':
                 if len(args)!=1: return 'Использование: /readiness4'
                 ident=queue.enqueue(conn,'nova','check_site',{'target':readiness_monitor.TARGET},event_key=source_key)

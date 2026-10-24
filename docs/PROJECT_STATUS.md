@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `61ce872a60c65aac3c715a11ad71e803eb7da06f`, draft
-[PR #35](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/35), stacked on PR #34.
+Application: `3ee49facd32e61068de1d98da1237e5b97f46d33`, draft
+[PR #36](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/36), stacked on PR #35.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
 one Telegram dispatcher and one operations worker. No separate systemd service was created.
@@ -27,6 +27,51 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [recipe-contract rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40087392409)
+passed all 361 source tests on the VPS, including twelve actual sandbox integrations with
+zero skips in that pass, plus 29 transport tests. Exact-source CI runs
+[40086330119](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40086330119)
+and [40086333162](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40086333162)
+passed. Real sandbox mutation cases reject four faulty implementations despite passing
+candidate tests. A disposable restored DB copy tested both recipes and crash-after-rename
+recovery with the exact profile/harness and no re-execution. Those fixtures were not live jobs.
+
+Real queue jobs184/185 created artifacts6/7. Paths passed three candidate tests and eight
+independent requirements; Git SHA passed two candidate tests and eight independent requirements.
+Both await owner review and have not been published or adopted. Telegram accepted artifact
+messages319/320 and activation321. Their complete reports were reused through transport retries
+without re-running production artifact tests or creating duplicates. Existing artifact reports
+remained unchanged; old recipes were not retroactively assigned new acceptance evidence.
+Manifest digests: paths `f896464ca9cbe4652b528faa1195717bf48552ee580fc2e98a49c70da4b86210`;
+Git SHA `ae4d9d1660570f29e99ce261a4d0c216ebac0c14dc7db4db4df86e94bd25c95f`.
+Acceptance harness hashes: review-path-v1
+`10df4ae82f46f8df0db746b83b4d66c192ea73ce502c597b237242221f96f150`;
+git-commit-v1 `04c484d354d6fba86d329795f436dfd0499799ba41cf9d803451cd5600836698`.
+The bounded-percent-v1 hash remains unchanged.
+
+Two earlier transport attempts rolled back UAC code while preserving the valid reports:
+first, a 55-second activation wait was shorter than the priority outbox drain (INFO actually
+arrived after about62 seconds behind two artifact decisions); then the verifier incorrectly
+expected three candidate tests for the SHA recipe instead of two. The helper now allows120
+seconds while still requiring an actual receipt and validates recipe-specific counts on the
+restored copy before activation. The diagnostic run confirmed every delivery succeeded once.
+These were installer verification failures, not failed acceptance results or Inventory changes.
+
+Final worker PID3002756, sole dispatcher PID3003115 and Inventory PID67760 were verified.
+Inventory source/configuration metadata matched. Paid policies stayed disabled, provider setup
+stayed deferred and actual requests/holds/spend stayed zero. No new schedule was created.
+The live catalog and Plan4.0 component passed; stage5 remains active for broader task contracts
+and other languages. A real scheduled NOVA readiness run186 was also observed, healthy=true,
+beyond the earlier initial job176. Backup:
+`/home/maksim/.ultimate-review-data/backups/before-uac4-1792838980101758356.sqlite3`.
+[Independent verification after runner cleanup](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40087624691)
+passed for the exact installed source, same worker/dispatcher PIDs, both unchanged artifacts
+and delivery receipts, recovery without repeat execution, the live catalog/Plan4.0 and the
+scheduled readiness observation. Original artifact reports, owner deferral and Inventory
+remained unchanged. Subsequent documentation-only checkpoint changes are not runtime deployments.
+
+Earlier readiness observations follow as historical evidence:
 
 Latest [NOVA readiness rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40082699315)
 passed all 352 source tests on the VPS, including ten actual sandbox integrations with zero
@@ -287,6 +332,12 @@ URL is still unknown; do not invent one or claim the chat is subscribed to Teleg
 
 ## Required progress updates
 
+Completed increment: [independent recipe acceptance](RECIPE_ACCEPTANCE.md), adding reviewed
+eight-test contracts to both existing offline recipes in separate sandboxes, harness-bound
+recovery and a live catalog. Legacy recipe artifacts retain their original evidence; no
+retroactive acceptance pass is assigned. VPS rollout and real artifact delivery passed. This is not arbitrary-task
+acceptance or enabled model generation; no paid call, publication or new schedule is included.
+
 Completed increment: [NOVA application readiness](READINESS_MONITOR.md), a separate bounded
 GET /health JSON contract, independent API/DB-readiness incidents, explicit command and a
 15-minute entry in the existing operations queue. The canceled hourly development automation
@@ -361,7 +412,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 2. Scheduler/queue | Live jobs, leases, pause, serialized worker and verified complete-artifact crash recovery. |
 | 3. API / $30 | Transport/holds implemented; key setup explicitly deferred by owner; paid policies disabled. |
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
-| 5. Tester | Network-free tests and independent seven-test demo contract live; custom contracts and wider stacks pending. |
+| 5. Tester | Separate demo/path/Git-SHA acceptance profiles and harness-bound recovery live; broader task-specific contracts and wider stacks pending. |
 | 6. Monitoring | Separate NOVA page and API/PostgreSQL-readiness checks with scoped recovery live; full business/resource checks and more verified targets pending. |
 | 7. Multiple projects | NOVA/Kinder pinned read scopes and real queue observations live; other mappings, isolated execution and change preparation pending. |
 | 8. Draft PRs | Private artifacts and human-created draft PRs exist; autonomous scoped patch-to-PR flow pending. |
@@ -380,8 +431,7 @@ The original audit itself granted no access; the current registry permits only i
 public source reads. No inspected project was modified, installed or deployed. Unknown
 project mappings remain unassigned; Inventory remains denied. Stage 7 is not complete.
 
-Next priority: custom acceptance contracts, further isolated project testing,
-memory and isolated project testing without
+Next priority: evidence-linked project memory and further isolated project testing without
 model access. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
 After the owner resumes it, a single bounded real generation → exact-bundle tests → owner
 notification with an actual financial receipt will be required. Artificial-response tests
@@ -394,14 +444,14 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_readiness_rollback`, with the recorded old app
-`c229f54f41719dc41a4abe8ef3ffeab2c0a96f9b` and state
-`.ultimate-review-data/live/uac4-readiness-rollout.json`. It validates exact current code
+Current UAC rollback: `uac4_contracts_rollback`, with the recorded old app
+`61ce872a60c65aac3c715a11ad71e803eb7da06f` and state
+`.ultimate-review-data/live/uac4-recipe-contracts-rollout.json`. It validates exact current code
 and recorded version transition, restores only UAC code, restarts only its worker/dispatcher and
 retains the task journal, incident history, valid resolutions, artifacts and the owner's API deferral. No policy/credential change is part of this update or
 rollback. Do not replace live accounting/history with an older backup. Reassess this rollback
 gate after any later activation or policy change.
-Readiness rollback disables only its matching schedule, drains UAC work, replaces its dispatcher
+The preceding readiness rollback (only when that release is current) disables only its matching schedule, drains UAC work, replaces its dispatcher
 before cancelling unsupported queued readiness checks with audit, and restores only its own
 temporary pause if the owner has not replaced it. It retains successful observations and incident
 history, and leaves the homepage monitor and independent services alone.

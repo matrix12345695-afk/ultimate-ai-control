@@ -1,10 +1,11 @@
-"""Reviewed acceptance contract for the bounded offline progress demonstration only.
+"""Reviewed acceptance contracts for the offline demo and two fixed code recipes.
 
 Candidate tests never enter this second sandbox. A narrow pure-function AST contract
 prevents the candidate from replacing unittest or the harness. This is not a general grader.
 """
 import ast
 import hashlib
+import recipe_acceptance
 from isolated_python import manifest,run_bundle
 
 PROFILE='bounded-percent-v1'
@@ -36,6 +37,38 @@ class OwnerProgressContract(unittest.TestCase):
             self.assertTrue(all(type(value) is int and 0<=value<=100 for value in values))
 '''
 HARNESS_SHA256=hashlib.sha256(TESTS.encode()).hexdigest()
+RECIPE_PROFILES=recipe_acceptance.RECIPE_PROFILES
+
+
+def harness_sha256(profile):
+    return HARNESS_SHA256 if profile==PROFILE else recipe_acceptance.harness_sha256(profile)
+
+
+def allowed_profile(engine,profile):
+    return (profile is None or (engine=='offline_broker_demo' and profile==PROFILE) or
+            (engine=='deterministic_recipe' and profile in RECIPE_PROFILES.values()))
+
+
+def describe(conn):
+    import json
+    profiles={PROFILE:('Расчёт процентов · демонстрация',7),
+              RECIPE_PROFILES['safe-paths']:('Безопасные пути файлов',8),
+              RECIPE_PROFILES['sha-check']:('Полный Git commit SHA',8)}
+    counts={name:0 for name in profiles}
+    for raw, in conn.execute("SELECT test_report FROM code_artifacts WHERE test_status='passed'"):
+        try: checks=json.loads(raw).get('independent_acceptance',{})
+        except (TypeError,ValueError,AttributeError): continue
+        if not isinstance(checks,dict): continue
+        profile=checks.get('profile')
+        if (profile in profiles and checks.get('status')=='passed' and
+                checks.get('harness_sha256')==harness_sha256(profile)):
+            counts[profile]+=1
+    lines=['🧪 Независимая приёмка ULTIMATE']
+    for profile,(label,tests) in profiles.items():
+        lines.append(f'{label}: {profile}\nПроверок требований: {tests}. Прошли артефактов: {counts[profile]}.\nSHA-256 набора: {harness_sha256(profile)}')
+    lines.append('Тесты черновика и требования проверяются раздельно. Ошибка любого обязательного этапа блокирует готовность. Старым артефактам новые проверки не приписываются.')
+    lines.append('Это проверенные контракты отдельных Python-рецептов, не приёмка произвольной задачи. Публикация требует отдельного согласования.')
+    return '\n\n'.join(lines)
 
 
 def candidate_source(files):
@@ -65,12 +98,13 @@ def candidate_source(files):
 
 
 def check(files,policy,profile,runner=run_bundle):
-    if profile!=PROFILE: raise ValueError('unknown_acceptance_profile')
-    result={'profile':PROFILE,'harness_sha256':HARNESS_SHA256,'candidate_source_digest':manifest(files)[1]}
-    try: source=candidate_source(files)
+    digest=harness_sha256(profile)
+    result={'profile':profile,'harness_sha256':digest,'candidate_source_digest':manifest(files)[1]}
+    try: source=candidate_source(files) if profile==PROFILE else recipe_acceptance.candidate_source(files,profile)
     except (ValueError,SyntaxError) as exc:
         return dict(result,status='failed',reason=str(exc) if isinstance(exc,ValueError) else 'acceptance_source_syntax',elapsed_seconds=0)
-    bundle={'draft_component.py':source,'tests/test_owner_acceptance.py':TESTS}
+    bundle=({'draft_component.py':source,'tests/test_owner_acceptance.py':TESTS} if profile==PROFILE else
+            {'acceptance_candidate.py':source,'tests/test_owner_acceptance.py':recipe_acceptance.spec(profile)['tests']})
     report=runner(bundle,policy,timeout=8)
     if report.get('source_digest')!=manifest(bundle)[1]: raise ValueError('acceptance_report_digest_mismatch')
     return dict(report,**result)

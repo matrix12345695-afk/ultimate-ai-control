@@ -29,7 +29,8 @@ def prepare(conn,job,artifact_root,policy_path,runner=run_bundle):
     if job['project']!='control': raise PermissionError("offline recipes are enabled only for ULTIMATE drafts")
     if type(job.get('attempt')) is not int or not 1<=job['attempt']<=5: raise ValueError("invalid job attempt")
     files=recipe_files(job['payload'].get('recipe'),job['id'])
-    return prepare_files(conn,job,artifact_root,policy_path,files,engine='deterministic_recipe',runner=runner)
+    return prepare_files(conn,job,artifact_root,policy_path,files,engine='deterministic_recipe',runner=runner,
+                         acceptance_profile=acceptance_checks.RECIPE_PROFILES[job['payload']['recipe']])
 
 
 def prepare_files(conn,job,artifact_root,policy_path,files,*,engine,provenance=None,runner=run_bundle,acceptance_profile=None):
@@ -37,8 +38,8 @@ def prepare_files(conn,job,artifact_root,policy_path,files,*,engine,provenance=N
         raise PermissionError('draft source is not enabled')
     if type(job.get('attempt')) is not int or not 1<=job['attempt']<=5: raise ValueError('invalid job attempt')
     if type(job.get('id')) is not int or job['id']<=0: raise ValueError('invalid job identity')
-    if acceptance_profile is not None and (engine!='offline_broker_demo' or acceptance_profile!=acceptance_checks.PROFILE):
-        raise ValueError('acceptance profile is enabled only for the reviewed offline demo')
+    if not acceptance_checks.allowed_profile(engine,acceptance_profile):
+        raise ValueError('acceptance profile is not enabled for this engine')
     entries,digest=manifest(files)
     root=Path(artifact_root).absolute()
     if 'inventory-bot' in root.resolve().parts: raise PermissionError('invalid artifact root')
@@ -47,7 +48,7 @@ def prepare_files(conn,job,artifact_root,policy_path,files,*,engine,provenance=N
     existing=artifact_recovery.restore(conn,job,root,files,engine,acceptance_profile,provenance)
     if existing: return existing
     if len(list(root.iterdir()))>=100: raise ValueError('artifact retention cap reached; reviewed cleanup required')
-    # The reviewed demo gets two eight-second runs in separate namespaces, within the
+    # Reviewed acceptance profiles get two eight-second runs in separate namespaces, within the
     # worker's existing 30-second tick deadline. General bundles keep their existing limit.
     report=runner(files,policy_path,timeout=8) if acceptance_profile else runner(files,policy_path)
     if report.get('source_digest')!=digest: raise ValueError("test report source digest mismatch")
@@ -55,7 +56,7 @@ def prepare_files(conn,job,artifact_root,policy_path,files,*,engine,provenance=N
     checks={'status':'not_configured','profile':None}
     if acceptance_profile:
         checks=(acceptance_checks.check(files,policy_path,acceptance_profile,runner=runner) if own_status=='passed'
-                else {'status':'not_run','profile':acceptance_profile,'harness_sha256':acceptance_checks.HARNESS_SHA256,
+                else {'status':'not_run','profile':acceptance_profile,'harness_sha256':acceptance_checks.harness_sha256(acceptance_profile),
                       'candidate_source_digest':digest,'reason':'candidate_tests_failed'})
     report=dict(report,candidate_test_status=own_status,independent_acceptance=checks)
     if acceptance_profile and checks['status']!='passed': report['status']='failed'

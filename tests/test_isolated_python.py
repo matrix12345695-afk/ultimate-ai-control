@@ -43,7 +43,7 @@ class BundlePolicyTests(unittest.TestCase):
             conn=sqlite3.connect(':memory:')
             offline_developer.initialize(conn)
             job={'id':1,'attempt':1,'project':'control','payload':{'recipe':'safe-paths'}}
-            def runner(files,policy):
+            def runner(files,policy,**kwargs):
                 return {'status':'passed','source_digest':sandbox.manifest(files)[1],
                         'elapsed_seconds':0.1,'backend':'bubblewrap-v1','writable_tmp':False,'output':'Ran 3 tests: OK'}
             result=offline_developer.prepare(conn,job,Path(name)/'artifacts','unused',runner=runner)
@@ -65,7 +65,7 @@ class BundlePolicyTests(unittest.TestCase):
             job={'id':1,'attempt':1,'project':'inventory','payload':{'recipe':'safe-paths'}}
             with self.assertRaises(PermissionError): offline_developer.prepare(conn,job,name,'unused')
             job['project']='control'
-            with self.assertRaises(ValueError): offline_developer.prepare(conn,job,name,'unused',runner=lambda *a:{'source_digest':'bad'})
+            with self.assertRaises(ValueError): offline_developer.prepare(conn,job,name,'unused',runner=lambda *a,**kwargs:{'source_digest':'bad'})
             conn.close()
 
     def test_real_test_failure_marks_job_failed_not_success(self):
