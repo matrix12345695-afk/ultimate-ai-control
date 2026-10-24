@@ -255,6 +255,12 @@ URL is still unknown; do not invent one or claim the chat is subscribed to Teleg
 
 ## Required progress updates
 
+Prepared increment: [NOVA application readiness](READINESS_MONITOR.md), a separate bounded
+GET /health JSON contract, independent API/DB-readiness incidents, explicit command and a
+15-minute entry in the existing operations queue. The canceled hourly development automation
+stays disabled. Local real readiness probe passed; VPS rollout is pending. No NOVA production
+or Inventory change is authorized by this increment.
+
 Completed increment: [measured daily/weekly analytics](WORK_ANALYTICS.md), clipping recorded
 work spans, reconstructing logged queue/owner waiting, separating receipts from unresolved
 holds and showing task-specific costs. Missing work/idle history remains unknown. VPS rollout

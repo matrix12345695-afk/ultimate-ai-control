@@ -28,6 +28,7 @@ import developer_pipeline
 import health_incidents
 import project_registry
 import work_analytics
+import readiness_monitor
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -81,6 +82,7 @@ class SafeRedirect(urllib.request.HTTPRedirectHandler):
 
 def check_site(payload,opener=None):
     target=payload.get("target")
+    if target==readiness_monitor.TARGET: return readiness_monitor.probe(payload,opener)
     if target not in TARGETS: raise ValueError("monitor target not enabled")
     url=TARGETS[target]
     opener=opener or urllib.request.build_opener(SafeRedirect()).open

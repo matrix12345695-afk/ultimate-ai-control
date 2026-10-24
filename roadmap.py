@@ -124,6 +124,8 @@ def completed_work(conn):
     if 'agent_health_incidents' in tables:
         counts=dict(conn.execute('SELECT state,count(*) FROM agent_health_incidents GROUP BY state'))
         if counts: details[6]=(details.get(6,'')+f' Тревог открыто: {counts.get("open",0)}; восстановлений подтверждено: {counts.get("recovered",0)}.').strip()
+        if setting(conn,'readiness_verified_release'):
+            details[6]=(details.get(6,'')+' ✅ Отдельная проверка API и готовности PostgreSQL подключена.').strip()
     if 'project_memory' in tables:
         count=conn.execute("SELECT count(*) FROM project_memory WHERE project!='policy'").fetchone()[0]
         if count: details[12]=f'✅ Контекстов проектов сохранено: {count}.'
