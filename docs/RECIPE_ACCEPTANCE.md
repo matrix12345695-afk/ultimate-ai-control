@@ -2,7 +2,7 @@
 
 The queue's existing safe-paths and sha-check recipes now have separate first-party behavioral
 contracts: review-path-v1 and git-commit-v1. Each has eight tests, beyond the candidate's own
-three tests. The prior bounded-percent-v1 demonstration retains its exact original seven-test
+three path tests or two commit tests. The prior bounded-percent-v1 demonstration retains its exact original seven-test
 harness and hash; existing demo artifacts remain recoverable without a changed contract.
 
 The path contract checks permitted namespaces, traversal/empty components, separators,
@@ -10,6 +10,8 @@ case-insensitive sensitive words, the 120-character suffix bound, ASCII/full-str
 and wrong types. This is the existing conservative recipe policy, not a new deployment scope.
 The commit contract checks exact lowercase hexadecimal SHA-1 identifiers, length, characters,
 whitespace, Unicode lookalikes, types and accidental path/ref input.
+These are lexical checks: they do not prove filesystem/symlink safety, commit existence,
+repository ownership or publication authorization. Those require their separate existing gates.
 
 The trusted recipe name determines the acceptance profile. Candidate code or tests cannot
 choose or disable it. The engine/profile pairing is checked; arbitrary model output does not

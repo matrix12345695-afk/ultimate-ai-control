@@ -1,4 +1,4 @@
-"""Reviewed acceptance contract for the bounded offline progress demonstration only.
+"""Reviewed acceptance contracts for the offline demo and two fixed code recipes.
 
 Candidate tests never enter this second sandbox. A narrow pure-function AST contract
 prevents the candidate from replacing unittest or the harness. This is not a general grader.
