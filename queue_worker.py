@@ -31,6 +31,8 @@ import work_analytics
 import readiness_monitor
 import evidence_memory
 import nova_project_tests
+import artifact_prs
+import artifact_pr_client
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -65,6 +67,7 @@ def initialize(conn):
     health_incidents.initialize(conn)
     evidence_memory.initialize(conn)
     nova_project_tests.initialize(conn)
+    artifact_prs.initialize(conn)
 
 
 def send_event(conn,kind,title,reason,event_key,task=None):
@@ -125,7 +128,7 @@ def inspect_source(payload,root=ROOT):
 
 
 def category(job):
-    return 'active' if job['payload'].get('ai_task') else ('testing' if job['kind'] in ('test_release','review_change') else 'active')
+    return 'active' if job['payload'].get('ai_task') or 'artifact_pr' in job['payload'] else ('testing' if job['kind'] in ('test_release','review_change') else 'active')
 
 
 def record_failed_interval(conn,job,start,tick):
@@ -177,6 +180,9 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
             report=run_bundle(SANDBOX_SMOKE,policy,timeout=10)
             result={'test_status':report['status'],'backend':report['backend'],'test_elapsed_seconds':report['elapsed_seconds'],
                     'source_digest':report['source_digest'],'output':report['output'][-4000:],'network':False,'writable_tmp':report['writable_tmp']}
+        elif job['kind']=='review_change' and 'artifact_pr' in job['payload']:
+            result=artifact_pr_client.request(path,job)
+            waiting=True
         elif job["kind"]=="review_change" and job['payload'].get('recipe'):
             with connect(path) as conn:
                 result=offline_developer.prepare(conn,job,Path(path).parent/'artifacts',Path(path).parent/'sandbox-policy.json')
@@ -211,6 +217,11 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                 send_event(conn,"decision","Нужен исполнитель для текстовых задач",
                            "Задачи сохранены. Платный провайдер с API-ключом и изолированный AI-разработчик ещё не подключены. Ключ нужно настраивать приватно на VPS. Мониторинг и независимые проверки продолжаются.",
                            "runtime-needs-ai-executor-v4",job["id"])
+            elif result.get('artifact_pr_id'):
+                send_event(conn,'info' if result['ci_state']=='success' else 'critical',
+                           'Draft PR из артефакта проверен' if result['ci_state']=='success' else 'Draft PR требует исправления CI',
+                           f"PR #{result['artifact_pr_id']}: {result['pr_url']}. Commit {result['head_sha']}. CI: {result['ci_state']}. Исходный артефакт {result['artifact_id']}. Merge и публикации не было.",
+                           'artifact-pr-'+str(result['artifact_pr_id'])+'-'+result['head_sha']+'-'+result['ci_state'],job['id'])
             elif result.get('artifact_id'):
                 engine=result.get('engine','deterministic_recipe')
                 label='OpenAI через отдельный посредник' if engine=='openai_broker' else ('демонстрация посредника без LLM' if engine=='offline_broker_demo' else 'детерминированный рецепт без LLM')
@@ -251,6 +262,16 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
             conn.execute("UPDATE agent_worker_status SET heartbeat=?,state=?,detail=? WHERE worker=?",(time.time(),"waiting_owner" if waiting else "idle",str(job["id"]),WORKER))
             conn.commit()
         return {"id":job["id"],"state":"awaiting_owner" if waiting else "succeeded"}
+    except (artifact_pr_client.Pending,artifact_pr_client.Blocked) as exc:
+        with connect(path) as conn:
+            record_failed_interval(conn,job,start,tick)
+            queue.fail(conn,job['id'],job['lease_token'],str(exc),retryable=isinstance(exc,artifact_pr_client.Pending))
+            failed=conn.execute('SELECT state FROM agent_jobs WHERE id=?',(job['id'],)).fetchone()[0]=='failed'
+            if failed:
+                send_event(conn,'critical','Подготовка Draft PR остановлена',
+                           'Требуется проверка доступа, исходной версии или CI. Сохранённый запрос оставлен для сверки; merge и публикации нет.',
+                           'artifact-pr-stopped-'+str(job['id']),job['id'])
+        return {'id':job['id'],'state':'failed' if failed else 'queued'}
     except project_registry.RepositoryScopeError as exc:
         with connect(path) as conn:
             record_failed_interval(conn,job,start,tick)

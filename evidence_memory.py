@@ -63,7 +63,7 @@ def sha(value):
 
 def evidence(conn,reference):
     """Re-read only explicitly referenced SQLite rows, never files or network sources."""
-    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','result'}
+    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','artifact_pr_id','result'}
             or type(reference.get('event_id')) is not int or type(reference.get('job_id')) is not int):
         raise ValueError('invalid memory reference')
     event=conn.execute('SELECT id,job_id,at,event,detail FROM agent_job_events WHERE id=?',
@@ -87,6 +87,13 @@ def evidence(conn,reference):
             FROM project_test_runs WHERE id=?''',(reference['project_test_id'],)).fetchone()
         if not run or run[1]!=job[0] or run[3]!=job[1]: raise ValueError('project test belongs to another job or project')
         source['project_test']=run
+    if 'artifact_pr_id' in reference:
+        import artifact_prs
+        identity,remote,_=artifact_prs.record(conn,reference['artifact_pr_id'])
+        payload=decode(job[3])
+        if job[1]!='control' or not payload or payload.get('artifact_pr')!=identity['artifact_id']:
+            raise ValueError('PR belongs to another job or project')
+        source['artifact_pr']={'identity':identity,'remote':{k:v for k,v in remote.items() if k!='checked_at'}}
     if reference.get('result') is True:
         source['result']=conn.execute('SELECT result FROM agent_jobs WHERE id=?',(job[0],)).fetchone()[0]
     elif 'result' in reference:
@@ -148,6 +155,13 @@ def observation(conn,event):
                 fact['project_test']={key:report[key] for key in
                     ('profile','revision','source_digest','test_counts','database_integration','browser_test','published')}
                 reference.update(project_test_id=ident,result=True)
+        if result and kind=='review_change' and project=='control' and type(result.get('artifact_pr_id')) is int:
+            import artifact_prs
+            identity,remote,_=artifact_prs.record(conn,result['artifact_pr_id'])
+            if (remote.get('verified') is True and result.get('head_sha')==remote.get('head_sha') and
+                    result.get('ci_state')==remote.get('ci_state') and result.get('source_digest')==identity['source_digest']):
+                fact['artifact_pr']={key:result[key] for key in ('pr_url','head_sha','base_sha','source_digest','ci_state','published')}
+                reference.update(artifact_pr_id=result['artifact_pr_id'],result=True)
     return project,at,fact,reference
 
 
@@ -231,6 +245,7 @@ def summary(conn,project,page=1):
                 lines.append(f'Черновик #{artifact["id"]}: тесты {artifact["test_status"]}; публикация не подтверждена.')
             if fact.get('repository'): lines.append('Файлы закреплённой версии прочитаны; код и тесты не запускались.')
             if fact.get('project_test'): lines.append('Выполнен выбранный набор тестов Node; PostgreSQL и браузер не проверялись. /nova_tests')
+            if fact.get('artifact_pr'): lines.append('Draft PR сверён с артефактом и точным CI; публикации нет. /artifact_prs')
             lines.append(f'Основание: событие {reference["event_id"]}. /memory_item {row[0]}')
         if not rows: lines.append('Наблюдений пока нет. Исходные требования: /memory '+project)
         if page<pages: lines.append(f'\nДальше: /memory_log {project} {page+1}')
