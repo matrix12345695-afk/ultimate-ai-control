@@ -1,12 +1,12 @@
 # ULTIMATE AI CONTROL 4.0 — current checkpoint
 
-Updated 2026-10-23 UTC. This is the resume point for later owner-authorized development. Historical
+Updated 2026-10-24 UTC. This is the resume point for later owner-authorized development. Historical
 deployment records retain their original observations; this file identifies the latest state.
 
 ## Installed state
 
-Application: `c541aaec14f5bb5b03417bd00cce037471ddd0ac`, draft
-[PR #32](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/32), stacked on PR #31.
+Application: `e41954e8758e8f4dcb233bfc735f7f618eec823e`, draft
+[PR #33](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/33), stacked on PR #32.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
 one Telegram dispatcher and one operations worker. No separate systemd service was created.
@@ -27,6 +27,32 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [pinned-project registry rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40079722673)
+passed all 330 source tests on the VPS including ten real sandbox integrations with zero
+skips in that pass; 23 transport tests passed. Exact-source CI runs
+[40079453773](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40079453773)
+and [40079455801](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40079455801)
+passed. Restored-copy probes confirmed the project view is read-only and protected/unmapped
+projects cannot enter the new handler.
+
+Real VPS queue jobs169/170 read four pinned NOVA files and two Kinder documentation files.
+Their manifest digests matched the independently observed values in PROJECT_REGISTRY.md;
+all file lengths and Git blob IDs matched. Each job has measured work spans and a committed
+succeeded result. The project view and Plan4.0 show those verified parts while stage7 stays
+active. No remote source, test or package hook was executed; no inspected project was modified
+or published. No new schedule was created. Telegram accepted activation307.
+Worker PID2879972, sole dispatcher PID2880313 and Inventory PID67760 were verified; Inventory
+source/configuration metadata remained unchanged. API setup remained deferred and actual paid
+requests/holds/spend stayed zero. Backup:
+`/home/maksim/.ultimate-review-data/backups/before-uac4-1792831991021306212.sqlite3`.
+[Independent verification after runner cleanup](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40079913809)
+passed with the same worker/dispatcher PIDs, exact installed source, activation307, jobs169/170
+and both source digests. Existing owner follow-ups, artifact acceptance and scoped incident
+recovery checks also passed. The installed application SHA above is distinct from subsequent
+documentation-only checkpoints.
+
+Earlier owner-follow-up observations follow as historical evidence:
 
 Latest [owner-follow-up rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/39916216925)
 passed all 318 source tests on the VPS, including ten real sandbox integrations with zero
@@ -202,9 +228,9 @@ URL is still unknown; do not invent one or claim the chat is subscribed to Teleg
 
 ## Required progress updates
 
-Prepared increment: [pinned project registry](PROJECT_REGISTRY.md), restricted public source
+Completed increment: [pinned project registry](PROJECT_REGISTRY.md), restricted public source
 reads for NOVA and Kinder, verified identities/commits/file hashes and journal-backed project
-status. Local real GETs matched all six allowlisted files. VPS rollout is pending; reading
+status. Local and VPS real GETs matched all six allowlisted files. VPS rollout passed; reading
 source must not be reported as executing project tests, developing code or completing stage7.
 
 Owner update 2026-10-23: continue independent authorized work, and retain actions requiring
@@ -267,7 +293,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
 | 5. Tester | Network-free tests and independent seven-test demo contract live; custom contracts and wider stacks pending. |
 | 6. Monitoring | NOVA availability, scoped incident recovery and local source inspections live; functional/API checks and more verified targets pending. |
-| 7. Multiple projects | Memory imported and initial read-only repository audit recorded; runtime identities/scopes and execution still pending. |
+| 7. Multiple projects | NOVA/Kinder pinned read scopes and real queue observations live; other mappings, isolated execution and change preparation pending. |
 | 8. Draft PRs | Private artifacts and human-created draft PRs exist; autonomous scoped patch-to-PR flow pending. |
 | 9. Publication approval | Required by policy; authenticated project/version/digest approval and rollback gates pending. |
 | 10. Voice | Pending transcription choice, budget accounting and task confirmation. |
@@ -280,10 +306,11 @@ Stages below describe partial capabilities, not a declaration that every accepta
 
 Initial [repository audit](PROJECT_REPOSITORY_AUDIT.md) found the NOVA Node.js project and
 the four-file Kinder Android scaffold, separately from an older Python Kinder candidate.
-No inspected project was modified, installed, deployed or granted worker access. Unknown
+The original audit itself granted no access; the current registry permits only its pinned
+public source reads. No inspected project was modified, installed or deployed. Unknown
 project mappings remain unassigned; Inventory remains denied. Stage 7 is not complete.
 
-Next priority: reviewed repository identities/read scopes, custom acceptance contracts,
+Next priority: measured daily/weekly analytics, custom acceptance contracts,
 memory and monitoring without
 model access. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
 After the owner resumes it, a single bounded real generation → exact-bundle tests → owner
@@ -297,10 +324,14 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_followups_rollback`, with the recorded old app
-`8a955c038c0b710e252f063adbc005059e631acb` and state
-`.ultimate-review-data/live/uac4-owner-followups-rollout.json`. It validates exact current code
+Current UAC rollback: `uac4_registry_rollback`, with the recorded old app
+`c541aaec14f5bb5b03417bd00cce037471ddd0ac` and state
+`.ultimate-review-data/live/uac4-project-registry-rollout.json`. It validates exact current code
 and recorded version transition, restores only UAC code, restarts only its worker/dispatcher and
 retains the task journal, incident history, valid resolutions, artifacts and the owner's API deferral. No policy/credential change is part of this update or
 rollback. Do not replace live accounting/history with an older backup. Reassess this rollback
 gate after any later activation or policy change.
+Registry rollback temporarily drains only the UAC queue, replaces its dispatcher before
+cancelling unsupported queued registry reads with an audit event, restarts its worker and
+restores its own temporary pause only if the owner has not replaced it. Existing owner pauses
+and successful source-read history are preserved. Inventory is never paused or restarted.
