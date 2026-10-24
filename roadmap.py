@@ -127,4 +127,9 @@ def completed_work(conn):
         if count: details[12]=f'✅ Контекстов проектов сохранено: {count}.'
         if setting(conn,'owner_followups_verified_release'):
             details[12]=(details.get(12,'')+' ✅ Список отложенных действий владельца проверен.').strip()
+    if 'agent_jobs' in tables:
+        import project_registry
+        registered=project_registry.verified(conn)
+        if registered:
+            details[7]=f'✅ Репозиториев с проверенными файлами и хешами: {len(registered)}. Доступ только для чтения; исполнение и публикация не включены.'
     return details

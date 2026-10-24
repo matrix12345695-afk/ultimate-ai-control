@@ -202,6 +202,11 @@ URL is still unknown; do not invent one or claim the chat is subscribed to Teleg
 
 ## Required progress updates
 
+Prepared increment: [pinned project registry](PROJECT_REGISTRY.md), restricted public source
+reads for NOVA and Kinder, verified identities/commits/file hashes and journal-backed project
+status. Local real GETs matched all six allowlisted files. VPS rollout is pending; reading
+source must not be reported as executing project tests, developing code or completing stage7.
+
 Owner update 2026-10-23: continue independent authorized work, and retain actions requiring
 the owner so they can be handled later. Do not repeatedly interrupt development for deferred
 setup. Record a concrete action and its reason; a deferred action is not completed or approved.
