@@ -10,6 +10,7 @@ import work_analytics
 import readiness_monitor
 import acceptance_checks
 import evidence_memory
+import nova_project_tests
 import chat_binding
 import budget_gate
 import offline_developer
@@ -39,9 +40,15 @@ def handle(text,connect,source_key=None):
     known.add('/readiness4')
     known.add('/acceptance4')
     known.update(('/memory_log','/memory_item'))
+    known.update(('/test_nova','/nova_tests'))
     if op not in known: return None
     with connect() as conn:
         try:
+            if op=='/nova_tests': return nova_project_tests.describe(conn)
+            if op=='/test_nova':
+                if len(args)!=1: return 'Использование: /test_nova'
+                ident=queue.enqueue(conn,'nova','test_release',{'target':nova_project_tests.PROFILE},event_key=source_key)
+                return f'Закреплённые проверки NOVA WEB #{ident} в очереди. Без npm, PostgreSQL, сети и публикации. Результат: /nova_tests и /job {ident}.'
             if op=='/memory_log':
                 project=args[1] if len(args)>1 else roadmap.setting(conn,'active_project','control')
                 page=owner_followups.number(args[2]) if len(args)==3 else 1

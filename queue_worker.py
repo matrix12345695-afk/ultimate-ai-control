@@ -30,6 +30,7 @@ import project_registry
 import work_analytics
 import readiness_monitor
 import evidence_memory
+import nova_project_tests
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -63,6 +64,7 @@ def initialize(conn):
     model_broker.initialize(conn)
     health_incidents.initialize(conn)
     evidence_memory.initialize(conn)
+    nova_project_tests.initialize(conn)
 
 
 def send_event(conn,kind,title,reason,event_key,task=None):
@@ -166,6 +168,10 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                 result=repository_inspector(job['project'],job['payload'])
                 if not project_registry.valid_result(job['project'],result):
                     raise project_registry.RepositoryScopeError('repository_result_scope_mismatch')
+        elif job['kind']=='test_release' and job['payload'].get('target')==nova_project_tests.PROFILE:
+            nova_project_tests.check_scope(job)
+            with connect(path) as conn:
+                result=nova_project_tests.execute(conn,job,Path(path).parent)
         elif job["kind"]=="test_release" and job['payload'].get('target')=='sandbox-smoke':
             policy=Path(path).parent/'sandbox-policy.json'
             report=run_bundle(SANDBOX_SMOKE,policy,timeout=10)
@@ -212,6 +218,11 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                            'Кодовый черновик проверен' if result['test_status']=='passed' else 'Проверка кодового черновика не прошла',
                            f"Артефакт #{result['artifact_id']}, SHA-256 {result['source_digest']}. Тесты: {result['test_status']}. Независимая приёмка: {result.get('independent_acceptance','not_configured')}. Просмотр: /artifact {result['artifact_id']}. Движок: {label}. "+('Восстановлен сохранённый результат; тесты повторно не запускались. ' if result.get('tests_reused') else '')+'Публикации не было.',
                            'artifact-'+str(job['id'])+'-'+result['source_digest'],job['id'])
+            elif result.get('project_test_id'):
+                send_event(conn,'info' if result['test_status']=='passed' else 'critical',
+                           'Проверки NOVA WEB завершены' if result['test_status']=='passed' else 'Проверки NOVA WEB не прошли',
+                           f"Отчёт #{result['project_test_id']}, версия {result['revision']}. Тесты: {result['test_status']}; {result['test_counts']}. PostgreSQL и браузер не проверялись. Исходники, рабочий сайт и Inventory не изменялись.",
+                           'project-test-'+str(job['id'])+'-'+result['source_digest'],job['id'])
             elif job["kind"]=="check_site":
                 result=health_incidents.complete(conn,job,result,observed_at=end)
             elif job["kind"]=="daily_report":
@@ -223,7 +234,7 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
             elif result.get("syntax_errors"):
                 send_event(conn,"critical","Ошибки синтаксиса ULTIMATE",str(result["syntax_errors"])[:500],"syntax-job-"+str(job["id"]),job["id"])
             if result.get('test_status') not in (None,'passed'):
-                if not result.get('artifact_id'):
+                if not result.get('artifact_id') and not result.get('project_test_id'):
                     send_event(conn,'critical','Изолированные тесты не прошли',result['test_status'],
                                'test-failed-'+str(job['id']),job['id'])
                 conn.execute('UPDATE agent_jobs SET result=? WHERE id=?',(json.dumps(result),job['id']))
@@ -269,7 +280,9 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
 
 def apply_limits():
     import resource
-    resource.setrlimit(resource.RLIMIT_AS,(384*1024*1024,384*1024*1024))
+    # Keep the worker's soft cap. Only the reviewed Node child raises its own limit
+    # to this hard ceiling; the Python sandbox still lowers both limits to320MiB.
+    resource.setrlimit(resource.RLIMIT_AS,(384*1024*1024,768*1024*1024))
     resource.setrlimit(resource.RLIMIT_NOFILE,(128,128))
     os.nice(10)
 

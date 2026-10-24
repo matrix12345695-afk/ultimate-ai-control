@@ -63,7 +63,7 @@ def sha(value):
 
 def evidence(conn,reference):
     """Re-read only explicitly referenced SQLite rows, never files or network sources."""
-    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','result'}
+    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','result'}
             or type(reference.get('event_id')) is not int or type(reference.get('job_id')) is not int):
         raise ValueError('invalid memory reference')
     event=conn.execute('SELECT id,job_id,at,event,detail FROM agent_job_events WHERE id=?',
@@ -81,6 +81,12 @@ def evidence(conn,reference):
         if not artifact or artifact[1]!=job[0] or artifact[3]!=job[1]:
             raise ValueError('artifact belongs to another job or project')
         source['artifact']=artifact
+    if 'project_test_id' in reference:
+        if type(reference['project_test_id']) is not int: raise ValueError('invalid project test reference')
+        run=conn.execute('''SELECT id,job_id,attempt,project,profile,revision,source_digest,report,report_sha256,created_at
+            FROM project_test_runs WHERE id=?''',(reference['project_test_id'],)).fetchone()
+        if not run or run[1]!=job[0] or run[3]!=job[1]: raise ValueError('project test belongs to another job or project')
+        source['project_test']=run
     if reference.get('result') is True:
         source['result']=conn.execute('SELECT result FROM agent_jobs WHERE id=?',(job[0],)).fetchone()[0]
     elif 'result' in reference:
@@ -131,6 +137,17 @@ def observation(conn,event):
                     fact['repository']={key:result[key] for key in
                         ('revision','source_digest','code_executed','tests_executed','published')}
                     reference['result']=True
+        if result and kind=='test_release' and project=='nova' and type(result.get('project_test_id')) is int:
+            import nova_project_tests as tests
+            ident=result['project_test_id']
+            row=conn.execute('''SELECT job_id,project,source_digest,report,report_sha256 FROM project_test_runs WHERE id=?''',(ident,)).fetchone()
+            report=decode(row[3]) if row else None
+            if (row and row[:2]==(job_id,project) and report and
+                    result.get('source_digest')==row[2] and tests.valid_report(report,row[2]) and
+                    result.get('test_status')==report['status'] and hashlib.sha256(row[3].encode()).hexdigest()==row[4]):
+                fact['project_test']={key:report[key] for key in
+                    ('profile','revision','source_digest','test_counts','database_integration','browser_test','published')}
+                reference.update(project_test_id=ident,result=True)
     return project,at,fact,reference
 
 
@@ -213,6 +230,7 @@ def summary(conn,project,page=1):
                 artifact=fact['artifact']
                 lines.append(f'Черновик #{artifact["id"]}: тесты {artifact["test_status"]}; публикация не подтверждена.')
             if fact.get('repository'): lines.append('Файлы закреплённой версии прочитаны; код и тесты не запускались.')
+            if fact.get('project_test'): lines.append('Выполнен выбранный набор тестов Node; PostgreSQL и браузер не проверялись. /nova_tests')
             lines.append(f'Основание: событие {reference["event_id"]}. /memory_item {row[0]}')
         if not rows: lines.append('Наблюдений пока нет. Исходные требования: /memory '+project)
         if page<pages: lines.append(f'\nДальше: /memory_log {project} {page+1}')
