@@ -26,6 +26,7 @@ import model_broker
 import broker_client
 import developer_pipeline
 import health_incidents
+import project_registry
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -133,7 +134,7 @@ def record_failed_interval(conn,job,start,tick):
         pass  # Expired work is never assigned to another worker's lease.
 
 
-def run_once(path,root=ROOT,site_checker=check_site):
+def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project_registry.inspect_remote):
     with connect(path) as conn:
         scheduler.tick(conn)
         conn.execute("INSERT INTO agent_worker_status VALUES(?,?,?,?) ON CONFLICT(worker) DO UPDATE SET heartbeat=excluded.heartbeat,state=excluded.state,detail=excluded.detail",(WORKER,time.time(),"idle",""))
@@ -151,7 +152,14 @@ def run_once(path,root=ROOT,site_checker=check_site):
     waiting=False
     try:
         if job["kind"]=="check_site": result=site_checker(job["payload"])
-        elif job["kind"]=="inspect_repository": result=inspect_source(job["payload"],root)
+        elif job["kind"]=="inspect_repository":
+            if job['project']=='control' and job['payload']=={'target':'control'}:
+                result=inspect_source(job["payload"],root)
+            else:
+                project_registry.check_scope(job['project'],job['payload'])
+                result=repository_inspector(job['project'],job['payload'])
+                if not project_registry.valid_result(job['project'],result):
+                    raise project_registry.RepositoryScopeError('repository_result_scope_mismatch')
         elif job["kind"]=="test_release" and job['payload'].get('target')=='sandbox-smoke':
             policy=Path(path).parent/'sandbox-policy.json'
             report=run_bundle(SANDBOX_SMOKE,policy,timeout=10)
@@ -225,6 +233,14 @@ def run_once(path,root=ROOT,site_checker=check_site):
             conn.execute("UPDATE agent_worker_status SET heartbeat=?,state=?,detail=? WHERE worker=?",(time.time(),"waiting_owner" if waiting else "idle",str(job["id"]),WORKER))
             conn.commit()
         return {"id":job["id"],"state":"awaiting_owner" if waiting else "succeeded"}
+    except project_registry.RepositoryScopeError as exc:
+        with connect(path) as conn:
+            record_failed_interval(conn,job,start,tick)
+            queue.fail(conn,job['id'],job['lease_token'],str(exc),retryable=False)
+            send_event(conn,'critical','Проверка репозитория остановлена',
+                       'Источник не соответствует разрешённому проекту, версии или хешам. Код не запускался; данные других проектов не изменялись.',
+                       'repository-scope-'+str(job['id']),job['id'])
+        return {'id':job['id'],'state':'failed','error':'RepositoryScopeError'}
     except (SandboxUnavailable,FileNotFoundError,model_broker.BrokerFailed,ArtifactRecoveryBlocked) as exc:
         with connect(path) as conn:
             record_failed_interval(conn,job,start,tick)

@@ -88,8 +88,9 @@ class BundlePolicyTests(unittest.TestCase):
             path=Path(name)/'control.db'
             with queue_worker.connect(path) as conn:
                 queue_worker.initialize(conn)
-                ident=task_queue.enqueue(conn,'control','inspect_repository',{'target':'not-enabled'},max_attempts=1)
-            result=queue_worker.run_once(path)
+                ident=task_queue.enqueue(conn,'control','inspect_repository',{'target':'control'},max_attempts=1)
+            with patch.object(queue_worker,'inspect_source',side_effect=OSError('artificial read failure')):
+                result=queue_worker.run_once(path)
             self.assertEqual(result['state'],'failed')
             with queue_worker.connect(path) as conn:
                 self.assertEqual(conn.execute('SELECT count(*) FROM agent_work_spans WHERE job_id=?',(ident,)).fetchone()[0],1)

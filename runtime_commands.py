@@ -5,6 +5,7 @@ import task_queue as queue
 import roadmap
 import health_incidents
 import owner_followups
+import project_registry
 import chat_binding
 import budget_gate
 import offline_developer
@@ -29,10 +30,18 @@ def handle(text,connect,source_key=None):
     known={"/roadmap","/queue","/job","/work","/project","/agents","/daily","/memory","/budget4","/pause","/resume","/chat_link","/chat_bind","/job_cancel","/sandbox","/recipe","/selftest","/artifact","/artifact_code","/provider4","/broker4","/develop","/developer_demo"}
     known.add('/monitor4')
     known.update(('/owner_later','/owner_item'))
+    known.update(('/projects4','/repo_check'))
     if op not in known: return None
     with connect() as conn:
         try:
             if op=='/monitor4': return health_incidents.describe(conn)
+            if op=='/projects4': return project_registry.describe(conn)
+            if op=='/repo_check':
+                if len(args)!=2: return 'Использование: /repo_check nova или /repo_check kinder'
+                payload={'target':args[1],'source':project_registry.METHOD}
+                project_registry.check_scope(args[1],payload)
+                ident=queue.enqueue(conn,args[1],'inspect_repository',payload,event_key=source_key)
+                return f'Проверка файлов #{ident} поставлена в очередь. Только чтение закреплённой версии и сверка хешей; установки, запуска кода и публикации нет. /job {ident}'
             if op=='/owner_later':
                 if len(args)>2: return 'Использование: /owner_later [страница]'
                 return owner_followups.describe(conn,owner_followups.number(args[1]) if len(args)==2 else 1)
