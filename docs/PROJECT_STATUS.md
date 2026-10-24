@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `3ee49facd32e61068de1d98da1237e5b97f46d33`, draft
-[PR #36](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/36), stacked on PR #35.
+Application: `640988e0b4c92aaca9a6740b29ebd1bf4a5c76a1`, draft
+[PR #37](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/37), stacked on PR #36.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
 one Telegram dispatcher and one operations worker. No separate systemd service was created.
@@ -27,6 +27,39 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [evidence-memory rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40089769620)
+passed all371 source tests on the VPS, including twelve real sandbox integrations with zero
+skips in that pass, plus31 transport tests. Exact-source CI runs
+[40089518037](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40089518037)
+and [40089521763](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40089521763)
+passed. A disposable restored database copy verified bounded backfill, idempotent cursor replay,
+atomic rollback of both cursor and entries, project scope, read-only views and invalidation
+when a referenced source changes. Artificial failures/source edits stayed on that copy.
+
+The live operations worker indexed192 committed observations at verification time. All seven
+existing artifact identities/reports were linked, including the two independently checked
+recipes, plus the pinned NOVA/Kinder source reads. Every indexed source fingerprint verified.
+Original business-rule rows matched byte-for-byte, and existing artifact reports were retained.
+Viewing history did not alter inbox/settings/project context. /memory_log [project] [page] and
+/memory_item ID work; the История проектов button uses the selected project. Historical and
+current task state remain distinct. This does not assert current file integrity, semantic
+learning, a model call, source execution or publication. Stage12 stays active with its completed
+history component shown in Plan4.0. No new schedule was created.
+
+Telegram accepted activation326, with its receipt persisted. Worker PID3041094, sole dispatcher
+PID3041473 and Inventory PID67760 were verified; Inventory source/configuration metadata matched.
+Paid policies remained disabled, provider setup stayed deferred and actual requests/holds/spend
+were zero. Backup:
+`/home/maksim/.ultimate-review-data/backups/before-uac4-1792841132577297635.sqlite3`.
+[Independent verification after runner cleanup](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40089978418)
+passed for the exact installed source, same worker/dispatcher PIDs, persisted receipt326, all192
+source-linked entries, seven artifact reports, both repository observations, read-only views
+and the partial Plan4.0 component. Existing UAC checks, original project rules, owner API deferral
+and unchanged Inventory passed again. Subsequent documentation commits save this checkpoint;
+they are not another runtime deployment. See [EVIDENCE_MEMORY.md](EVIDENCE_MEMORY.md) for boundaries.
+
+Earlier recipe-acceptance observations follow as historical evidence:
 
 Latest [recipe-contract rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40087392409)
 passed all 361 source tests on the VPS, including twelve actual sandbox integrations with
@@ -419,7 +452,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 9. Publication approval | Required by policy; authenticated project/version/digest approval and rollback gates pending. |
 | 10. Voice | Pending transcription choice, budget accounting and task confirmation. |
 | 11. Analytics | Daily/weekly measured work, role/project/worker grouping, logged task waiting and per-task receipts/holds live; full idle observation and external billing reconciliation pending. |
-| 12. Memory | Project rules/decisions and owner follow-up view persisted; broader evidence-linked lifecycle/retrieval pending. |
+| 12. Memory | Rules, owner follow-ups and append-only source-verified job/artifact/repository history live; semantic retrieval, controlled business-rule editing and model learning pending. |
 | 13. Design/browser | Pending isolated browser execution and visual/mobile acceptance. |
 | 14. Open source | Initial research exists; choose only after license/security/dependency/resource review. |
 | 15. Autonomous cycle | Operations run on VPS; general development, approvals/recovery and measured end-to-end acceptance pending. |
@@ -431,8 +464,10 @@ The original audit itself granted no access; the current registry permits only i
 public source reads. No inspected project was modified, installed or deployed. Unknown
 project mappings remain unassigned; Inventory remains denied. Stage 7 is not complete.
 
-Next priority: evidence-linked project memory and further isolated project testing without
-model access. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
+Next priority: isolated tests of the actual pinned NOVA project, with independently reviewed
+Node.js execution/resource boundaries and exact-source evidence. Current repository observations
+are reads only; do not treat them as executed tests. Then prepare scoped draft PR and exact
+project/version/digest owner approval gates, without model access. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
 After the owner resumes it, a single bounded real generation → exact-bundle tests → owner
 notification with an actual financial receipt will be required. Artificial-response tests
 must never be represented as actual model access.
@@ -444,9 +479,9 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_contracts_rollback`, with the recorded old app
-`61ce872a60c65aac3c715a11ad71e803eb7da06f` and state
-`.ultimate-review-data/live/uac4-recipe-contracts-rollout.json`. It validates exact current code
+Current UAC rollback: `uac4_memory_rollback`, with the recorded old app
+`3ee49facd32e61068de1d98da1237e5b97f46d33` and state
+`.ultimate-review-data/live/uac4-evidence-memory-rollout.json`. It validates exact current code
 and recorded version transition, restores only UAC code, restarts only its worker/dispatcher and
 retains the task journal, incident history, valid resolutions, artifacts and the owner's API deferral. No policy/credential change is part of this update or
 rollback. Do not replace live accounting/history with an older backup. Reassess this rollback

@@ -35,4 +35,8 @@ Validation: ten focused tests cover atomic rollback, resume/idempotence, paginat
 queries, changed/deleted sources, failures/retries, protected projects, historical vs current
 state, artifact/profile provenance and source-read limitations. Full local suite:371 passing,
 including twelve real namespace integration tests with UAC_SANDBOX_TEST_BINARY configured.
-VPS rollout and Telegram receipt evidence will be recorded in PROJECT_STATUS.md after validation.
+VPS rollout40089769620 and independent verification40089978418 passed. The live index contained
+192 observations, all seven artifacts and both repository reads; Telegram accepted activation326.
+All371 source tests (including12 real sandbox integrations) and31 transport tests passed on
+the VPS. Original business rules and artifact reports matched; Inventory stayed unchanged and
+paid API calls remained zero. Full checkpoint and rollback: [PROJECT_STATUS.md](PROJECT_STATUS.md).
