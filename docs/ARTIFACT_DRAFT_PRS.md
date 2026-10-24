@@ -40,13 +40,14 @@ owner outbox and evidence-linked memory. No new daemon/schedule is created.
 successful exact-head check no older than15 minutes. Its immutable scope binds project,
 repository, PR, base/head SHA, artifact/report digests and CI run IDs/attempts. Existing
 owner-authenticated /approve and /reject record the decision for60 minutes. Candidate+approval
-are created in one transaction; repeat requests for the same scope reuse them. An approval
+are created in one transaction; repeat requests for the same still-valid scope reuse them. Explicit renewal after rejection/expiry
+creates a new request and preserves old decisions. An approval
 does not execute anything. A future publisher must re-fetch GitHub immediately before acting,
 recompute observed scope, check freshness and authorization, and enforce separate deployment,
 environment and rollback gates. The publisher itself is not implemented or enabled here.
 No live approval is made by a rollout or test. Stage8 and9 remain partial beyond these parts.
 
-Validation:394 local source tests, including15 real Python/Node sandbox cases;12 added tests
+Validation:395 local source tests, including15 real Python/Node sandbox cases;13 added tests
 cover uncertain creation/replay, source integrity, scope, lease/policy, latest CI, drift,
 GET-only refresh, exact approval binding/expiry, atomic rollback and memory provenance.
 Actual VPS/App access, PR CI and Telegram delivery are recorded in PROJECT_STATUS.md after

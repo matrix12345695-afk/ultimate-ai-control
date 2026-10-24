@@ -33,7 +33,8 @@ def initialize(conn):
         created_at REAL NOT NULL,updated_at REAL NOT NULL)''')
     conn.execute('''CREATE TABLE IF NOT EXISTS artifact_release_candidates(
         id INTEGER PRIMARY KEY,request_id INTEGER NOT NULL,scope TEXT NOT NULL,
-        scope_sha256 TEXT NOT NULL UNIQUE,approval_id TEXT NOT NULL UNIQUE,created_at REAL NOT NULL)''')
+        scope_sha256 TEXT NOT NULL,approval_id TEXT NOT NULL UNIQUE,created_at REAL NOT NULL)''')
+    conn.execute('CREATE INDEX IF NOT EXISTS artifact_release_scope ON artifact_release_candidates(scope_sha256)')
     conn.commit()
 
 
@@ -138,7 +139,11 @@ def release_scope(identity,remote):
 def request_release(conn,ident):
     with q._write(conn):
         identity,remote,_=record(conn,ident);scope=release_scope(identity,remote);sha=digest(scope)
-        existing=conn.execute('SELECT id,approval_id FROM artifact_release_candidates WHERE scope_sha256=?',(sha,)).fetchone()
+        from datetime import datetime,timezone
+        existing=conn.execute('''SELECT c.id,c.approval_id FROM artifact_release_candidates c
+            JOIN approvals a ON a.id=c.approval_id WHERE c.scope_sha256=?
+            AND a.status IN ('pending','approved') AND a.expires_at>? ORDER BY c.id DESC LIMIT 1''',
+            (sha,datetime.now(timezone.utc).isoformat())).fetchone()
         if existing: return existing[0],existing[1],scope
         # Reuse owner-authenticated approval primitives atomically; no decision is made here.
         aid=approval.request_approval(conn,ident,'publish_exact_version','production',scope,ttl_minutes=60,commit=False)

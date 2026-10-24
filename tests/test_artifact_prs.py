@@ -157,6 +157,17 @@ class ArtifactPRTests(unittest.TestCase):
         with self.assertRaises(sqlite3.IntegrityError): ledger.request_release(self.conn,1)
         self.assertEqual(self.conn.execute('SELECT count(*) FROM approvals').fetchone()[0],before)
 
+    def test_expired_or_rejected_scope_can_get_a_new_explicit_request_without_rewriting_history(self):
+        self.run_broker();first,aid,scope=ledger.request_release(self.conn,1)
+        approval.decide(self.conn,aid,'owner','owner',False)
+        second,second_aid,_=ledger.request_release(self.conn,1)
+        self.assertNotEqual(first,second)
+        self.conn.execute("UPDATE approvals SET expires_at='2000-01-01T00:00:00+00:00' WHERE id=?",(second_aid,));self.conn.commit()
+        third,_,_=ledger.request_release(self.conn,1)
+        self.assertNotEqual(second,third)
+        self.assertEqual(self.conn.execute('SELECT status FROM approvals WHERE id=?',(aid,)).fetchone()[0],'rejected')
+        self.assertFalse(ledger.release_authorized(self.conn,second,scope))
+
     def test_expired_verification_and_ci_failure_cannot_request_publication(self):
         self.run_broker();remote=ledger.record(self.conn,1)[1];remote['checked_at']=time.time()-901
         ledger.save_remote(self.conn,self.job,1,remote)
