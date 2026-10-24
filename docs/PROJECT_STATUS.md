@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `c229f54f41719dc41a4abe8ef3ffeab2c0a96f9b`, draft
-[PR #34](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/34), stacked on PR #33.
+Application: `61ce872a60c65aac3c715a11ad71e803eb7da06f`, draft
+[PR #35](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/35), stacked on PR #34.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
 one Telegram dispatcher and one operations worker. No separate systemd service was created.
@@ -27,6 +27,38 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [NOVA readiness rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40082699315)
+passed all 352 source tests on the VPS, including ten actual sandbox integrations with zero
+skips in that pass, plus 27 transport tests. Exact-source CI runs
+[40082403544](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40082403544)
+and [40082406438](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40082406438)
+passed. Artificial API/page incidents and transaction failure were confined to a restored
+database copy. That probe verified independent recoveries, preservation of other decisions,
+transaction rollback and scheduler tick deduplication. No synthetic incident reached production.
+
+Real initial queue job176 returned the expected readiness contract: HTTP200, valid JSON,
+application ready, storage postgres and the reviewed version. Its body fingerprint matched
+the independent local GET:
+`b941ccde69a2d9bf809b2c40886e08caa5a521913226ea8a25c8288262d6517c`.
+Only booleans/status/size/fingerprint were stored, not the response body. The existing operations
+scheduler now has nova-api-readiness-v1 at a 900-second interval, separate from the unchanged
+homepage monitor. The initial observation is real; a later periodic run is not claimed from
+that initial observation alone. The canceled hourly development automation stays disabled.
+Plan4.0 reports the verified readiness component while stage6 remains active. Telegram accepted
+activation318; no incident/recovery notice was required for the initial healthy sample.
+Worker PID2927915, sole dispatcher PID2928249 and Inventory PID67760 were verified; Inventory
+source/configuration metadata remained unchanged. NOVA source, hosting, data and credentials
+were not modified. Paid OpenAI policies stayed disabled, provider setup stayed deferred and
+actual paid requests/holds/spend stayed zero. Backup:
+`/home/maksim/.ultimate-review-data/backups/before-uac4-1792834706897462629.sqlite3`.
+[Independent verification after runner cleanup](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40082919503)
+passed for the exact installed source, same worker/dispatcher PIDs, initial readiness job176,
+all five positive checks, body fingerprint and enabled 15-minute schedule. The homepage schedule,
+existing analytics/registry/owner-deferral checks and unchanged Inventory were verified again.
+Subsequent documentation-only commits save this checkpoint and are not runtime deployments.
+
+Earlier measured-analytics observations follow as historical evidence:
 
 Latest [measured-analytics rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40080570299)
 passed all 340 source tests on the VPS including ten actual sandbox integrations with zero
@@ -255,10 +287,10 @@ URL is still unknown; do not invent one or claim the chat is subscribed to Teleg
 
 ## Required progress updates
 
-Prepared increment: [NOVA application readiness](READINESS_MONITOR.md), a separate bounded
+Completed increment: [NOVA application readiness](READINESS_MONITOR.md), a separate bounded
 GET /health JSON contract, independent API/DB-readiness incidents, explicit command and a
 15-minute entry in the existing operations queue. The canceled hourly development automation
-stays disabled. Local real readiness probe passed; VPS rollout is pending. No NOVA production
+stays disabled. Local and initial VPS real readiness probes passed. No NOVA production
 or Inventory change is authorized by this increment.
 
 Completed increment: [measured daily/weekly analytics](WORK_ANALYTICS.md), clipping recorded
@@ -330,7 +362,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 3. API / $30 | Transport/holds implemented; key setup explicitly deferred by owner; paid policies disabled. |
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
 | 5. Tester | Network-free tests and independent seven-test demo contract live; custom contracts and wider stacks pending. |
-| 6. Monitoring | NOVA availability, scoped incident recovery and local source inspections live; functional/API checks and more verified targets pending. |
+| 6. Monitoring | Separate NOVA page and API/PostgreSQL-readiness checks with scoped recovery live; full business/resource checks and more verified targets pending. |
 | 7. Multiple projects | NOVA/Kinder pinned read scopes and real queue observations live; other mappings, isolated execution and change preparation pending. |
 | 8. Draft PRs | Private artifacts and human-created draft PRs exist; autonomous scoped patch-to-PR flow pending. |
 | 9. Publication approval | Required by policy; authenticated project/version/digest approval and rollback gates pending. |
@@ -348,7 +380,7 @@ The original audit itself granted no access; the current registry permits only i
 public source reads. No inspected project was modified, installed or deployed. Unknown
 project mappings remain unassigned; Inventory remains denied. Stage 7 is not complete.
 
-Next priority: functional read-only NOVA readiness checks, custom acceptance contracts,
+Next priority: custom acceptance contracts, further isolated project testing,
 memory and isolated project testing without
 model access. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
 After the owner resumes it, a single bounded real generation → exact-bundle tests → owner
@@ -362,13 +394,17 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_analytics_rollback`, with the recorded old app
-`e41954e8758e8f4dcb233bfc735f7f618eec823e` and state
-`.ultimate-review-data/live/uac4-work-analytics-rollout.json`. It validates exact current code
+Current UAC rollback: `uac4_readiness_rollback`, with the recorded old app
+`c229f54f41719dc41a4abe8ef3ffeab2c0a96f9b` and state
+`.ultimate-review-data/live/uac4-readiness-rollout.json`. It validates exact current code
 and recorded version transition, restores only UAC code, restarts only its worker/dispatcher and
 retains the task journal, incident history, valid resolutions, artifacts and the owner's API deferral. No policy/credential change is part of this update or
 rollback. Do not replace live accounting/history with an older backup. Reassess this rollback
 gate after any later activation or policy change.
+Readiness rollback disables only its matching schedule, drains UAC work, replaces its dispatcher
+before cancelling unsupported queued readiness checks with audit, and restores only its own
+temporary pause if the owner has not replaced it. It retains successful observations and incident
+history, and leaves the homepage monitor and independent services alone.
 The preceding registry rollback (only when that registry release is current) temporarily drains only the UAC queue, replaces its dispatcher before
 cancelling unsupported queued registry reads with an audit event, restarts its worker and
 restores its own temporary pause only if the owner has not replaced it. Existing owner pauses
