@@ -11,6 +11,7 @@ import readiness_monitor
 import acceptance_checks
 import evidence_memory
 import nova_project_tests
+import artifact_prs
 import chat_binding
 import budget_gate
 import offline_developer
@@ -41,9 +42,29 @@ def handle(text,connect,source_key=None):
     known.add('/acceptance4')
     known.update(('/memory_log','/memory_item'))
     known.update(('/test_nova','/nova_tests'))
+    known.update(('/artifact_pr','/artifact_prs','/artifact_pr_status','/artifact_pr_refresh','/artifact_release'))
     if op not in known: return None
     with connect() as conn:
         try:
+            if op=='/artifact_prs': return artifact_prs.describe(conn)
+            if op=='/artifact_pr_status':
+                if len(args)!=2: return 'Использование: /artifact_pr_status ID'
+                return artifact_prs.describe(conn,owner_followups.number(args[1]))
+            if op=='/artifact_release':
+                if len(args)!=2: return 'Использование: /artifact_release ID'
+                ident,aid,scope=artifact_prs.request_release(conn,owner_followups.number(args[1]))
+                return (f'Согласование версии #{ident}\nПроект: control\nCommit: {scope["head_sha"]}\n'
+                        +f'Артефакт SHA-256: {scope["artifact_sha256"]}\nОдобрить: /approve {aid}\nОтклонить: /reject {aid}'
+                        +'\nДействует 60 минут только для этой версии. Решение сохраняется; исполнитель публикации ещё не подключён. Изменение PR/CI требует нового согласования.')
+            if op in ('/artifact_pr','/artifact_pr_refresh'):
+                if len(args)!=2: return 'Использование: '+op+' ID'
+                ident=owner_followups.number(args[1]);payload={'artifact_pr':ident}
+                if op=='/artifact_pr_refresh':
+                    identity,_,_=artifact_prs.record(conn,ident);payload={'artifact_pr':identity['artifact_id'],'refresh':True}
+                else: artifact_prs.material(conn,ident,Path(conn.execute('PRAGMA database_list').fetchone()[2]).parent)
+                job=queue.enqueue(conn,'control','review_change',payload,max_attempts=5,
+                                  event_key=source_key if op=='/artifact_pr_refresh' else 'artifact-pr-v1:'+str(ident))
+                return f'Задание #{job} сохранено. Только отдельная ветка/Draft PR или проверка существующего PR. Merge и deploy запрещены. /artifact_prs'
             if op=='/nova_tests': return nova_project_tests.describe(conn)
             if op=='/test_nova':
                 if len(args)!=1: return 'Использование: /test_nova'

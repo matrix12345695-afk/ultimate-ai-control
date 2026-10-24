@@ -14,6 +14,7 @@ BUTTONS = [
     ["📚 Память", "💬 Этот чат"],
     ["🧾 История проектов"],
     ["🧪 NOVA WEB"],
+    ["📝 PR из артефактов"],
     ["🛑 Пауза", "▶️ Продолжить"],
     ["📊 Статус", "🗂 Проекты"],
     ["📋 Задачи", "🌐 Проверить сайт"],
@@ -24,6 +25,7 @@ BUTTONS = [
     ["🧠 AI-статус", "📖 Помощь"],
 ]
 ROUTES = {
+    "📝 PR из артефактов":"/artifact_prs",
     "🧪 NOVA WEB":"/test_nova",
     "🧾 История проектов":"/memory_log",
     "🧪 Приёмка":"/acceptance4",
@@ -76,6 +78,8 @@ HELP = (
     "/roadmap /queue /agents /daily /budget4 /memory\n"
     "/memory_log [проект] [страница] /memory_item ID — история со сверкой оснований\n"
     "/test_nova /nova_tests — закреплённые тесты NOVA без сети и базы данных\n"
+    "/artifact_pr ID /artifact_prs /artifact_pr_status ID /artifact_pr_refresh ID — Draft PR из рецепта\n"
+    "/artifact_release ID — запрос согласования точной версии, без исполнения публикации\n"
     "/monitor4 — доступность сайтов и история восстановления тревог\n"
     "/readiness4 — проверить API и готовность PostgreSQL через публичный /health\n"
     "/owner_later [страница] — сохранённые действия владельца\n"

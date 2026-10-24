@@ -18,7 +18,9 @@ def init_approvals(conn: sqlite3.Connection):
     )""")
     conn.commit()
 
-def request_approval(conn, task_id:int, action:str, environment:str, payload:dict, ttl_minutes=30):
+def request_approval(conn, task_id:int, action:str, environment:str, payload:dict, ttl_minutes=30, *, commit=True):
+    if type(commit) is not bool or (not commit and not conn.in_transaction):
+        raise ValueError('approval transaction required')
     if not action or not environment or ttl_minutes<=0:
         raise ValueError("invalid approval request")
     now=datetime.now(timezone.utc)
@@ -27,7 +29,7 @@ def request_approval(conn, task_id:int, action:str, environment:str, payload:dic
                  (req_id,task_id,action,environment,canonical_digest(payload),
                   "pending",(now+timedelta(minutes=ttl_minutes)).isoformat(),
                   now.isoformat(),None,None))
-    conn.commit()
+    if commit: conn.commit()
     return req_id
 
 def decide(conn, request_id:str, approver_id:str, allowed_admin_id:str, approve:bool):

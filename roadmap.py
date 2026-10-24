@@ -143,4 +143,8 @@ def completed_work(conn):
             details[7]=f'✅ Репозиториев с проверенными файлами и хешами: {len(registered)}. Доступ только для чтения; исполнение и публикация не включены.'
     if 'project_test_runs' in tables and setting(conn,'nova_tests_verified_release'):
         details[5]=(details.get(5,'')+' ✅ Закреплённые тесты NOVA без PostgreSQL и браузера подключены.').strip()
+    if 'artifact_pr_requests' in tables and setting(conn,'artifact_pr_verified_release'):
+        count=conn.execute('SELECT count(*) FROM artifact_pr_requests').fetchone()[0]
+        details[8]=f'✅ Связанных заявок Draft PR: {count}. Проверка точного diff/CI подключена для двух рецептов ULTIMATE.'
+        details[9]='✅ Запрос согласования связывает проект, commit, артефакт и CI. Исполнитель публикации ещё не подключён.'
     return details
