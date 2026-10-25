@@ -1,12 +1,13 @@
 # ULTIMATE AI CONTROL 4.0 — current checkpoint
 
-Updated 2026-10-24 UTC. This is the resume point for later owner-authorized development. Historical
+Updated 2026-10-25 UTC. This is the resume point for later owner-authorized development. Historical
 deployment records retain their original observations; this file identifies the latest state.
 
 ## Installed state
 
-Application: `fa0403e73541364aabd358c6fa896be60aaaade6`, draft
-[PR #39](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/39), stacked on PR #38.
+Application: `0621a2d82dd3cacc6702599ef821e83dc7469043`, draft
+[PR #41](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/41), stacked on PR #39.
+No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
 one Telegram dispatcher and one operations worker. No separate systemd service was created.
@@ -27,6 +28,41 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [release preflight rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40162897144)
+passed 37 transport tests and 404 application tests on the VPS. The initial default test pass
+skipped 15 host-dependent sandbox cases; the subsequent sandbox-enabled 404-test pass had zero
+skips and included all 15 real Python/Node cases. Exact-source CI runs
+[40162843264](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40162843264)
+and [40162846314](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40162846314)
+succeeded. A restored-copy probe used the actual artifact 6 with simulated GitHub responses and
+an artificial owner decision; none of these simulated approvals or calls touched production.
+
+Real queue job 338 used an installation token restricted to repository read permissions and
+re-read existing PR 40, its exact two-file diff, main/head and successful PR CI 40094408053,
+attempt 1. Head `60dd3b13a53cdceb45bc2a11b90a59186bc7dad5` and
+base `cb1536d55ed00190782470a74803cc67daf47151` remain unchanged. The durable report SHA-256 is
+`d7fb2fca5458cf01073ee51907f7a6e54089e457c9442b2c21ad62ba2cdecea0`.
+It found no owner approval and always records publish_allowed=false. The referenced base is
+only a rollback reference; deployment rollback is not implemented or claimed as verified.
+No remote branch/PR write, merge or publication was performed by this check.
+
+Telegram accepted activation 346 and actual report 347; evidence memory 339 binds the report.
+Worker 4107922 and sole dispatcher 4108276 were verified, Inventory remained PID 67760 with
+unchanged source/configuration metadata. Approval count stayed unchanged, release candidates
+remained zero, the API-key deferral stayed set and actual paid calls/holds/spend remained zero.
+Backup: `/home/maksim/.ultimate-review-data/backups/before-uac4-1792903502575092908.sqlite3`.
+The Plan4.0 stage 9 shows this completed component but remains active. `/release_check REQUEST_ID`
+queues a fresh read; `/release_checks` displays historical reports and does not imply continuing
+GitHub validity. No new daemon or schedule was created. See [RELEASE_PREFLIGHT.md](RELEASE_PREFLIGHT.md).
+
+[Independent server verification](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40163145833)
+passed at04:47 UTC with the same source, worker/dispatcher PIDs, real PR/head/base/CI,
+report hash, Telegram receipt347 and memory339. Approval/candidate counts, disabled paid
+policies and Inventory were verified again. Subsequent documentation commits save this
+checkpoint; the installed application remains0621a2d82dd3cacc6702599ef821e83dc7469043.
+
+The following artifact-PR checkpoint is historical evidence from the preceding application:
 
 Latest [artifact Draft PR rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40094272024)
 passed all395 source tests on the VPS, including15 real Python/Node sandbox cases with zero
@@ -547,7 +583,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 6. Monitoring | Separate NOVA page and API/PostgreSQL-readiness checks with scoped recovery live; full business/resource checks and more verified targets pending. |
 | 7. Multiple projects | NOVA/Kinder pinned read scopes and real queue observations live; other mappings, isolated execution and change preparation pending. |
 | 8. Draft PRs | VPS broker created and exact-diff/CI verified a real Draft PR from a tested control recipe; broader project/model patches pending. |
-| 9. Publication approval | Explicit exact-version owner approval candidates, expiry/renewal and drift checks implemented; real owner decision and publisher/live rollback gates pending. |
+| 9. Publication approval | Exact-version candidates plus GET-only live artifact/diff/base/head/CI and existing approval preflight implemented, with durable reports and Telegram receipts; real owner decision, publisher and tested deployment rollback pending. |
 | 10. Voice | Pending transcription choice, budget accounting and task confirmation. |
 | 11. Analytics | Daily/weekly measured work, role/project/worker grouping, logged task waiting and per-task receipts/holds live; full idle observation and external billing reconciliation pending. |
 | 12. Memory | Rules, owner follow-ups and append-only source-verified job/artifact/repository history live; semantic retrieval, controlled business-rule editing and model learning pending. |
@@ -562,8 +598,8 @@ The original audit itself granted no access; the current registry permits only i
 public source reads. No inspected project was modified, installed or deployed. Unknown
 project mappings remain unassigned; Inventory remains denied. Stage 7 is not complete.
 
-Next priorities: prepare a separately reviewed publisher with dry-run/live revalidation and
-rollback gates; no live merge/deployment before owner approval. Improve read-only VPS resource
+Next priorities: extend the read-only preflight toward a separately reviewed publisher and
+tested deployment rollback; no live merge/deployment before exact owner approval. Improve read-only VPS resource
 monitoring and extend project coverage without model access. Extend NOVA tests only with an isolated disposable
 PostgreSQL/pg setup and browser profile; current24-test subset does not satisfy either gate.
 Pinned repository-registry observations remain reads; executed subset reports are separate. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
@@ -578,13 +614,13 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_artifact_pr_rollback`, old app
-`851bfbc01e5c8e736a4543ab549b1797d4d294c4`, state
-`.ultimate-review-data/live/uac4-artifact-pr-rollout.json`. It pauses/drains only UAC, replaces
-the dispatcher, cancels only unsupported queued artifact-PR jobs with audit, restarts its worker
+Current UAC rollback: `uac4_release_check_rollback`, old app
+`fa0403e73541364aabd358c6fa896be60aaaade6`, state
+`.ultimate-review-data/live/uac4-release-check-rollout.json`. It pauses/drains only UAC, replaces
+the dispatcher, cancels only unsupported queued release-check jobs with audit, restarts its worker
 and restores only its own temporary pause. Owner pauses are retained. Remote branches/Draft PRs
 and private request/report/approval/memory history are kept without merge, deletion or publication.
-Older memory code may require the newer reader for artifact-PR references. Existing GitHub App
+Older memory code may require the newer reader for release-check references. Existing GitHub App
 key/activation and other services are not changed by rollback. It validates exact current code
 and recorded version transition, restores only UAC code, restarts only its worker/dispatcher and
 retains the task journal, incident history, valid resolutions, artifacts and the owner's API deferral. No policy/credential change is part of this update or

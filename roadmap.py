@@ -147,4 +147,6 @@ def completed_work(conn):
         count=conn.execute('SELECT count(*) FROM artifact_pr_requests').fetchone()[0]
         details[8]=f'✅ Связанных заявок Draft PR: {count}. Проверка точного diff/CI подключена для двух рецептов ULTIMATE.'
         details[9]='✅ Запрос согласования связывает проект, commit, артефакт и CI. Исполнитель публикации ещё не подключён.'
+    if 'artifact_release_checks' in tables and setting(conn,'release_check_verified_release'):
+        details[9]=(details.get(9,'')+' ✅ Проверка версии, CI и согласования перед выпуском подключена. /release_checks. Публикация отключена.').strip()
     return details

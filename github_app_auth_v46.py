@@ -53,11 +53,12 @@ def make_jwt(path, now=None, signer=None):
     return header + "." + payload + "." + _encode(signed)
 
 
-def installation_token(key_path, opener=None):
+def installation_token(key_path, opener=None, *, read_only=False):
+    if type(read_only) is not bool: raise ValueError("invalid GitHub token mode")
     jwt = make_jwt(key_path)
     body = json.dumps({
         "repositories": ["ultimate-ai-control"],
-        "permissions": {"contents": "write", "pull_requests": "write", "actions": "read"},
+        "permissions": {"contents": "read" if read_only else "write", "pull_requests": "read" if read_only else "write", "actions": "read"},
     }).encode()
     request = urllib.request.Request(
         BASE + "/app/installations/" + str(INSTALLATION_ID) + "/access_tokens",
