@@ -1,0 +1,34 @@
+{
+  "schema": "nova-browser-ci-v1",
+  "repository": "matrix12345695-afk/ultimate-ai-control",
+  "harness_commit": "8c1292c489f6336c1310d287d970498e43b153e5",
+  "workflow_path": ".github/workflows/nova-browser-tests.yml",
+  "workflow_name": "NOVA isolated browser tests",
+  "gate_step": "Run and verify browser checks",
+  "source_revision": "1a23239a0a9c7d79905c91505a8741d8350d7e75",
+  "source_manifest_sha256": "d7014f77e8ed48988d4f2ebcd08d9f08a5ec9ca6b4242b22c8b8b4c70c30896d",
+  "dependency_lock_sha256": "f6c9247107a9fe628e5b0a1f0ba2f9bd64c7bdbaa9054bedcc1102346a7d02ef",
+  "browser_version": "151.0.7922.34",
+  "playwright_version": "1.62.0",
+  "expected_tests": 27,
+  "expected_screenshots": 15,
+  "artifact_name_prefix": "nova-browser-evidence-",
+  "viewports": {
+    "mobile": [
+      360,
+      800
+    ],
+    "tablet": [
+      768,
+      1024
+    ],
+    "desktop": [
+      1440,
+      900
+    ]
+  },
+  "advisories": [
+    "Language switch targets are smaller than44 CSS px; full touch accessibility remains pending.",
+    "UZ page keeps Russian input placeholders; localization coverage is partial."
+  ]
+}
