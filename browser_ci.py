@@ -32,7 +32,8 @@ def expires(value):
     return date.timestamp()
 
 
-def observe(client):
+def observe(client,contract=None):
+    CONTRACT=contract if contract is not None else globals()['CONTRACT'];PROFILE=CONTRACT['schema']
     run,job,passed=hosted_ci.inspect(client,CONTRACT)
     artifact=None
     if passed:
@@ -61,14 +62,15 @@ def observe(client):
             'source_revision':CONTRACT['source_revision'],'source_manifest_sha256':CONTRACT['source_manifest_sha256'],
             'dependency_lock_sha256':CONTRACT['dependency_lock_sha256'],'ci_run_id':run['id'],'ci_attempt':run['run_attempt'],'ci_job_id':job['id'],
             'ci_url':'https://github.com/'+REPO+'/actions/runs/'+str(run['id']),'status':'passed' if passed else 'failed',
-            'counts':{'tests':27,'pass':27,'fail':0,'errors':0,'skipped':0} if passed else None,
+            'counts':{'tests':CONTRACT['expected_tests'],'pass':CONTRACT['expected_tests'],'fail':0,'errors':0,'skipped':0} if passed else None,
             'counts_source':'exact_commit_required_ci_gate','engine':'chromium','browser_version':CONTRACT['browser_version'],
             'viewports':CONTRACT['viewports'],'screenshots':15 if passed else None,'advisories':CONTRACT['advisories'] if passed else None,
             'artifact':artifact,'execution_location':'github_hosted_disposable_runner','backend_mocked':True,'vps_local_execution':False,
             'production_access':False,'physical_device_test':False,'pixel_baseline_test':False,'published':False,'checked_at':time.time()}
 
 
-def valid(report):
+def valid(report,contract=None):
+    CONTRACT=contract if contract is not None else globals()['CONTRACT'];PROFILE=CONTRACT['schema']
     keys={'schema','contract_sha256','repository','harness_commit','source_revision','source_manifest_sha256','dependency_lock_sha256',
           'ci_run_id','ci_attempt','ci_job_id','ci_url','status','counts','counts_source','engine','browser_version','viewports','screenshots','advisories',
           'artifact','execution_location','backend_mocked','vps_local_execution','production_access','physical_device_test','pixel_baseline_test','published','checked_at'}
@@ -83,7 +85,7 @@ def valid(report):
     if report['ci_url']!='https://github.com/'+REPO+'/actions/runs/'+str(report['ci_run_id']): return False
     if type(report['checked_at']) not in (int,float) or not math.isfinite(report['checked_at']) or report['checked_at']<=0: return False
     if report['status']=='failed': return all(report[k] is None for k in ('counts','screenshots','advisories','artifact'))
-    if report['status']!='passed' or report['counts']!={'tests':27,'pass':27,'fail':0,'errors':0,'skipped':0} or any(type(x) is not int for x in report['counts'].values()): return False
+    if report['status']!='passed' or report['counts']!={'tests':CONTRACT['expected_tests'],'pass':CONTRACT['expected_tests'],'fail':0,'errors':0,'skipped':0} or any(type(x) is not int for x in report['counts'].values()): return False
     if type(report['screenshots']) is not int or report['screenshots']!=15 or report['advisories']!=CONTRACT['advisories']: return False
     a=report['artifact']
     if not isinstance(a,dict) or set(a)!={'id','name','digest','size_bytes','expires_at','url'}: return False

@@ -155,4 +155,13 @@ def completed_work(conn):
         details[5]=(details.get(5,'')+' ✅ Все34 теста закреплённой NOVA с PostgreSQL16 проходят на временном GitHub runner; VPS сверяет точный CI. /nova_pg.').strip()
     if 'browser_ci_runs' in tables and setting(conn,'browser_ci_verified_release'):
         details[13]=(details.get(13,'')+' ✅ Chromium:27 проверок,3 размера экрана,15 снимков; API подставной. Два замечания сохранены. /nova_browser.').strip()
+    if 'browser_candidate_runs' in tables:
+        import browser_candidate_ci
+        row=conn.execute('SELECT report,report_sha256 FROM browser_candidate_runs ORDER BY id DESC LIMIT 1').fetchone()
+        try:
+            report=json.loads(row[0]) if row else None
+            passed=row and browser_candidate_ci.valid(report) and browser_candidate_ci.util.digest(report)==row[1] and report['status']=='passed'
+        except (TypeError,ValueError): passed=False
+        if passed:
+            details[13]=details.get(13,'')+' ✅ Выполнено в Draft PR15: подсказки RU/UZ, кнопки44px и мобильное положение;34 проверки. Публикация ожидает решения. /nova_candidate.'
     return details

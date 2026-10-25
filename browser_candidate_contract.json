@@ -1,0 +1,31 @@
+{
+  "schema": "nova-browser-candidate-v1",
+  "repository": "matrix12345695-afk/ultimate-ai-control",
+  "harness_commit": "8bd210e3acefe36b92b2f55ff8d0a8135bd83bd6",
+  "workflow_path": ".github/workflows/nova-browser-candidate.yml",
+  "workflow_name": "NOVA candidate browser tests",
+  "gate_step": "Run and verify browser checks",
+  "source_revision": "495a7f1a1a3a25c45fd98101fffa9c02e58f3970",
+  "source_manifest_sha256": "f8d279db7ae4ea3a1a9ca1b863e9ef72677a54c7daa035e098b22fc40031f958",
+  "dependency_lock_sha256": "f6c9247107a9fe628e5b0a1f0ba2f9bd64c7bdbaa9054bedcc1102346a7d02ef",
+  "browser_version": "151.0.7922.34",
+  "playwright_version": "1.62.0",
+  "expected_tests": 34,
+  "expected_screenshots": 15,
+  "artifact_name_prefix": "nova-browser-candidate-",
+  "viewports": {
+    "mobile": [
+      360,
+      800
+    ],
+    "tablet": [
+      768,
+      1024
+    ],
+    "desktop": [
+      1440,
+      900
+    ]
+  },
+  "advisories": []
+}

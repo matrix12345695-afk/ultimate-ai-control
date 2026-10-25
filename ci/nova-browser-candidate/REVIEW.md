@@ -1,6 +1,6 @@
 # NOVA frontend candidate acceptance
 
-Exact candidate: nova-web-agency90f60bdaead95b65857dd0a19a905f43cf8658ef,
+Exact candidate: nova-web-agency495a7f1a1a3a25c45fd98101fffa9c02e58f3970,
 Draft PR15, based on1a23239a. Only index.html changes. No merge or publication.
 
 Reuse the existing27 isolated Chromium fixture checks and add7 regression cases:
@@ -25,3 +25,8 @@ live baseline contract. Its historical report remains unchanged and continues
 to describe the original source and two findings. A candidate pass cannot rewrite
 that evidence or enable publication. Archives retain30 days; owner approval and
 an independently tested deployment/rollback procedure remain pending.
+
+The first candidate failed the mobile target-bounds regression: header backdrop-filter
+created a containing block for fixed controls (target y=-20 at360x800). Disabling
+that filter only below761px restores viewport positioning (y=678); desktop blur
+remains. The corrected candidate must pass the same unweakened bounds test.
