@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `0621a2d82dd3cacc6702599ef821e83dc7469043`, draft
-[PR #41](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/41), stacked on PR #39.
+Application: `fe19f8220d7337cdc9f253cfb4d8948f4a06bb62`, draft
+[PR #42](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/42), stacked on PR #41.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -28,6 +28,44 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [VPS resource rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40171830616)
+passed 39 transport tests and all 416 app tests on the VPS. The first default pass skipped
+15 host-dependent cases; the subsequent sandbox-enabled pass included all 15 real Python/Node
+cases with zero skips. Exact-source CI runs
+[40171645188](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40171645188)
+and [40171648112](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40171648112)
+succeeded. Alarm/recovery/debounce and transaction-failure injections ran only on a restored
+copy, retaining the original notification rows and project rules unchanged. No production
+resource-overload incident was deliberately generated.
+
+Two real resource jobs sampled the VPS 65.60167455673218 seconds apart; the second was job360.
+Its aggregate CPU was 0.78%, MemAvailable 6.257 GiB, available data-volume space 61.610 GiB and
+available inodes 5952203. These are timestamped historical observations, not present resource
+promises. Report SHA-256: `7e0965f51ceb8ff3043aadb9c95df31cf67aa226a4a5466bf9baf58f0a5b5b57`.
+Telegram accepted activation352 and report353; source-linked evidence memory361 binds the
+sample/report. Worker 68767 and sole dispatcher 69102 were verified; Inventory stayed PID67760 with
+unchanged source and configuration metadata. Paid calls/holds/spend remain zero;
+owner API-key setup is still deferred. Existing PR40 and release preflight338/receipt347
+were rechecked successfully without changing approvals or publishing anything.
+
+Backup: `/home/maksim/.ultimate-review-data/backups/before-uac4-1792912489789521934.sqlite3`.
+One 300-second resource schedule uses the existing worker and queue pause; no new daemon,
+cron entry or ChatGPT development automation was created. `/vps4` and 🖥 VPS show current
+stored observations with staleness warnings; `/vps_check` requests another sample. Manual
+bursts cannot advance alarm/recovery, and unknown data cannot establish health. Stage6
+shows its completed resource component but remains active. See [VPS_RESOURCES.md](VPS_RESOURCES.md).
+
+[Independent verification](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40172325629)
+passed at07:20 UTC. It waited for actual periodic queue job362 created by the existing
+scheduler, verified its fixed project/payload and source-bound report, and rechecked the
+same UAC source/processes, initial two-sample evidence, Telegram353, memory361 and unchanged
+Inventory/approval/paid-policy state. The periodic report SHA-256 is
+`6914ad6fda52c7b90e6ca4357934317cfa7d007c25ca794e6aca6c0612712b84`.
+This confirms an actual scheduled observation, not only a schedule configuration or unit fixture.
+Documentation commits after this checkpoint do not change the installed applicationfe19f8220d7337cdc9f253cfb4d8948f4a06bb62.
+
+The following release-preflight checkpoint is historical evidence from the preceding application:
 
 Latest [release preflight rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40162897144)
 passed 37 transport tests and 404 application tests on the VPS. The initial default test pass
@@ -580,7 +618,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 3. API / $30 | Transport/holds implemented; key setup explicitly deferred by owner; paid policies disabled. |
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
 | 5. Tester | Python contract checks plus24 exact pinned NOVA tests in guarded read-only Node live; PostgreSQL/full npm/browser testing and broader contracts pending. |
-| 6. Monitoring | Separate NOVA page and API/PostgreSQL-readiness checks with scoped recovery live; full business/resource checks and more verified targets pending. |
+| 6. Monitoring | Separate NOVA page/API readiness plus VPS CPU/MemAvailable/data-volume/inode observations, confirmed alarms/recovery and telemetry checks; full business checks and more targets pending. |
 | 7. Multiple projects | NOVA/Kinder pinned read scopes and real queue observations live; other mappings, isolated execution and change preparation pending. |
 | 8. Draft PRs | VPS broker created and exact-diff/CI verified a real Draft PR from a tested control recipe; broader project/model patches pending. |
 | 9. Publication approval | Exact-version candidates plus GET-only live artifact/diff/base/head/CI and existing approval preflight implemented, with durable reports and Telegram receipts; real owner decision, publisher and tested deployment rollback pending. |
@@ -599,8 +637,8 @@ public source reads. No inspected project was modified, installed or deployed. U
 project mappings remain unassigned; Inventory remains denied. Stage 7 is not complete.
 
 Next priorities: extend the read-only preflight toward a separately reviewed publisher and
-tested deployment rollback; no live merge/deployment before exact owner approval. Improve read-only VPS resource
-monitoring and extend project coverage without model access. Extend NOVA tests only with an isolated disposable
+tested deployment rollback; no live merge/deployment before exact owner approval. Extend resource observation toward measured capacity planning and extend project coverage
+without model access. Do not automatically stop or clean independent services. Extend NOVA tests only with an isolated disposable
 PostgreSQL/pg setup and browser profile; current24-test subset does not satisfy either gate.
 Pinned repository-registry observations remain reads; executed subset reports are separate. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
 After the owner resumes it, a single bounded real generation → exact-bundle tests → owner
@@ -614,13 +652,14 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_release_check_rollback`, old app
-`fa0403e73541364aabd358c6fa896be60aaaade6`, state
-`.ultimate-review-data/live/uac4-release-check-rollout.json`. It pauses/drains only UAC, replaces
-the dispatcher, cancels only unsupported queued release-check jobs with audit, restarts its worker
+Current UAC rollback: `uac4_vps_resources_rollback`, old app
+`0621a2d82dd3cacc6702599ef821e83dc7469043`, state
+`.ultimate-review-data/live/uac4-vps-resources-rollout.json`. It disables only its matching
+resource schedule after checking its project/kind/payload/interval identity. It pauses/drains only UAC, replaces
+the dispatcher, cancels only unsupported queued resource-check jobs with audit, restarts its worker
 and restores only its own temporary pause. Owner pauses are retained. Remote branches/Draft PRs
 and private request/report/approval/memory history are kept without merge, deletion or publication.
-Older memory code may require the newer reader for release-check references. Existing GitHub App
+Older memory code may require the newer reader for resource-sample references. Existing GitHub App
 key/activation and other services are not changed by rollback. It validates exact current code
 and recorded version transition, restores only UAC code, restarts only its worker/dispatcher and
 retains the task journal, incident history, valid resolutions, artifacts and the owner's API deferral. No policy/credential change is part of this update or
