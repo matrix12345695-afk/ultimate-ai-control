@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `a03e1cfd22b8e807a2afa41ea6a92d6b578c3141`, draft
-[PR #45](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/45), stacked on PR #44.
+Application: `9d0360570284a7c18b39246af4cad1632dc2fb94`, draft
+[PR #46](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/46), stacked on PR #45.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -28,6 +28,56 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [NOVA release-rehearsal reporting rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40234805546)
+passed49 transport tests and456 app tests on VPS. The default pass skipped15 host-dependent
+cases; full sandbox-enabled pass included all15 real Python/Node cases without skips.
+Exact-app Safe unit CI40234688758/40234692431 and rehearsal PR40234692424 succeed.
+Real read-only App authentication and restored-copy pending/tamper/memory probes passed.
+
+The owner confirmed Render workspace My Workspace,tea-d52kjcur433s73ca9810 for read-only
+NOVA inspection. Service:srv-dbbhm5k9v7es73f9kf10; live deploydep-dbchlhqvcj2c738paun0,
+source1a23239a. Main commits auto-publish, HTTP healthCheckPath is empty despite repository
+render.yaml/health, and npm install with^pg is not reproducible. No Render setting, deploy,
+restart, permission, credential or paid resource was changed. Available MCP trigger lacks
+an exact commit option and has no rollback tool. Archived safe metadata is pinned in
+nova_render_snapshot.json; VPS does not automatically refresh Render observations.
+
+Hosted harnessce46dc1bbbdbc9c65b2706053b53dcffcb881f10 / push40234072189 and
+PR40234075915 passes34 original candidate tests and15 actual loopback HTTP/PostgreSQL16
+transition checks: exact baseline1a23239a -> candidate495a7f1a -> baseline. All four CRM
+tables retain old and candidate-era fixed fixture writes without restoring DB. Failed local
+candidate startup leaves baseline available. Socket guards reject external destinations;
+server/helper children receive no real service secrets. This is a local process rehearsal,
+not an executed Render/platform/zero-downtime rollback. No real lead or production DB access.
+Archive12612949720/956 bytes/digest2e50bef068c70b16ab063608f7bae39e0dd94c1ac102a29d3fe96b125b00ec47
+and report digest7db73ce6ef7dcea143bf7fcebaab3b68ca1e4bd3fe7719d85dc4fd74a3dd0db8
+were independently verified after download. Archive expires2026-11-24T21:09:04Z.
+
+Live VPS job646 saved reporte27459e3ca6de628c5932f4456765868456f20066dadf9d2cdb9ace47127f3b6.
+Telegram accepted activation369/result370; memory647 binds CI/report/snapshot/blockers.
+/nova_release or 🚦 Выпуск NOVA shows completion and pending conditions; /test_nova_release
+GET-only revalidates fixed CI, not Render state and not a new test/deploy trigger. Plan9
+stays active, showing completed34+15 rehearsal; no approval/candidate created or consumed.
+
+[Independent verify40235182107](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40235182107)
+passed21:22 UTC with unchanged exact report/receipt/memory and original baseline/browser/PG/
+local Node/resource/recipe/PR preflight evidence. Sole poller940092 and one clean-env worker
+verified. InventoryPID67760/source/config unchanged; model setup deferred, paid calls/holds/
+spend0. New Render reads21:22 still show same live baseline/settings/deploy; main remains
+1a23239a and public homepage200/35735 bytes matches original00d76b47 blob. No new daemon,
+schedule, DB/browser/dependency on VPS, NOVA source change or production publication.
+
+Backup/home/maksim/.ultimate-review-data/backups/before-uac4-1792963174109785797.sqlite3.
+Details:[NOVA_RELEASE_REHEARSAL.md](NOVA_RELEASE_REHEARSAL.md). Non-executable exact-service
+proposal:[NOVA_PUBLICATION_PLAN.json](NOVA_PUBLICATION_PLAN.json). Next: pin production
+NOVA dependency/runtime versions in a new Draft revision and re-run exact-head acceptance;
+prepare approval-scoped/health and auto-deploy change, fresh platform/retained-build/recovery
+checks and least-privilege exact-version publisher before asking for publication approval.
+No assumption that current GitHub App or Render MCP grants VPS NOVA publication rights.
+Installed app stays9d036057; following commits record documentation only.
+
+The following frontend-candidate checkpoint is historical evidence from the preceding application:
 
 Latest [NOVA frontend candidate rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40229896025)
 passed46 transport tests and447 app tests on VPS; its default pass skipped15 host-dependent
@@ -787,7 +837,15 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_browser_candidate_rollback`, only for installeda03e1cfd, restores
+Current UAC rollback: `uac4_nova_release_rollback`, only for installed9d036057, restores
+`a03e1cfd22b8e807a2afa41ea6a92d6b578c3141`; state
+`.ultimate-review-data/live/uac4-nova-release-rollout.json`. It drains/pauses only UAC,
+restores its dispatcher/worker and cancels only unsupported queuednova-release-rehearsal-v1
+checks. Owner pauses and additive snapshot/policy/report/delivery/history/accounting/typed refs
+are retained. No DB restore, schedule/external-service change or actual Render rollback; no
+live rollback was executed. Older code needs the newer reader for rehearsal memory references.
+
+Preceding UAC candidate rollback (only when that app is current): `uac4_browser_candidate_rollback`, restores
 `3fa30fefac0e8dc878f849283b253c9e52d67318`; state
 `.ultimate-review-data/live/uac4-browser-candidate-rollout.json`. It pauses/drains only UAC,
 retains owner pauses and all accounting/report/notification/history data, replaces its dispatcher
