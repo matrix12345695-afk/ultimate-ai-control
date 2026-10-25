@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 8
     env:
-      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/nova-browser-runtime
+      PLAYWRIGHT_BROWSERS_PATH: /tmp/nova-browser-runtime
     steps:
       - name: Checkout exact browser harness
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
