@@ -1,0 +1,23 @@
+{
+  "schema": "nova-render-observation-v1",
+  "workspace_id": "tea-d52kjcur433s73ca9810",
+  "service_id": "srv-dbbhm5k9v7es73f9kf10",
+  "repository": "https://github.com/matrix12345695-afk/nova-web-agency",
+  "branch": "main",
+  "type": "web_service",
+  "plan": "free",
+  "runtime": "node",
+  "region": "frankfurt",
+  "auto_deploy": "commit",
+  "health_check_path": "",
+  "build_command": "npm install --omit=dev",
+  "start_command": "npm start",
+  "live_deploy_id": "dep-dbchlhqvcj2c738paun0",
+  "live_commit": "1a23239a0a9c7d79905c91505a8741d8350d7e75",
+  "deploy_status": "live",
+  "observed_at": "2026-10-25 21:08:45 UTC",
+  "source": "read_only_Render_connector_owner_confirmed_workspace",
+  "retained_build_available": null,
+  "render_rollback_executed": false,
+  "settings_changed": false
+}

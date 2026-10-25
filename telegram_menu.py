@@ -16,7 +16,7 @@ BUTTONS = [
     ["🧪 NOVA WEB", "🐘 PostgreSQL NOVA"],
     ["📝 PR из артефактов"],
     ["🖥 VPS", "🖼 Браузер NOVA"],
-    ["🎨 Черновик NOVA"],
+    ["🎨 Черновик NOVA", "🚦 Выпуск NOVA"],
     ["🛑 Пауза", "▶️ Продолжить"],
     ["📊 Статус", "🗂 Проекты"],
     ["📋 Задачи", "🌐 Проверить сайт"],
@@ -29,6 +29,7 @@ BUTTONS = [
 ROUTES = {
     "🖼 Браузер NOVA":"/nova_browser",
     "🎨 Черновик NOVA":"/nova_candidate",
+    "🚦 Выпуск NOVA":"/nova_release",
     "🐘 PostgreSQL NOVA":"/nova_pg",
     "🖥 VPS":"/vps4",
     "📝 PR из артефактов":"/artifact_prs",
