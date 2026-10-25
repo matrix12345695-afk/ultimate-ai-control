@@ -1,0 +1,41 @@
+name: NOVA isolated PostgreSQL tests
+on:
+  push:
+    paths:
+      - 'ci/nova-postgres/**'
+      - '.github/workflows/nova-postgres-tests.yml'
+  pull_request:
+    paths:
+      - 'ci/nova-postgres/**'
+      - '.github/workflows/nova-postgres-tests.yml'
+permissions:
+  contents: read
+jobs:
+  postgres-tests:
+    name: NOVA isolated PostgreSQL tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres@sha256:f9d1e581cde3e4c8bc696b07e6f7b7aea1d41014b33a52b27990762daae61beb
+        env:
+          POSTGRES_DB: novaweb_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ['15432:5432']
+        options: >-
+          --memory=512m --cpus=1 --pids-limit=64
+          --tmpfs /var/lib/postgresql/data:rw,size=192m
+          --health-cmd "pg_isready -U postgres -d novaweb_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - name: Checkout exact harness
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Set reviewed Node version
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.21.0'
+      - name: Run and verify all NOVA tests
+        run: python3 ci/nova-postgres/run.py

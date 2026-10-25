@@ -1,0 +1,14 @@
+{
+  "schema": "nova-postgres-ci-v1",
+  "repository": "matrix12345695-afk/ultimate-ai-control",
+  "harness_commit": "0a21efb320d65ae98c6788d5cd9825b124f2f4c4",
+  "workflow_path": ".github/workflows/nova-postgres-tests.yml",
+  "workflow_name": "NOVA isolated PostgreSQL tests",
+  "source_revision": "1a23239a0a9c7d79905c91505a8741d8350d7e75",
+  "source_manifest_sha256": "8134f5dd2dc584dde8753a881eba7663e3d5c542ce11f011ba6f1880fb8217ce",
+  "dependency_lock_sha256": "eac00401d1ee798079e81955c6d5b11b01968ffa3d64cfadbf6e0eb1bc48074b",
+  "postgres_image": "postgres@sha256:f9d1e581cde3e4c8bc696b07e6f7b7aea1d41014b33a52b27990762daae61beb",
+  "postgres_major": 16,
+  "node_version": "24.21.0",
+  "expected_tests": 34
+}

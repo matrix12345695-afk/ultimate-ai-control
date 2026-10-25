@@ -11,7 +11,9 @@ from artifact_pr_broker import Pending,Blocked
 
 
 def request(path,job,timeout=25):
-    command=[sys.executable,str(Path(__file__).with_name('artifact_pr_broker.py')),'--once',str(Path(path).resolve())]
+    import nova_ci
+    script='nova_ci_broker.py' if job.get('kind')=='test_release' and job.get('payload')=={'target':nova_ci.PROFILE} else 'artifact_pr_broker.py'
+    command=[sys.executable,str(Path(__file__).with_name(script)),'--once',str(Path(path).resolve())]
     env={'HOME':str(Path.home()),'PATH':'/usr/bin:/bin','LANG':'C.UTF-8','PYTHONDONTWRITEBYTECODE':'1'}
     proc=subprocess.Popen(command,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,
                           env=env,start_new_session=True,close_fds=True)

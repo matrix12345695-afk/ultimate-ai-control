@@ -13,7 +13,7 @@ BUTTONS = [
     ["📆 Работа за неделю"],
     ["📚 Память", "💬 Этот чат"],
     ["🧾 История проектов"],
-    ["🧪 NOVA WEB"],
+    ["🧪 NOVA WEB", "🐘 PostgreSQL NOVA"],
     ["📝 PR из артефактов"],
     ["🖥 VPS"],
     ["🛑 Пауза", "▶️ Продолжить"],
@@ -26,6 +26,7 @@ BUTTONS = [
     ["🧠 AI-статус", "📖 Помощь"],
 ]
 ROUTES = {
+    "🐘 PostgreSQL NOVA":"/nova_pg",
     "🖥 VPS":"/vps4",
     "📝 PR из артефактов":"/artifact_prs",
     "🧪 NOVA WEB":"/test_nova",
