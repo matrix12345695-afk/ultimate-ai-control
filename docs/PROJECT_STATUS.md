@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `562be5084d70fc71f7e07ddfaac44d176eaaa93b`, draft
-[PR #43](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/43), stacked on PR #42.
+Application: `3fa30fefac0e8dc878f849283b253c9e52d67318`, draft
+[PR #44](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/44), stacked on PR #43.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -28,6 +28,55 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [browser CI rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40220228872)
+passed43 transport tests and439 app tests on the VPS. The default pass skipped15 host-dependent
+cases; the subsequent sandbox-enabled439-test pass included all15 real Python/Node cases with
+zero skips. Exact-app CI40219927424/40219930241 succeeded, as did browser PR CI40219930277.
+Actual scoped GitHub App read-only authentication, exact hosted CI/archive observation and
+restored-copy pending/tampered-evidence probes passed. No browser/Python dependency or writable
+capsule was installed on the VPS. The PG observer now shares metadata identity validation;
+its pinned PG contract and earlier proof remain valid and were rechecked live.
+
+Real [browser push CI40219630608](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40219630608),
+attempt1, used harness8c1292c489f6336c1310d287d970498e43b153e5 and NOVA source
+1a23239a0a9c7d79905c91505a8741d8350d7e75. Chromium151.0.7922.34/Playwright1.62.0 ran27 checks
+without failures/errors/skips and emitted15 screenshots for three emulated viewport sizes.
+Page/API requests were intercepted fixture traffic; no actual lead was submitted. Two known
+advisories were preserved: Russian UZ placeholders and language targets below44 CSS px. This
+is not full localization/accessibility, pixel baseline, real-device/cross-browser or production
+acceptance. The local development probe used preinstalled Chromium154 separately and also passed27.
+
+Archive12608412193 is12842536 bytes, digest
+`653af95268ada23e853a8337e8e2d44ed822164616aad96c82bbb358f75453e6`, expires2026-11-24T18:07:10Z.
+The archive was downloaded through the GitHub connector; its ZIP digest, all15 PNG manifest
+hashes/dimensions and JSON gate were verified locally. Report-file SHA-256 is
+`70681038aa2666af078dd2d96f4f42c72e21f3ca2b6f00d8f199f49d1cfe1752`.
+Mobile UZ and estate desktop CI screenshots were visually inspected; this is no design approval.
+VPS verifies gate/upload/archive metadata and expiry, not PNG decoding or independent visual quality.
+
+Real VPS queue job582 saved its own CI metadata report SHA-256
+`f87dcf1f1a41e6aa86958e169987efb222ca9535796106512e982bc23fad248e`.
+Telegram accepted activation359 and result360; evidence memory583 binds the report/findings.
+Worker747665 and sole poller747994 were verified. Inventory remained PID67760 with unchanged
+source/config metadata. Paid calls/holds/spend stayed zero, model-key setup stayed deferred,
+and production approval/candidate counts were unchanged. Existing monitoring/resource/PG/local
+Node/recipe/PR/approval preflight checks all passed again. No new daemon, schedule or publishing
+executor was introduced. The initial YAML syntax failures occurred before any browser job and
+were fixed before this verified harness; they are not represented as browser results.
+
+Backup: `/home/maksim/.ultimate-review-data/backups/before-uac4-1792952109878862959.sqlite3`.
+`/test_nova_browser` revalidates this fixed CI; `/nova_browser` and 🖼 Браузер NOVA show the
+report, archive URL/expiry and unresolved findings. Stage13 shows its completed component but
+remains active. See [BROWSER_CI.md](BROWSER_CI.md); review/requirements/harness are under ci/nova-browser.
+
+[Independent verification40220619554](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40220619554)
+passed at18:18 UTC, observing the same CI run/attempt/harness/source, archive ID/digest/expiry,
+report hash, receipt360, memory583 and UAC process IDs. Inventory/approval/paid-policy state
+was unchanged again. Subsequent documentation commits save this checkpoint; installed app
+remains3fa30fefac0e8dc878f849283b253c9e52d67318.
+
+The following PostgreSQL checkpoint is historical evidence from the preceding application:
 
 Latest [NOVA PostgreSQL CI rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40197421540)
 passed41 transport tests and all428 app tests on the VPS. Its first default pass skipped15
@@ -671,7 +720,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 10. Voice | Pending transcription choice, budget accounting and task confirmation. |
 | 11. Analytics | Daily/weekly measured work, role/project/worker grouping, logged task waiting and per-task receipts/holds live; full idle observation and external billing reconciliation pending. |
 | 12. Memory | Rules, owner follow-ups and append-only source-verified job/artifact/repository history live; semantic retrieval, controlled business-rule editing and model learning pending. |
-| 13. Design/browser | Pending isolated browser execution and visual/mobile acceptance. |
+| 13. Design/browser | Hosted Chromium:27 frontend checks/3 emulated viewport sizes/15 screenshots with source-bound CI/archive verification on VPS. Two localization/touch findings retained; fixes, cross-browser/real-device/pixel/full accessibility pending. |
 | 14. Open source | Initial research exists; choose only after license/security/dependency/resource review. |
 | 15. Autonomous cycle | Operations run on VPS; general development, approvals/recovery and measured end-to-end acceptance pending. |
 | 16. NOVA commerce | Requirements retained; no NOVA production changes authorized by this checkpoint. |
@@ -685,7 +734,8 @@ project mappings remain unassigned; Inventory remains denied. Stage 7 is not com
 Next priorities: extend the read-only preflight toward a separately reviewed publisher and
 tested deployment rollback; no live merge/deployment before exact owner approval. Extend resource observation toward measured capacity planning and extend project coverage
 without model access. Do not automatically stop or clean independent services. NOVA now has a separate disposable hosted PostgreSQL/pg gate; the24-test VPS-local profile
-still does not cover PG or browser. Prepare a separately isolated browser/visual profile.
+still does not cover PG or browser. The separate hosted browser profile is now live; next prepare reviewable fixes for UZ
+placeholders and small language controls, then broader accessibility/device/cross-browser coverage.
 Pinned repository-registry observations remain reads; executed subset reports are separate. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
 After the owner resumes it, a single bounded real generation → exact-bundle tests → owner
 notification with an actual financial receipt will be required. Artificial-response tests
@@ -698,14 +748,14 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_nova_ci_rollback`, old app
-`fe19f8220d7337cdc9f253cfb4d8948f4a06bb62`, state
-`.ultimate-review-data/live/uac4-nova-ci-rollout.json`. No schedule, database or external
+Current UAC rollback: `uac4_browser_ci_rollback`, old app
+`562be5084d70fc71f7e07ddfaac44d176eaaa93b`, state
+`.ultimate-review-data/live/uac4-browser-ci-rollout.json`. No schedule, database or external
 service is changed; the read-only CI policy/report history is retained. It pauses/drains only UAC, replaces
-the dispatcher, cancels only unsupported queued NOVA CI jobs with audit, restarts its worker
+the dispatcher, cancels only unsupported queued browser CI jobs with audit, restarts its worker
 and restores only its own temporary pause. Owner pauses are retained. Remote branches/Draft PRs
 and private request/report/approval/memory history are kept without merge, deletion or publication.
-Older memory code may require the newer reader for NOVA CI references. Existing GitHub App
+Older memory code may require the newer reader for browser CI references. Existing GitHub App
 key/activation and other services are not changed by rollback. It validates exact current code
 and recorded version transition, restores only UAC code, restarts only its worker/dispatcher and
 retains the task journal, incident history, valid resolutions, artifacts and the owner's API deferral. No policy/credential change is part of this update or

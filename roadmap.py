@@ -153,4 +153,6 @@ def completed_work(conn):
         details[6]=(details.get(6,'')+' ✅ Память, CPU, диск и inode VPS: замеры и подтверждённые ресурсные тревоги. /vps4.').strip()
     if 'nova_ci_runs' in tables and setting(conn,'nova_ci_verified_release'):
         details[5]=(details.get(5,'')+' ✅ Все34 теста закреплённой NOVA с PostgreSQL16 проходят на временном GitHub runner; VPS сверяет точный CI. /nova_pg.').strip()
+    if 'browser_ci_runs' in tables and setting(conn,'browser_ci_verified_release'):
+        details[13]=(details.get(13,'')+' ✅ Chromium:27 проверок,3 размера экрана,15 снимков; API подставной. Два замечания сохранены. /nova_browser.').strip()
     return details
