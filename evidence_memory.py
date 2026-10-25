@@ -63,7 +63,7 @@ def sha(value):
 
 def evidence(conn,reference):
     """Re-read only explicitly referenced SQLite rows, never files or network sources."""
-    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','artifact_pr_id','release_check_id','result'}
+    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','artifact_pr_id','release_check_id','resource_sample_id','result'}
             or type(reference.get('event_id')) is not int or type(reference.get('job_id')) is not int):
         raise ValueError('invalid memory reference')
     event=conn.execute('SELECT id,job_id,at,event,detail FROM agent_job_events WHERE id=?',
@@ -100,6 +100,12 @@ def evidence(conn,reference):
         if not row or row[0]!=job[0] or job[1]!='control' or artifact_prs.digest(json.loads(row[1]))!=row[2]:
             raise ValueError('release check belongs to another job or changed')
         source['release_check']=row
+    if 'resource_sample_id' in reference:
+        import vps_resources
+        row=conn.execute('SELECT job_id,sample,report,report_sha256 FROM vps_resource_samples WHERE id=?',(reference['resource_sample_id'],)).fetchone()
+        if not row or row[0]!=job[0] or job[1]!='control' or vps_resources.digest(json.loads(row[2]))!=row[3]:
+            raise ValueError('resource sample source changed or outside scope')
+        source['resource_sample']=row
     if reference.get('result') is True:
         source['result']=conn.execute('SELECT result FROM agent_jobs WHERE id=?',(job[0],)).fetchone()[0]
     elif 'result' in reference:
@@ -176,6 +182,13 @@ def observation(conn,event):
                 if report.get('publish_allowed') is False:
                     fact['release_check']={'head_sha':report['scope']['head_sha'],'approval_state':report['approval_state'],'published':False}
                     reference.update(release_check_id=result['release_check_id'],result=True)
+        if result and kind=='inspect_repository' and project=='control' and type(result.get('resource_sample_id')) is int:
+            import vps_resources
+            row=conn.execute('SELECT job_id,report,report_sha256 FROM vps_resource_samples WHERE id=?',(result['resource_sample_id'],)).fetchone()
+            if row and row[0]==job_id and vps_resources.digest(json.loads(row[1]))==row[2]==result.get('report_sha256'):
+                report=json.loads(row[1])
+                fact['resource_sample']={'observed_at':report['observed_at'],'grades':report['grades'],'read_only':True}
+                reference.update(resource_sample_id=result['resource_sample_id'],result=True)
     return project,at,fact,reference
 
 
@@ -259,6 +272,7 @@ def summary(conn,project,page=1):
                 lines.append(f'Черновик #{artifact["id"]}: тесты {artifact["test_status"]}; публикация не подтверждена.')
             if fact.get('repository'): lines.append('Файлы закреплённой версии прочитаны; код и тесты не запускались.')
             if fact.get('project_test'): lines.append('Выполнен выбранный набор тестов Node; PostgreSQL и браузер не проверялись. /nova_tests')
+            if fact.get('resource_sample'): lines.append('Сохранён замер ресурсов VPS; история не подтверждает текущее состояние. /vps4')
             if fact.get('release_check'): lines.append('Проверка перед выпуском сохранена; это исторический отчёт, публикация отключена. /release_checks')
             if fact.get('artifact_pr'): lines.append('Draft PR сверён с артефактом и точным CI; публикации нет. /artifact_prs')
             lines.append(f'Основание: событие {reference["event_id"]}. /memory_item {row[0]}')

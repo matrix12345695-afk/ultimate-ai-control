@@ -13,6 +13,7 @@ import evidence_memory
 import nova_project_tests
 import artifact_prs
 import release_preflight
+import vps_resources
 import chat_binding
 import budget_gate
 import offline_developer
@@ -43,11 +44,17 @@ def handle(text,connect,source_key=None):
     known.add('/acceptance4')
     known.update(('/memory_log','/memory_item'))
     known.update(('/test_nova','/nova_tests'))
+    known.update(('/vps4','/vps_check'))
     known.update(('/release_check','/release_checks'))
     known.update(('/artifact_pr','/artifact_prs','/artifact_pr_status','/artifact_pr_refresh','/artifact_release'))
     if op not in known: return None
     with connect() as conn:
         try:
+            if op=='/vps4': return vps_resources.describe(conn)
+            if op=='/vps_check':
+                if len(args)!=1: return 'Использование: /vps_check'
+                ident=queue.enqueue(conn,'control','inspect_repository',{'target':vps_resources.TARGET},event_key=source_key)
+                return f'Замер ресурсов VPS #{ident} в очереди. /vps4. Только чтение; сервисы и файлы не изменяются.'
             if op=='/release_checks': return release_preflight.describe(conn)
             if op=='/release_check':
                 if len(args)!=2: return 'Использование: /release_check ID_заявки_PR'
