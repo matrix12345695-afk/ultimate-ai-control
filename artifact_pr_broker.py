@@ -171,7 +171,8 @@ def run(conn,envelope,data,client_factory=Client,token_issuer=auth.installation_
         remaining=deadline-time.monotonic()
         if remaining<.5: raise Pending('github_auth_deadline')
         return opener.open(request,timeout=min(4,remaining))
-    credential=token_issuer(folder/'github-app.pem',opener=scoped_open)
+    readonly=job['payload'].get('refresh') is True
+    credential=token_issuer(folder/'github-app.pem',opener=scoped_open,**({'read_only':True} if readonly else {}))
     client=client_factory(credential,deadline)
     _,remote,row=ledger.record(conn,request)
     remote=dict(remote,verified=False);ledger.save_remote(conn,job,request,remote)
@@ -182,6 +183,9 @@ def run(conn,envelope,data,client_factory=Client,token_issuer=auth.installation_
         if remote['ci_state']=='pending': raise Pending('draft_ci_pending')
     else:
         remote=advance(client,identity,remote,files,lambda state:ledger.save_remote(conn,job,request,state),row[5])
+    if job['payload'].get('release_check') is True:
+        import release_preflight
+        return release_preflight.save(conn,job,request,data,remote)
     return {'artifact_pr_id':request,'artifact_id':identity['artifact_id'],'source_digest':identity['source_digest'],
             'pr_url':remote['pr_url'],'head_sha':remote['head_sha'],'base_sha':remote['base_sha'],
             'ci_state':remote['ci_state'],'draft':True,'merged':False,'published':False}

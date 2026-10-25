@@ -1,0 +1,30 @@
+# Release preflight (read-only)
+
+`/release_check REQUEST_ID` queues a finite leased UAC operation; `/release_checks`
+shows the last three durable historical reports. No schedule is added.
+
+The short-lived broker requests contents/pull_requests/actions **read** on only
+ultimate-ai-control. Its client rejects non-GET repository calls. Token issuance
+itself uses the existing GitHub App token endpoint; no new key or grants are installed.
+The operation revalidates the exact artifact source, independent test evidence,
+PR identity, open/draft state, two-file diff, base/head refs and latest matching
+pull-request CI. Source/report material is checked again after network reads and
+under the queue lease/write transaction.
+
+A report binds the observed scope and latest existing candidate, if any. It neither
+requests nor decides/consumes an approval. Pending, expired, rejected and scope-
+mismatched approval records never count as authorized. Even an exact approval
+leaves `publish_allowed=false`: publisher and tested deployment rollback are absent.
+The base SHA is only a reference, not proof that deployment rollback works.
+
+Reports bind queue job, exact scope, timestamp and SHA-256. Committed reports are
+retained on retry; a new job is needed for a new observation. Evidence memory links
+the report and detects changed/missing sources. Reading an old report does not
+revalidate GitHub or grant future permission. Repository reads are sequential and
+cannot eliminate later remote changes. A future publisher needs immediate new checks,
+scoped rollback validation and separate review. No merge/deploy adapter exists here.
+
+Unit fixtures simulate GitHub/owner decisions only in temporary databases. VPS
+acceptance must use the existing PR and actual GET responses, save the result and
+observe the Telegram receipt while proving approval counts, paid policy and
+Inventory's process/source/config metadata remain unchanged.

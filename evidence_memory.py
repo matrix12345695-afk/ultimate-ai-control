@@ -63,7 +63,7 @@ def sha(value):
 
 def evidence(conn,reference):
     """Re-read only explicitly referenced SQLite rows, never files or network sources."""
-    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','artifact_pr_id','result'}
+    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','artifact_pr_id','release_check_id','result'}
             or type(reference.get('event_id')) is not int or type(reference.get('job_id')) is not int):
         raise ValueError('invalid memory reference')
     event=conn.execute('SELECT id,job_id,at,event,detail FROM agent_job_events WHERE id=?',
@@ -94,6 +94,12 @@ def evidence(conn,reference):
         if job[1]!='control' or not payload or payload.get('artifact_pr')!=identity['artifact_id']:
             raise ValueError('PR belongs to another job or project')
         source['artifact_pr']={'identity':identity,'remote':{k:v for k,v in remote.items() if k!='checked_at'}}
+    if 'release_check_id' in reference:
+        row=conn.execute('SELECT job_id,report,report_sha256 FROM artifact_release_checks WHERE id=?',(reference['release_check_id'],)).fetchone()
+        import artifact_prs
+        if not row or row[0]!=job[0] or job[1]!='control' or artifact_prs.digest(json.loads(row[1]))!=row[2]:
+            raise ValueError('release check belongs to another job or changed')
+        source['release_check']=row
     if reference.get('result') is True:
         source['result']=conn.execute('SELECT result FROM agent_jobs WHERE id=?',(job[0],)).fetchone()[0]
     elif 'result' in reference:
@@ -162,6 +168,14 @@ def observation(conn,event):
                     result.get('ci_state')==remote.get('ci_state') and result.get('source_digest')==identity['source_digest']):
                 fact['artifact_pr']={key:result[key] for key in ('pr_url','head_sha','base_sha','source_digest','ci_state','published')}
                 reference.update(artifact_pr_id=result['artifact_pr_id'],result=True)
+        if result and kind=='review_change' and project=='control' and type(result.get('release_check_id')) is int:
+            import artifact_prs
+            row=conn.execute('SELECT job_id,report,report_sha256 FROM artifact_release_checks WHERE id=?',(result['release_check_id'],)).fetchone()
+            if row and row[0]==job_id and artifact_prs.digest(json.loads(row[1]))==row[2]==result.get('report_sha256'):
+                report=json.loads(row[1])
+                if report.get('publish_allowed') is False:
+                    fact['release_check']={'head_sha':report['scope']['head_sha'],'approval_state':report['approval_state'],'published':False}
+                    reference.update(release_check_id=result['release_check_id'],result=True)
     return project,at,fact,reference
 
 
@@ -245,6 +259,7 @@ def summary(conn,project,page=1):
                 lines.append(f'Черновик #{artifact["id"]}: тесты {artifact["test_status"]}; публикация не подтверждена.')
             if fact.get('repository'): lines.append('Файлы закреплённой версии прочитаны; код и тесты не запускались.')
             if fact.get('project_test'): lines.append('Выполнен выбранный набор тестов Node; PostgreSQL и браузер не проверялись. /nova_tests')
+            if fact.get('release_check'): lines.append('Проверка перед выпуском сохранена; это исторический отчёт, публикация отключена. /release_checks')
             if fact.get('artifact_pr'): lines.append('Draft PR сверён с артефактом и точным CI; публикации нет. /artifact_prs')
             lines.append(f'Основание: событие {reference["event_id"]}. /memory_item {row[0]}')
         if not rows: lines.append('Наблюдений пока нет. Исходные требования: /memory '+project)

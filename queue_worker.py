@@ -182,7 +182,7 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                     'source_digest':report['source_digest'],'output':report['output'][-4000:],'network':False,'writable_tmp':report['writable_tmp']}
         elif job['kind']=='review_change' and 'artifact_pr' in job['payload']:
             result=artifact_pr_client.request(path,job)
-            waiting=True
+            waiting=not result.get('release_check_id')
         elif job["kind"]=="review_change" and job['payload'].get('recipe'):
             with connect(path) as conn:
                 result=offline_developer.prepare(conn,job,Path(path).parent/'artifacts',Path(path).parent/'sandbox-policy.json')
@@ -217,6 +217,10 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                 send_event(conn,"decision","Нужен исполнитель для текстовых задач",
                            "Задачи сохранены. Платный провайдер с API-ключом и изолированный AI-разработчик ещё не подключены. Ключ нужно настраивать приватно на VPS. Мониторинг и независимые проверки продолжаются.",
                            "runtime-needs-ai-executor-v4",job["id"])
+            elif result.get('release_check_id'):
+                send_event(conn,'info','Проверка перед выпуском завершена',
+                           f"Отчёт #{result['release_check_id']}. {result['pr_url']}. Commit {result['head_sha']}. CI: {result['ci_state']}. Согласование: {result['approval_state']}. Исполнитель публикации отключён; merge и deploy не выполнялись. /release_checks",
+                           'release-check-'+str(job['id']),job['id'])
             elif result.get('artifact_pr_id'):
                 send_event(conn,'info' if result['ci_state']=='success' else 'critical',
                            'Draft PR из артефакта проверен' if result['ci_state']=='success' else 'Draft PR требует исправления CI',

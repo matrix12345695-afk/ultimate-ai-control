@@ -35,6 +35,9 @@ def initialize(conn):
         id INTEGER PRIMARY KEY,request_id INTEGER NOT NULL,scope TEXT NOT NULL,
         scope_sha256 TEXT NOT NULL,approval_id TEXT NOT NULL UNIQUE,created_at REAL NOT NULL)''')
     conn.execute('CREATE INDEX IF NOT EXISTS artifact_release_scope ON artifact_release_candidates(scope_sha256)')
+    conn.execute('''CREATE TABLE IF NOT EXISTS artifact_release_checks(
+        id INTEGER PRIMARY KEY,job_id INTEGER NOT NULL UNIQUE,request_id INTEGER NOT NULL,
+        report TEXT NOT NULL,report_sha256 TEXT NOT NULL,created_at REAL NOT NULL)''')
     conn.commit()
 
 
@@ -83,8 +86,10 @@ def material(conn,ident,data):
 def prepare(conn,job,data):
     payload=job.get('payload')
     refresh=isinstance(payload,dict) and payload.get('refresh') is True
+    dry_run=isinstance(payload,dict) and payload.get('release_check') is True
     if (job.get('project')!='control' or job.get('kind')!='review_change' or not isinstance(payload,dict)
-            or set(payload)!=({'artifact_pr','refresh'} if refresh else {'artifact_pr'})):
+            or set(payload)!=({'artifact_pr','refresh','release_check'} if dry_run and refresh else ({'artifact_pr','refresh'} if refresh else {'artifact_pr'}))
+            or ('release_check' in payload and not (dry_run and refresh))):
         raise PermissionError('artifact PR scope not enabled')
     identity,files=material(conn,payload['artifact_pr'],data)
     with q._write(conn):

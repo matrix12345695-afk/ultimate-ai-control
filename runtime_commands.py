@@ -12,6 +12,7 @@ import acceptance_checks
 import evidence_memory
 import nova_project_tests
 import artifact_prs
+import release_preflight
 import chat_binding
 import budget_gate
 import offline_developer
@@ -42,10 +43,17 @@ def handle(text,connect,source_key=None):
     known.add('/acceptance4')
     known.update(('/memory_log','/memory_item'))
     known.update(('/test_nova','/nova_tests'))
+    known.update(('/release_check','/release_checks'))
     known.update(('/artifact_pr','/artifact_prs','/artifact_pr_status','/artifact_pr_refresh','/artifact_release'))
     if op not in known: return None
     with connect() as conn:
         try:
+            if op=='/release_checks': return release_preflight.describe(conn)
+            if op=='/release_check':
+                if len(args)!=2: return 'Использование: /release_check ID_заявки_PR'
+                ident=owner_followups.number(args[1]);identity,_,_=artifact_prs.record(conn,ident)
+                job=queue.enqueue(conn,'control','review_change',{'artifact_pr':identity['artifact_id'],'refresh':True,'release_check':True},max_attempts=5,event_key=source_key)
+                return f'Проверка перед выпуском #{job} в очереди. Чтение GitHub и локальная сверка; согласование не создаётся, публикация отключена. /release_checks'
             if op=='/artifact_prs': return artifact_prs.describe(conn)
             if op=='/artifact_pr_status':
                 if len(args)!=2: return 'Использование: /artifact_pr_status ID'
