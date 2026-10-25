@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `fe19f8220d7337cdc9f253cfb4d8948f4a06bb62`, draft
-[PR #42](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/42), stacked on PR #41.
+Application: `562be5084d70fc71f7e07ddfaac44d176eaaa93b`, draft
+[PR #43](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/43), stacked on PR #42.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -28,6 +28,52 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [NOVA PostgreSQL CI rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40197421540)
+passed41 transport tests and all428 app tests on the VPS. Its first default pass skipped15
+host-dependent sandbox cases; its subsequent sandbox-enabled428-test pass had zero skips,
+including all15 real Python/Node sandbox cases. Exact-app CI runs
+[40197084941](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40197084941)
+and [40197088130](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40197088130)
+succeeded. The existing GitHub App actually authenticated with repository read-only scopes
+and observed the pinned hosted test gate before activation. A restored-copy probe injected
+pending CI and changed evidence with a fake API only on the copy; production notices and
+project rules were not changed by those fixtures.
+
+Real [hosted PostgreSQL CI40196637203](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40196637203),
+push attempt1, executed all34 original NOVA tests with zero failures/skips. SQL assertions
+independently confirmed PostgreSQL16, persisted status/history/event rows and restored fields.
+The exact harness commit is0a21efb320d65ae98c6788d5cd9825b124f2f4c4 and NOVA source is
+1a23239a0a9c7d79905c91505a8741d8350d7e75. Node24.21.0, the separate14-package dependency
+lock and official PG image/action commits are pinned. Original NOVA source/production and
+its repository were not modified. The workflow used an ephemeral GitHub-hosted runner and
+a disposable PG container with dummy credentials, not a VPS database. PR CI40196640109 and
+later same-profile PR CI40197088153 also succeeded, but the VPS contract specifically pins
+the first push head/attempt source. No scheduled coding automation was created.
+
+Real VPS queue job484 used only GETs to verify exact workflow/head/repository, hosted runner,
+run/attempt/job and required gate, then saved the CI evidence. Report SHA-256:
+`0b1a60ea0325643d935fa936257dd8085d595751059e4efad9ee10e17e7818fb`.
+Its34/34 counts are attested by that immutable workflow gate, not guessed or represented as
+VPS-local SQL execution. Telegram accepted activation355 and result356; memory485 binds the
+report. Worker449580 and sole dispatcher450023 were verified. Inventory stayed PID67760
+with unchanged source/configuration metadata. Paid calls/holds/spend remain zero, API setup
+is still deferred, and production approval/candidate counts did not change. No service,
+VPS dependency, sandbox guard or resource schedule was altered by the CI profile.
+
+Backup: `/home/maksim/.ultimate-review-data/backups/before-uac4-1792934735276458178.sqlite3`.
+`/test_nova_pg` revalidates the pinned CI; `/nova_pg` and 🐘 PostgreSQL NOVA show stored
+historical evidence. `/test_nova` remains the separate24-test read-only local sandbox profile.
+Stage5 shows this completed PG component but remains active: browser/production-state and
+broader project coverage are still pending. See [NOVA_POSTGRES_CI.md](NOVA_POSTGRES_CI.md).
+
+[Independent verification40197785804](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40197785804)
+passed at13:29 UTC, observing the same real CI run/attempt/harness/source and report hash,
+receipt356, memory485, worker/poller PIDs and unchanged Inventory/approval/paid-policy state.
+The latest documentation-only commit records this checkpoint; the installed application
+remains562be5084d70fc71f7e07ddfaac44d176eaaa93b.
+
+The following VPS-resource checkpoint is historical evidence from the preceding application:
 
 Latest [VPS resource rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40171830616)
 passed 39 transport tests and all 416 app tests on the VPS. The first default pass skipped
@@ -617,7 +663,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 2. Scheduler/queue | Live jobs, leases, pause, serialized worker and verified complete-artifact crash recovery. |
 | 3. API / $30 | Transport/holds implemented; key setup explicitly deferred by owner; paid policies disabled. |
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
-| 5. Tester | Python contract checks plus24 exact pinned NOVA tests in guarded read-only Node live; PostgreSQL/full npm/browser testing and broader contracts pending. |
+| 5. Tester | Python contracts and24 local guarded read-only NOVA tests plus all34 pinned NOVA tests on disposable hosted PG16 CI with persistence/restore SQL gates; exact CI evidence is verified on VPS. Browser, production-state and broader project coverage pending. |
 | 6. Monitoring | Separate NOVA page/API readiness plus VPS CPU/MemAvailable/data-volume/inode observations, confirmed alarms/recovery and telemetry checks; full business checks and more targets pending. |
 | 7. Multiple projects | NOVA/Kinder pinned read scopes and real queue observations live; other mappings, isolated execution and change preparation pending. |
 | 8. Draft PRs | VPS broker created and exact-diff/CI verified a real Draft PR from a tested control recipe; broader project/model patches pending. |
@@ -638,8 +684,8 @@ project mappings remain unassigned; Inventory remains denied. Stage 7 is not com
 
 Next priorities: extend the read-only preflight toward a separately reviewed publisher and
 tested deployment rollback; no live merge/deployment before exact owner approval. Extend resource observation toward measured capacity planning and extend project coverage
-without model access. Do not automatically stop or clean independent services. Extend NOVA tests only with an isolated disposable
-PostgreSQL/pg setup and browser profile; current24-test subset does not satisfy either gate.
+without model access. Do not automatically stop or clean independent services. NOVA now has a separate disposable hosted PostgreSQL/pg gate; the24-test VPS-local profile
+still does not cover PG or browser. Prepare a separately isolated browser/visual profile.
 Pinned repository-registry observations remain reads; executed subset reports are separate. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
 After the owner resumes it, a single bounded real generation → exact-bundle tests → owner
 notification with an actual financial receipt will be required. Artificial-response tests
@@ -652,14 +698,14 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_vps_resources_rollback`, old app
-`0621a2d82dd3cacc6702599ef821e83dc7469043`, state
-`.ultimate-review-data/live/uac4-vps-resources-rollout.json`. It disables only its matching
-resource schedule after checking its project/kind/payload/interval identity. It pauses/drains only UAC, replaces
-the dispatcher, cancels only unsupported queued resource-check jobs with audit, restarts its worker
+Current UAC rollback: `uac4_nova_ci_rollback`, old app
+`fe19f8220d7337cdc9f253cfb4d8948f4a06bb62`, state
+`.ultimate-review-data/live/uac4-nova-ci-rollout.json`. No schedule, database or external
+service is changed; the read-only CI policy/report history is retained. It pauses/drains only UAC, replaces
+the dispatcher, cancels only unsupported queued NOVA CI jobs with audit, restarts its worker
 and restores only its own temporary pause. Owner pauses are retained. Remote branches/Draft PRs
 and private request/report/approval/memory history are kept without merge, deletion or publication.
-Older memory code may require the newer reader for resource-sample references. Existing GitHub App
+Older memory code may require the newer reader for NOVA CI references. Existing GitHub App
 key/activation and other services are not changed by rollback. It validates exact current code
 and recorded version transition, restores only UAC code, restarts only its worker/dispatcher and
 retains the task journal, incident history, valid resolutions, artifacts and the owner's API deferral. No policy/credential change is part of this update or
