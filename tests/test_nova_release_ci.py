@@ -119,3 +119,11 @@ class ReleaseCITests(unittest.TestCase):
         self.conn.execute("CREATE TRIGGER fail_release BEFORE INSERT ON nova_release_ci_runs BEGIN SELECT RAISE(FAIL,'copy-only gap'); END");self.conn.commit()
         with self.assertRaises(sqlite3.IntegrityError): self.run_broker()
         self.assertEqual(self.conn.execute('SELECT count(*) FROM nova_release_ci_runs').fetchone()[0],0)
+
+    def test_blocked_observation_uses_its_own_alarm_without_success_evidence(self):
+        self.conn.execute("UPDATE agent_jobs SET state='queued',lease_token=NULL,lease_until=NULL");self.conn.commit()
+        with patch.object(queue_worker.artifact_pr_client,'request',side_effect=errors.Blocked('nova_release_snapshot_changed')):
+            self.assertEqual(queue_worker.run_once(self.path),{'id':self.job['id'],'state':'failed'})
+        notes=self.conn.execute('SELECT title,event_key FROM owner_notifications').fetchall()
+        self.assertEqual(notes,[('Сверка репетиции выпуска остановлена','nova-release-stopped-'+str(self.job['id']))])
+        self.assertEqual(self.conn.execute('SELECT count(*) FROM nova_release_ci_runs').fetchone()[0],0)

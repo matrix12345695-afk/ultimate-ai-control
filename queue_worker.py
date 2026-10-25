@@ -319,11 +319,12 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
             queue.fail(conn,job['id'],job['lease_token'],str(exc),retryable=isinstance(exc,artifact_pr_client.Pending))
             failed=conn.execute('SELECT state FROM agent_jobs WHERE id=?',(job['id'],)).fetchone()[0]=='failed'
             if failed:
-                browser_check=job['kind']=='test_release' and job['payload'] in ({'target':browser_ci.PROFILE},{'target':browser_candidate_ci.PROFILE},{'target':nova_release_ci.PROFILE})
+                browser_check=job['kind']=='test_release' and job['payload'] in ({'target':browser_ci.PROFILE},{'target':browser_candidate_ci.PROFILE})
                 ci_check=job['kind']=='test_release' and job['payload']=={'target':nova_ci.PROFILE}
-                send_event(conn,'critical','Сверка браузерного CI остановлена' if browser_check else 'Сверка PostgreSQL CI остановлена' if ci_check else 'Подготовка Draft PR остановлена',
+                rehearsal_check=job['kind']=='test_release' and job['payload']=={'target':nova_release_ci.PROFILE}
+                send_event(conn,'critical','Сверка репетиции выпуска остановлена' if rehearsal_check else 'Сверка браузерного CI остановлена' if browser_check else 'Сверка PostgreSQL CI остановлена' if ci_check else 'Подготовка Draft PR остановлена',
                            'Требуется проверка доступа, исходной версии или CI. Сохранённый запрос оставлен для сверки; merge и публикации нет.',
-                           ('browser-ci-stopped-' if browser_check else 'nova-ci-stopped-' if ci_check else 'artifact-pr-stopped-')+str(job['id']),job['id'])
+                           ('nova-release-stopped-' if rehearsal_check else 'browser-ci-stopped-' if browser_check else 'nova-ci-stopped-' if ci_check else 'artifact-pr-stopped-')+str(job['id']),job['id'])
         return {'id':job['id'],'state':'failed' if failed else 'queued'}
     except project_registry.RepositoryScopeError as exc:
         with connect(path) as conn:
