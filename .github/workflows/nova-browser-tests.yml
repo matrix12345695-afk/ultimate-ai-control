@@ -27,7 +27,8 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install hashed browser dependencies
-        run: python -m pip install --require-hashes --only-binary=:all: -r ci/nova-browser/requirements.txt
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: -r ci/nova-browser/requirements.txt
       - name: Install fixed Chromium revision
         run: python -m playwright install --with-deps --only-shell chromium
       - name: Run and verify browser checks
