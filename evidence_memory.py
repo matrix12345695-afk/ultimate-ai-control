@@ -63,7 +63,7 @@ def sha(value):
 
 def evidence(conn,reference):
     """Re-read only explicitly referenced SQLite rows, never files or network sources."""
-    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','artifact_pr_id','release_check_id','resource_sample_id','result'}
+    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','artifact_pr_id','release_check_id','resource_sample_id','nova_ci_id','result'}
             or type(reference.get('event_id')) is not int or type(reference.get('job_id')) is not int):
         raise ValueError('invalid memory reference')
     event=conn.execute('SELECT id,job_id,at,event,detail FROM agent_job_events WHERE id=?',
@@ -106,6 +106,12 @@ def evidence(conn,reference):
         if not row or row[0]!=job[0] or job[1]!='control' or vps_resources.digest(json.loads(row[2]))!=row[3]:
             raise ValueError('resource sample source changed or outside scope')
         source['resource_sample']=row
+    if 'nova_ci_id' in reference:
+        import nova_ci
+        row=conn.execute('SELECT job_id,report,report_sha256 FROM nova_ci_runs WHERE id=?',(reference['nova_ci_id'],)).fetchone()
+        if not row or row[0]!=job[0] or job[1]!='nova' or not nova_ci.valid(json.loads(row[1])) or nova_ci.util.digest(json.loads(row[1]))!=row[2]:
+            raise ValueError('NOVA CI evidence changed or outside scope')
+        source['nova_ci']=row
     if reference.get('result') is True:
         source['result']=conn.execute('SELECT result FROM agent_jobs WHERE id=?',(job[0],)).fetchone()[0]
     elif 'result' in reference:
@@ -189,6 +195,13 @@ def observation(conn,event):
                 report=json.loads(row[1])
                 fact['resource_sample']={'observed_at':report['observed_at'],'grades':report['grades'],'read_only':True}
                 reference.update(resource_sample_id=result['resource_sample_id'],result=True)
+        if result and kind=='test_release' and project=='nova' and type(result.get('nova_ci_id')) is int:
+            import nova_ci
+            row=conn.execute('SELECT job_id,report,report_sha256 FROM nova_ci_runs WHERE id=?',(result['nova_ci_id'],)).fetchone()
+            if row and row[0]==job_id and nova_ci.valid(json.loads(row[1])) and nova_ci.util.digest(json.loads(row[1]))==row[2]==result.get('report_sha256'):
+                report=json.loads(row[1])
+                fact['nova_ci']={key:report[key] for key in ('ci_url','harness_commit','source_revision','status','execution_location','vps_local_execution')}
+                reference.update(nova_ci_id=result['nova_ci_id'],result=True)
     return project,at,fact,reference
 
 
@@ -272,6 +285,7 @@ def summary(conn,project,page=1):
                 lines.append(f'Черновик #{artifact["id"]}: тесты {artifact["test_status"]}; публикация не подтверждена.')
             if fact.get('repository'): lines.append('Файлы закреплённой версии прочитаны; код и тесты не запускались.')
             if fact.get('project_test'): lines.append('Выполнен выбранный набор тестов Node; PostgreSQL и браузер не проверялись. /nova_tests')
+            if fact.get('nova_ci'): lines.append('Сверен точный GitHub CI с PostgreSQL; это не локальное исполнение на VPS. /nova_pg')
             if fact.get('resource_sample'): lines.append('Сохранён замер ресурсов VPS; история не подтверждает текущее состояние. /vps4')
             if fact.get('release_check'): lines.append('Проверка перед выпуском сохранена; это исторический отчёт, публикация отключена. /release_checks')
             if fact.get('artifact_pr'): lines.append('Draft PR сверён с артефактом и точным CI; публикации нет. /artifact_prs')

@@ -151,4 +151,6 @@ def completed_work(conn):
         details[9]=(details.get(9,'')+' ✅ Проверка версии, CI и согласования перед выпуском подключена. /release_checks. Публикация отключена.').strip()
     if 'vps_resource_samples' in tables and setting(conn,'vps_resources_verified_release'):
         details[6]=(details.get(6,'')+' ✅ Память, CPU, диск и inode VPS: замеры и подтверждённые ресурсные тревоги. /vps4.').strip()
+    if 'nova_ci_runs' in tables and setting(conn,'nova_ci_verified_release'):
+        details[5]=(details.get(5,'')+' ✅ Все34 теста закреплённой NOVA с PostgreSQL16 проходят на временном GitHub runner; VPS сверяет точный CI. /nova_pg.').strip()
     return details

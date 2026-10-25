@@ -14,6 +14,7 @@ import nova_project_tests
 import artifact_prs
 import release_preflight
 import vps_resources
+import nova_ci
 import chat_binding
 import budget_gate
 import offline_developer
@@ -44,12 +45,18 @@ def handle(text,connect,source_key=None):
     known.add('/acceptance4')
     known.update(('/memory_log','/memory_item'))
     known.update(('/test_nova','/nova_tests'))
+    known.update(('/test_nova_pg','/nova_pg'))
     known.update(('/vps4','/vps_check'))
     known.update(('/release_check','/release_checks'))
     known.update(('/artifact_pr','/artifact_prs','/artifact_pr_status','/artifact_pr_refresh','/artifact_release'))
     if op not in known: return None
     with connect() as conn:
         try:
+            if op=='/nova_pg': return nova_ci.describe(conn)
+            if op=='/test_nova_pg':
+                if len(args)!=1: return 'Использование: /test_nova_pg'
+                ident=queue.enqueue(conn,'nova','test_release',{'target':nova_ci.PROFILE},max_attempts=5,event_key=source_key)
+                return f'Сверка PostgreSQL CI #{ident} в очереди. /nova_pg. Только чтение CI; новая БД на VPS не запускается.'
             if op=='/vps4': return vps_resources.describe(conn)
             if op=='/vps_check':
                 if len(args)!=1: return 'Использование: /vps_check'

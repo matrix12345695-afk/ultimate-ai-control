@@ -34,6 +34,7 @@ import nova_project_tests
 import artifact_prs
 import artifact_pr_client
 import vps_resources
+import nova_ci
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -70,6 +71,7 @@ def initialize(conn):
     nova_project_tests.initialize(conn)
     artifact_prs.initialize(conn)
     vps_resources.initialize(conn)
+    nova_ci.initialize(conn)
 
 
 def send_event(conn,kind,title,reason,event_key,task=None):
@@ -176,6 +178,9 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                 result=repository_inspector(job['project'],job['payload'])
                 if not project_registry.valid_result(job['project'],result):
                     raise project_registry.RepositoryScopeError('repository_result_scope_mismatch')
+        elif job['kind']=='test_release' and job['payload'].get('target')==nova_ci.PROFILE:
+            nova_ci.scope(job)
+            result=artifact_pr_client.request(path,job)
         elif job['kind']=='test_release' and job['payload'].get('target')==nova_project_tests.PROFILE:
             nova_project_tests.check_scope(job)
             with connect(path) as conn:
@@ -240,6 +245,11 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                            'Кодовый черновик проверен' if result['test_status']=='passed' else 'Проверка кодового черновика не прошла',
                            f"Артефакт #{result['artifact_id']}, SHA-256 {result['source_digest']}. Тесты: {result['test_status']}. Независимая приёмка: {result.get('independent_acceptance','not_configured')}. Просмотр: /artifact {result['artifact_id']}. Движок: {label}. "+('Восстановлен сохранённый результат; тесты повторно не запускались. ' if result.get('tests_reused') else '')+'Публикации не было.',
                            'artifact-'+str(job['id'])+'-'+result['source_digest'],job['id'])
+            elif result.get('nova_ci_id'):
+                send_event(conn,'info' if result['test_status']=='passed' else 'critical',
+                           'PostgreSQL-тесты NOVA: CI сверен' if result['test_status']=='passed' else 'PostgreSQL-тесты NOVA: CI не прошёл',
+                           f"{result['ci_url']}. Версия NOVA {result['revision']}. Тесты: {result['test_status']}, {result['test_counts']}. Исполнение на временном GitHub runner и отдельном PostgreSQL16; VPS сверяет отчёт. Рабочая база и Inventory не изменялись. /nova_pg",
+                           'nova-ci-job-'+str(job['id']),job['id'])
             elif result.get('project_test_id'):
                 send_event(conn,'info' if result['test_status']=='passed' else 'critical',
                            'Проверки NOVA WEB завершены' if result['test_status']=='passed' else 'Проверки NOVA WEB не прошли',
@@ -256,7 +266,7 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
             elif result.get("syntax_errors"):
                 send_event(conn,"critical","Ошибки синтаксиса ULTIMATE",str(result["syntax_errors"])[:500],"syntax-job-"+str(job["id"]),job["id"])
             if result.get('test_status') not in (None,'passed'):
-                if not result.get('artifact_id') and not result.get('project_test_id'):
+                if not result.get('artifact_id') and not result.get('project_test_id') and not result.get('nova_ci_id'):
                     send_event(conn,'critical','Изолированные тесты не прошли',result['test_status'],
                                'test-failed-'+str(job['id']),job['id'])
                 conn.execute('UPDATE agent_jobs SET result=? WHERE id=?',(json.dumps(result),job['id']))
@@ -279,9 +289,10 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
             queue.fail(conn,job['id'],job['lease_token'],str(exc),retryable=isinstance(exc,artifact_pr_client.Pending))
             failed=conn.execute('SELECT state FROM agent_jobs WHERE id=?',(job['id'],)).fetchone()[0]=='failed'
             if failed:
-                send_event(conn,'critical','Подготовка Draft PR остановлена',
+                ci_check=job['kind']=='test_release' and job['payload']=={'target':nova_ci.PROFILE}
+                send_event(conn,'critical','Сверка PostgreSQL CI остановлена' if ci_check else 'Подготовка Draft PR остановлена',
                            'Требуется проверка доступа, исходной версии или CI. Сохранённый запрос оставлен для сверки; merge и публикации нет.',
-                           'artifact-pr-stopped-'+str(job['id']),job['id'])
+                           ('nova-ci-stopped-' if ci_check else 'artifact-pr-stopped-')+str(job['id']),job['id'])
         return {'id':job['id'],'state':'failed' if failed else 'queued'}
     except project_registry.RepositoryScopeError as exc:
         with connect(path) as conn:
