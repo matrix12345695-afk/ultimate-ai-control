@@ -61,3 +61,8 @@ queued browser-CI checks with audit. It preserves owner pauses, CI policy/report
 archive references, delivery and memory history. Older memory readers may need this
 newer version for browser evidence. No database, external service or schedule changes;
 no live rollback was executed on the successful deployment. Whole stage13 remains active.
+
+A later candidate fixes the two findings and a related mobile positioning defect in Draft PR15.
+Its separate34-check contract/report does not rewrite this original-source evidence. See
+[NOVA_UI_CANDIDATE.md](NOVA_UI_CANDIDATE.md) for verified candidate activation and remaining
+owner/publication/rollback requirements. The Draft is not deployed to the public site.

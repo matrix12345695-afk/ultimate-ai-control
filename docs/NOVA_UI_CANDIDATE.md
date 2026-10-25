@@ -35,4 +35,40 @@ report, separate from pending owner decision and production publication. Origina
 source findings remain historical facts under /nova_browser.
 
 Local447 app tests pass including15 real Python/Node sandbox cases,0 skips with
-explicit reviewed local sandbox policies. VPS activation/receipt pending verification.
+explicit reviewed local sandbox policies. VPS activation and receipt independently verified below.
+
+## Verified VPS activation,2026-10-25 UTC
+
+Appa03e1cfd22b8e807a2afa41ea6a92d6b578c3141, UAC Draft PR45 stacked on44.
+Rollout40229896025 passed46 transport tests and447 app tests: default pass skipped15
+host-dependent cases; full sandbox-enabled pass exercised all15 real Python/Node
+cases with zero skips. Exact-app Safe unit tests40229722955/40229726534 and candidate
+browser checks40229722962/40229726573 also succeeded.
+
+Actual own GitHub App GET-only authentication/CI/archive gate and restored-copy
+pending/tampered-report probes passed. Live queue job623 saved candidate report SHA256
+82a45d58430d27a9b433238fcd803bfba095162c17f749886daf63989c2c85ca.
+Telegram accepted activation363 and result364; typed evidence memory624 binds it.
+Independent verify40230295351 at20:20 UTC repeated the exact source/harness/run/attempt,
+archive ID/digest/expiry, report/receipt/memory, commands and partial Plan13.
+Baseline browser report/findings, original PG/local Node checks, resource/health,
+recipe, PR and approval preflight also reverified without changing historical evidence.
+
+Sole dispatcher874510 and one credential-free operations worker verified; Inventory
+PID67760/source/configuration metadata unchanged. API calls/holds/spend0, provider
+setup still deferred. No approval or release candidate was created. Read-only HTTP
+GET of https://novaweb.uz/ returned200,35735 bytes, git blob
+00d76b471b3675ab052bbe30526fb0f2e350ac42, matching the original index.html; NOVA main
+still1a23239a. Thus these fixes are completed in the Draft, not published.
+
+Backup: /home/maksim/.ultimate-review-data/backups/before-uac4-1792959430844990896.sqlite3.
+Pinned transport05a49fa2d3fe051b02eac6d5f039b168ef1d7852; bridge verify request
+4ac79a151f271be9cd481506d1e4891120cdfa81. UAC-only rollback action
+uac4_browser_candidate_rollback requires this exact installed app, drains only UAC,
+restores3fa30fefac0e8dc878f849283b253c9e52d67318 and cancels only unsupported queued
+nova-browser-candidate-v1 checks. It preserves owner pauses, additive report/policy/
+delivery/history/typed references, budgets and external services. Older code needs
+the newer reader for candidate references. No DB restore or live rollback executed.
+This rollback is for UAC code, not a tested NOVA deployment rollback. Next: prepare
+and independently verify the NOVA publication/rollback path and exact owner approval;
+no publication until those requirements are met.
