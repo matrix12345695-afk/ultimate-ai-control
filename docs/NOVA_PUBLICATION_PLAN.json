@@ -1,0 +1,64 @@
+{
+  "schema": "nova-publication-plan-v1",
+  "executable": false,
+  "project": "nova",
+  "workspace_id": "tea-d52kjcur433s73ca9810",
+  "service_id": "srv-dbbhm5k9v7es73f9kf10",
+  "repository": "matrix12345695-afk/nova-web-agency",
+  "draft_pr": 15,
+  "reviewed_candidate": "495a7f1a1a3a25c45fd98101fffa9c02e58f3970",
+  "baseline_commit": "1a23239a0a9c7d79905c91505a8741d8350d7e75",
+  "baseline_deploy_reference": "dep-dbchlhqvcj2c738paun0",
+  "baseline_artifact_eligibility_verified": false,
+  "proposed_settings": {
+    "health_check_path": {
+      "observed": "",
+      "proposed": "/health"
+    },
+    "auto_deploy": {
+      "observed": "commit",
+      "proposed": "off"
+    }
+  },
+  "settings_approval_required": true,
+  "publication_approval_required": true,
+  "production_backup_verified": false,
+  "new_revision_needed_for_dependency_lock": true,
+  "must_revalidate_before_owner_request": [
+    "exact updated source diff and immutable dependency lock",
+    "candidate-specific unit, PostgreSQL, browser and restart acceptance",
+    "current owner-confirmed Render workspace/service/repository/main/live deploy identity",
+    "current platform settings and deploy queue; no conflicting release",
+    "baseline retained build eligibility and compatibility with current external state",
+    "recovery/backup access and least-privilege exact-commit publication/rollback adapter"
+  ],
+  "approval_must_bind": [
+    "project",
+    "workspace_id",
+    "service_id",
+    "repository",
+    "base_commit",
+    "candidate_commit",
+    "source_and_evidence_hashes",
+    "exact_CI_runs_and_attempts",
+    "prior_live_deploy",
+    "settings_diff",
+    "conditional_rollback_scope",
+    "expiry"
+  ],
+  "post_deploy_checks": [
+    "specific deploy reaches live; API acceptance alone is not success",
+    "exact expected frontend bytes on public domain and Render origin",
+    "HTTP health200 with postgres readiness and correct application contract",
+    "status/intake readiness without sending a real lead or changing business data"
+  ],
+  "rollback_constraints": [
+    "only the prevalidated baseline build for this service and authorized failure scope",
+    "observe the new rollback deployment to terminal live and verify baseline HTTP/readiness",
+    "do not restore an older database over live writes",
+    "do not change domains, payment settings, tokens or other services",
+    "do not reenable automatic deploys without a deliberate owner-authorized decision"
+  ],
+  "baseline_html_git_blob": "00d76b471b3675ab052bbe30526fb0f2e350ac42",
+  "candidate_html_git_blob": "3453ee7fa6794d207c5f9f41967752da1bba1f47"
+}

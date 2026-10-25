@@ -37,6 +37,7 @@ import vps_resources
 import nova_ci
 import browser_ci
 import browser_candidate_ci
+import nova_release_ci
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -76,6 +77,7 @@ def initialize(conn):
     nova_ci.initialize(conn)
     browser_ci.initialize(conn)
     browser_candidate_ci.initialize(conn)
+    nova_release_ci.initialize(conn)
 
 
 def send_event(conn,kind,title,reason,event_key,task=None):
@@ -182,6 +184,9 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                 result=repository_inspector(job['project'],job['payload'])
                 if not project_registry.valid_result(job['project'],result):
                     raise project_registry.RepositoryScopeError('repository_result_scope_mismatch')
+        elif job['kind']=='test_release' and job['payload'].get('target')==nova_release_ci.PROFILE:
+            nova_release_ci.scope(job)
+            result=artifact_pr_client.request(path,job)
         elif job['kind']=='test_release' and job['payload'].get('target')==browser_candidate_ci.PROFILE:
             browser_candidate_ci.scope(job)
             result=artifact_pr_client.request(path,job)
@@ -255,6 +260,11 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                            'Кодовый черновик проверен' if result['test_status']=='passed' else 'Проверка кодового черновика не прошла',
                            f"Артефакт #{result['artifact_id']}, SHA-256 {result['source_digest']}. Тесты: {result['test_status']}. Независимая приёмка: {result.get('independent_acceptance','not_configured')}. Просмотр: /artifact {result['artifact_id']}. Движок: {label}. "+('Восстановлен сохранённый результат; тесты повторно не запускались. ' if result.get('tests_reused') else '')+'Публикации не было.',
                            'artifact-'+str(job['id'])+'-'+result['source_digest'],job['id'])
+            elif result.get('nova_release_ci_id'):
+                send_event(conn,'info' if result['test_status']=='passed' else 'critical',
+                           'Репетиция выпуска NOVA проверена' if result['test_status']=='passed' else 'Репетиция NOVA не прошла',
+                           f"{result['ci_url']}. "+('34 теста NOVA и15 проверок HTTP/PostgreSQL. Возврат старого кода сохранил тестовые данные новой версии. Это не откат Render. Настройка /health, закрепление зависимостей, доступность сборки и согласование ещё нужны. Публикация отключена. /nova_release' if result['test_status']=='passed' else 'CI не прошёл. Сохранность данных при возврате версии не подтверждена. Публикация отключена. /nova_release'),
+                           'nova-release-job-'+str(job['id']),job['id'])
             elif result.get('browser_candidate_id'):
                 send_event(conn,'info' if result['test_status']=='passed' else 'critical',
                            'Исправления интерфейса NOVA проверены' if result['test_status']=='passed' else 'Черновик NOVA не прошёл проверки',
@@ -286,7 +296,7 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
             elif result.get("syntax_errors"):
                 send_event(conn,"critical","Ошибки синтаксиса ULTIMATE",str(result["syntax_errors"])[:500],"syntax-job-"+str(job["id"]),job["id"])
             if result.get('test_status') not in (None,'passed'):
-                if not result.get('artifact_id') and not result.get('project_test_id') and not result.get('nova_ci_id') and not result.get('browser_ci_id') and not result.get('browser_candidate_id'):
+                if not result.get('artifact_id') and not result.get('project_test_id') and not result.get('nova_ci_id') and not result.get('browser_ci_id') and not result.get('browser_candidate_id') and not result.get('nova_release_ci_id'):
                     send_event(conn,'critical','Изолированные тесты не прошли',result['test_status'],
                                'test-failed-'+str(job['id']),job['id'])
                 conn.execute('UPDATE agent_jobs SET result=? WHERE id=?',(json.dumps(result),job['id']))
@@ -311,9 +321,10 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
             if failed:
                 browser_check=job['kind']=='test_release' and job['payload'] in ({'target':browser_ci.PROFILE},{'target':browser_candidate_ci.PROFILE})
                 ci_check=job['kind']=='test_release' and job['payload']=={'target':nova_ci.PROFILE}
-                send_event(conn,'critical','Сверка браузерного CI остановлена' if browser_check else 'Сверка PostgreSQL CI остановлена' if ci_check else 'Подготовка Draft PR остановлена',
+                rehearsal_check=job['kind']=='test_release' and job['payload']=={'target':nova_release_ci.PROFILE}
+                send_event(conn,'critical','Сверка репетиции выпуска остановлена' if rehearsal_check else 'Сверка браузерного CI остановлена' if browser_check else 'Сверка PostgreSQL CI остановлена' if ci_check else 'Подготовка Draft PR остановлена',
                            'Требуется проверка доступа, исходной версии или CI. Сохранённый запрос оставлен для сверки; merge и публикации нет.',
-                           ('browser-ci-stopped-' if browser_check else 'nova-ci-stopped-' if ci_check else 'artifact-pr-stopped-')+str(job['id']),job['id'])
+                           ('nova-release-stopped-' if rehearsal_check else 'browser-ci-stopped-' if browser_check else 'nova-ci-stopped-' if ci_check else 'artifact-pr-stopped-')+str(job['id']),job['id'])
         return {'id':job['id'],'state':'failed' if failed else 'queued'}
     except project_registry.RepositoryScopeError as exc:
         with connect(path) as conn:
