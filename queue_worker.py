@@ -33,6 +33,7 @@ import evidence_memory
 import nova_project_tests
 import artifact_prs
 import artifact_pr_client
+import vps_resources
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -68,6 +69,7 @@ def initialize(conn):
     evidence_memory.initialize(conn)
     nova_project_tests.initialize(conn)
     artifact_prs.initialize(conn)
+    vps_resources.initialize(conn)
 
 
 def send_event(conn,kind,title,reason,event_key,task=None):
@@ -164,7 +166,10 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
     try:
         if job["kind"]=="check_site": result=site_checker(job["payload"])
         elif job["kind"]=="inspect_repository":
-            if job['project']=='control' and job['payload']=={'target':'control'}:
+            if job['payload'].get('target')==vps_resources.TARGET:
+                vps_resources.scope(job)
+                result={'resource_observation':vps_resources.collect(Path(path).parent)}
+            elif job['project']=='control' and job['payload']=={'target':'control'}:
                 result=inspect_source(job["payload"],root)
             else:
                 project_registry.check_scope(job['project'],job['payload'])
@@ -213,7 +218,9 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
         # Record only the measured handler interval. Time waiting in the queue is not work.
         with connect(path) as conn:
             queue.add_work_span(conn,job["id"],job["lease_token"],category(job),start,end,now=max(time.time(),end))
-            if waiting and result.get('blocked') and roadmap.setting(conn,'provider_setup_deferred')!='true':
+            if result.get('resource_observation'):
+                result=vps_resources.complete(conn,job,result['resource_observation'],now=max(time.time(),end))
+            elif waiting and result.get('blocked') and roadmap.setting(conn,'provider_setup_deferred')!='true':
                 send_event(conn,"decision","Нужен исполнитель для текстовых задач",
                            "Задачи сохранены. Платный провайдер с API-ключом и изолированный AI-разработчик ещё не подключены. Ключ нужно настраивать приватно на VPS. Мониторинг и независимые проверки продолжаются.",
                            "runtime-needs-ai-executor-v4",job["id"])
@@ -261,7 +268,7 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                       {'target':'developer-bundle','generation_job_id':job['id'],'source_digest':result['source_digest']},
                       event_key='developer-test:'+str(job['id'])+':'+result['source_digest'])
                 result['followup_job_id']=child
-            elif job['kind']!='check_site':
+            elif job['kind']!='check_site' and not result.get('resource_sample_id'):
                 queue.finish(conn,job["id"],job["lease_token"],result,awaiting_owner=waiting)
             conn.execute("UPDATE agent_worker_status SET heartbeat=?,state=?,detail=? WHERE worker=?",(time.time(),"waiting_owner" if waiting else "idle",str(job["id"]),WORKER))
             conn.commit()

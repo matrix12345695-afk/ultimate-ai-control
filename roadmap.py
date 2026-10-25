@@ -149,4 +149,6 @@ def completed_work(conn):
         details[9]='✅ Запрос согласования связывает проект, commit, артефакт и CI. Исполнитель публикации ещё не подключён.'
     if 'artifact_release_checks' in tables and setting(conn,'release_check_verified_release'):
         details[9]=(details.get(9,'')+' ✅ Проверка версии, CI и согласования перед выпуском подключена. /release_checks. Публикация отключена.').strip()
+    if 'vps_resource_samples' in tables and setting(conn,'vps_resources_verified_release'):
+        details[6]=(details.get(6,'')+' ✅ Память, CPU, диск и inode VPS: замеры и подтверждённые ресурсные тревоги. /vps4.').strip()
     return details
