@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import re
 
-REVISION='90f60bdaead95b65857dd0a19a905f43cf8658ef'
+REVISION='495a7f1a1a3a25c45fd98101fffa9c02e58f3970'
 VIEWPORTS={'mobile':[360,800],'tablet':[768,1024],'desktop':[1440,900]}
 SHOTS=sorted([f'main-{v}-{lang}.png' for v in VIEWPORTS for lang in ('ru','uz')]+[f'{c}-{v}.png' for c in ('beauty','estate','cafe') for v in VIEWPORTS])
 ADVISORIES=[]

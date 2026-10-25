@@ -18,7 +18,7 @@ def main():
     for path in sorted(suite.OUTPUT.glob('*.png')):
         raw=path.read_bytes()
         screenshots.append({'path':path.name,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()})
-    report={'schema':'nova-browser-candidate-v1','source_revision':'90f60bdaead95b65857dd0a19a905f43cf8658ef',
+    report={'schema':'nova-browser-candidate-v1','source_revision':'495a7f1a1a3a25c45fd98101fffa9c02e58f3970',
             'source_manifest_sha256':hashlib.sha256(Path(__file__).with_name('source-pins.json').read_bytes()).hexdigest(),
             'engine':'chromium','browser_version':suite.BROWSER_VERSION,'playwright_version':version('playwright'),
             'counts':{'tests':result.testsRun,'pass':result.testsRun-len(result.failures)-len(result.errors)-len(result.skipped),
