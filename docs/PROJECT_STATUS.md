@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `3fa30fefac0e8dc878f849283b253c9e52d67318`, draft
-[PR #44](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/44), stacked on PR #43.
+Application: `a03e1cfd22b8e807a2afa41ea6a92d6b578c3141`, draft
+[PR #45](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/45), stacked on PR #44.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -28,6 +28,45 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [NOVA frontend candidate rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40229896025)
+passed46 transport tests and447 app tests on VPS; its default pass skipped15 host-dependent
+cases, full sandbox-enabled pass included all15 real Python/Node cases without skips.
+Exact-app Safe unit CI40229722955/40229726534 and candidate browser CI40229722962/40229726573 pass.
+
+NOVA Draft PR15 contains only index.html fixes: reversible name/contact placeholders RU/UZ,
+44x44 language targets and visible keyboard focus, plus mobile backdrop-filter containing-block
+fix. Exact candidate495a7f1a1a3a25c45fd98101fffa9c02e58f3970, based on1a23239a. Its original
+NOVA checks40229463007 succeed. All7 new regressions fail on the baseline; first candidate
+failed mobile bounds and was corrected without weakening the test. Local Chromium154 passes34.
+Exact hosted harness8bd210e3acefe36b92b2f55ff8d0a8135bd83bd6 / push40229505378 and
+PR40229509407 pass34/34 with no failures/skips on Chromium151.0.7922.34,3 viewports,15 PNGs.
+APIs are fixtures; no real lead/backend, physical-device or full localization/accessibility acceptance.
+
+Archive12612513627 is12840836 bytes, sha256
+2c17578aff9305de3576d7c7839d2bde26f6f00895e83ba6fa7a18c7fd2570fc, expires2026-11-24T20:11:41Z.
+Downloaded archive digest, all15 PNG hashes/dimensions and report gate were verified; mobile UZ
+screenshot visually sampled. Separate candidate contract/table/broker/memory preserve baseline
+source reports and findings unchanged. No VPS browser/dependency, schedule, model key or publisher.
+
+VPS job623 saved report82a45d58430d27a9b433238fcd803bfba095162c17f749886daf63989c2c85ca.
+Telegram accepted activation363/result364; memory624 binds it. /nova_candidate or 🎨 Черновик NOVA
+shows completed Draft work and pending publication; /test_nova_candidate revalidates only the
+fixed CI/archive. Plan13 remains active, its Draft component is marked completed from valid
+saved evidence. It does not approve or publish NOVA. Broader agent, voice, publishing/rollback,
+model and project coverage remain incomplete. Paid calls/holds/spend stay0; setup deferred.
+
+[Independent verify40230295351](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40230295351)
+passed20:20 UTC with unchanged exact report/archive/receipt/memory and partial Plan. One UAC
+worker and sole dispatcher874510 verified; Inventory67760/source/config metadata unchanged.
+NOVA main remains1a23239a; public homepage GET200/35735 bytes matches original git blob
+00d76b471b3675ab052bbe30526fb0f2e350ac42. No production approval/candidate, merge or deployment.
+Backup/home/maksim/.ultimate-review-data/backups/before-uac4-1792959430844990896.sqlite3.
+See [NOVA_UI_CANDIDATE.md](NOVA_UI_CANDIDATE.md). Next: verify the NOVA publication/rollback
+path and exact owner approval before any publication. Installed app remainsa03e1cfd; later
+checkpoint commits update documentation only.
+
+The following browser-baseline checkpoint is historical evidence from the preceding application:
 
 Latest [browser CI rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40220228872)
 passed43 transport tests and439 app tests on the VPS. The default pass skipped15 host-dependent
@@ -748,7 +787,15 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_browser_ci_rollback`, old app
+Current UAC rollback: `uac4_browser_candidate_rollback`, only for installeda03e1cfd, restores
+`3fa30fefac0e8dc878f849283b253c9e52d67318`; state
+`.ultimate-review-data/live/uac4-browser-candidate-rollout.json`. It pauses/drains only UAC,
+retains owner pauses and all accounting/report/notification/history data, replaces its dispatcher
+and cancels only unsupported queued nova-browser-candidate-v1 checks with audit. No external
+service, schedule or DB restore; older code may require the newer reader for candidate references.
+No live rollback was executed. This does not establish a NOVA deployment rollback.
+
+Preceding UAC browser-baseline rollback (only when that app is current): `uac4_browser_ci_rollback`, old app
 `562be5084d70fc71f7e07ddfaac44d176eaaa93b`, state
 `.ultimate-review-data/live/uac4-browser-ci-rollout.json`. No schedule, database or external
 service is changed; the read-only CI policy/report history is retained. It pauses/drains only UAC, replaces
