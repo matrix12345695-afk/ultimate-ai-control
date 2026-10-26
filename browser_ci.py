@@ -37,7 +37,7 @@ def observe(client,contract=None):
     run,job,passed=hosted_ci.inspect(client,CONTRACT)
     artifact=None
     if passed:
-        uploads=[step for step in job['steps'] if step.get('name')=='Upload browser evidence']
+        uploads=[step for step in job['steps'] if step.get('name')==CONTRACT.get('upload_step','Upload browser evidence')]
         if len(uploads)!=1 or uploads[0].get('status')!='completed' or uploads[0].get('conclusion')!='success': raise broker.Blocked('browser_artifact_upload_not_verified')
         data=client.call('GET','/actions/runs/'+str(run['id'])+'/artifacts?per_page=100')
         if (not isinstance(data,dict) or type(data.get('total_count')) is not int or not 0<=data['total_count']<=100 or
@@ -63,9 +63,9 @@ def observe(client,contract=None):
             'dependency_lock_sha256':CONTRACT['dependency_lock_sha256'],'ci_run_id':run['id'],'ci_attempt':run['run_attempt'],'ci_job_id':job['id'],
             'ci_url':'https://github.com/'+REPO+'/actions/runs/'+str(run['id']),'status':'passed' if passed else 'failed',
             'counts':{'tests':CONTRACT['expected_tests'],'pass':CONTRACT['expected_tests'],'fail':0,'errors':0,'skipped':0} if passed else None,
-            'counts_source':'exact_commit_required_ci_gate','engine':'chromium','browser_version':CONTRACT['browser_version'],
+            'counts_source':'exact_commit_required_ci_gate','engine':CONTRACT.get('engine','chromium'),'browser_version':CONTRACT['browser_version'],
             'viewports':CONTRACT['viewports'],'screenshots':15 if passed else None,'advisories':CONTRACT['advisories'] if passed else None,
-            'artifact':artifact,'execution_location':'github_hosted_disposable_runner','backend_mocked':True,'vps_local_execution':False,
+            'artifact':artifact,'execution_location':'github_hosted_disposable_runner','backend_mocked':CONTRACT.get('backend_mocked',True),'vps_local_execution':False,
             'production_access':False,'physical_device_test':False,'pixel_baseline_test':False,'published':False,'checked_at':time.time()}
 
 
@@ -78,9 +78,9 @@ def valid(report,contract=None):
     expected={'schema':PROFILE,'contract_sha256':util.digest(CONTRACT),'repository':REPO,'harness_commit':CONTRACT['harness_commit'],
               'source_revision':CONTRACT['source_revision'],'source_manifest_sha256':CONTRACT['source_manifest_sha256'],
               'dependency_lock_sha256':CONTRACT['dependency_lock_sha256'],'counts_source':'exact_commit_required_ci_gate',
-              'engine':'chromium','browser_version':CONTRACT['browser_version'],'viewports':CONTRACT['viewports'],'execution_location':'github_hosted_disposable_runner'}
+              'engine':CONTRACT.get('engine','chromium'),'browser_version':CONTRACT['browser_version'],'viewports':CONTRACT['viewports'],'execution_location':'github_hosted_disposable_runner'}
     if any(report.get(k)!=v for k,v in expected.items()): return False
-    if report.get('backend_mocked') is not True or any(report.get(k) is not False for k in ('vps_local_execution','production_access','physical_device_test','pixel_baseline_test','published')): return False
+    if report.get('backend_mocked') is not CONTRACT.get('backend_mocked',True) or any(report.get(k) is not False for k in ('vps_local_execution','production_access','physical_device_test','pixel_baseline_test','published')): return False
     if any(type(report[k]) is not int or report[k]<=0 for k in ('ci_run_id','ci_attempt','ci_job_id')): return False
     if report['ci_url']!='https://github.com/'+REPO+'/actions/runs/'+str(report['ci_run_id']): return False
     if type(report['checked_at']) not in (int,float) or not math.isfinite(report['checked_at']) or report['checked_at']<=0: return False
@@ -115,7 +115,7 @@ def save(conn,job,report):
     return {'browser_ci_id':ident,'report_sha256':util.digest(report),'test_status':report['status'],'test_counts':report['counts'],
             'revision':report['source_revision'],'harness_commit':report['harness_commit'],'ci_url':report['ci_url'],
             'ci_run_id':report['ci_run_id'],'ci_attempt':report['ci_attempt'],'artifact_url':report['artifact']['url'] if report['artifact'] else None,
-            'screenshots':report['screenshots'],'advisories':report['advisories'],'backend_mocked':True,'vps_local_execution':False,'published':False}
+            'screenshots':report['screenshots'],'advisories':report['advisories'],'backend_mocked':CONTRACT.get('backend_mocked',True),'vps_local_execution':False,'published':False}
 
 
 def describe(conn):

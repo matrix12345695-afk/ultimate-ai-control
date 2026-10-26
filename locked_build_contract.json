@@ -1,0 +1,42 @@
+{
+  "schema": "nova-locked-build-v1",
+  "repository": "matrix12345695-afk/ultimate-ai-control",
+  "harness_commit": "7d4081e9bdc86cdc620656b44cadb40067d12331",
+  "workflow_path": ".github/workflows/nova-locked-build.yml",
+  "workflow_name": "NOVA locked build acceptance",
+  "gate_step": "Run and verify locked build acceptance",
+  "source_revision": "a3c3e77e0e74d33241935d25dd3bdfdd306ccd90",
+  "source_manifest_sha256": "18a5b3dde064f72bc6b3b5fc60a3794bde3749a81b0b534f16520da281f1c770",
+  "dependency_lock_sha256": "9db9b93b90b4fbeabb5fb780eefe6345e5f87a08d9e2b530cd93335f46efafcf",
+  "browser_version": "151.0.7922.34",
+  "playwright_version": "1.62.0",
+  "expected_tests": 83,
+  "expected_screenshots": 15,
+  "artifact_name_prefix": "nova-locked-build-",
+  "viewports": {
+    "mobile": [
+      360,
+      800
+    ],
+    "tablet": [
+      768,
+      1024
+    ],
+    "desktop": [
+      1440,
+      900
+    ]
+  },
+  "advisories": [],
+  "upload_step": "Upload release rehearsal evidence",
+  "engine": "node_postgres_chromium",
+  "backend_mocked": false,
+  "component_tests": {
+    "application": 34,
+    "http_postgres_transition": 15,
+    "chromium": 34
+  },
+  "node_version": "24.21.0",
+  "pg_version": "8.23.1",
+  "draft_pr": 16
+}

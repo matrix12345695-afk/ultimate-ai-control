@@ -173,4 +173,13 @@ def completed_work(conn):
         except (TypeError,ValueError): passed=False
         if passed:
             details[9]=details.get(9,'')+' ✅ Репетиция HTTP/PG:34+15 проверок, данные сохранены. Откат Render и выпуск ещё не выполнены. /nova_release.'
+    if 'locked_build_ci_runs' in tables:
+        import locked_build_ci
+        row=conn.execute('SELECT report,report_sha256 FROM locked_build_ci_runs ORDER BY id DESC LIMIT 1').fetchone()
+        try:
+            report=json.loads(row[0]) if row else None
+            passed=row and locked_build_ci.valid(report) and locked_build_ci.util.digest(report)==row[1] and report['status']=='passed'
+        except (TypeError,ValueError): passed=False
+        if passed:
+            details[9]=details.get(9,'')+' ✅ Draft PR16: версии/сборка закреплены,83 проверки. /nova_build.'
     return details
