@@ -182,6 +182,14 @@ def completed_work(conn):
         except (TypeError,ValueError): passed=False
         if passed:
             details[9]=details.get(9,'')+' ✅ Draft PR16: версии/сборка закреплены,83 проверки. /nova_build.'
+    if 'emergency_selftest_runs' in tables:
+        import emergency_selftest
+        row=conn.execute('SELECT report,report_sha256 FROM emergency_selftest_runs ORDER BY id DESC LIMIT 1').fetchone()
+        try:
+            report=json.loads(row[0]) if row else None
+            passed=row and emergency_selftest.valid(report) and emergency_selftest.util.digest(report)==row[1]
+        except (TypeError,ValueError): passed=False
+        if passed: details[2]=details.get(2,'')+' ✅ Аварийная блокировка и отдельный сброс проверены. /emergency.'
     if 'nova_private_copy_ci_runs' in tables:
         import nova_private_copy_ci
         row=conn.execute('SELECT report,report_sha256 FROM nova_private_copy_ci_runs ORDER BY id DESC LIMIT 1').fetchone()

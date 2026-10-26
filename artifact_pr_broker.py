@@ -15,6 +15,7 @@ import artifact_prs as ledger
 import artifact_recovery as private
 import github_app_auth_v46 as auth
 import task_queue as q
+import emergency_control as emergency
 
 class Pending(RuntimeError): pass
 class Blocked(PermissionError): pass
@@ -56,6 +57,25 @@ class Client:
             raise Blocked('github_denied_http_'+str(exc.code)) from None
         except (OSError,ValueError) as exc:
             raise Pending('github_transport_'+type(exc).__name__) from None
+
+
+class ControlledClient:
+    """One durable admission for each mutation; GETs and receipt writes may finish."""
+    def __init__(self,client,conn,job): self.client=client;self.conn=conn;self.job=job
+    @property
+    def read_only(self): return self.client.read_only
+    @read_only.setter
+    def read_only(self,value): self.client.read_only=value
+    def call(self,method,path,*args,**kwargs):
+        if method=='GET': return self.client.call(method,path,*args,**kwargs)
+        if self.read_only: raise Blocked('refresh_cannot_write_github')
+        ident=emergency.admit(self.conn,'github_draft_write',method+' '+path,
+                              job_id=self.job['id'],lease_token=self.job['lease_token'])
+        try: result=self.client.call(method,path,*args,**kwargs)
+        except BaseException:
+            emergency.acknowledge(self.conn,ident,unknown=True);raise
+        emergency.acknowledge(self.conn,ident)
+        return result
 
 
 def ci_evidence(data,head):
@@ -158,6 +178,7 @@ def run(conn,envelope,data,client_factory=Client,token_issuer=auth.installation_
     q._owned(conn,ident,token,time.time())
     row=conn.execute('SELECT project,kind,payload,attempts FROM agent_jobs WHERE id=?',(ident,)).fetchone()
     job={'id':ident,'lease_token':token,'project':row[0],'kind':row[1],'payload':json.loads(row[2]),'attempt':row[3]}
+    emergency.check_job(conn,ident,token)
     request,identity,files=ledger.prepare(conn,job,data)
     cfg=json.loads(private.private_read(Path(data)/'artifact-pr-policy.json',4096))
     if cfg!={'enabled':True,'mode':'draft_only','repository':ledger.REPO,'recipes':['safe-paths','sha-check']}:
@@ -172,8 +193,9 @@ def run(conn,envelope,data,client_factory=Client,token_issuer=auth.installation_
         if remaining<.5: raise Pending('github_auth_deadline')
         return opener.open(request,timeout=min(4,remaining))
     readonly=job['payload'].get('refresh') is True
+    emergency.check_job(conn,ident,token)
     credential=token_issuer(folder/'github-app.pem',opener=scoped_open,**({'read_only':True} if readonly else {}))
-    client=client_factory(credential,deadline)
+    client=ControlledClient(client_factory(credential,deadline),conn,job)
     _,remote,row=ledger.record(conn,request)
     remote=dict(remote,verified=False);ledger.save_remote(conn,job,request,remote)
     if job['payload'].get('refresh'):
@@ -202,7 +224,7 @@ def main():
             result=run(conn,json.loads(raw),data)
         print(json.dumps({'ok':True,'result':result}))
     except Exception as exc:
-        print(json.dumps({'ok':False,'pending':isinstance(exc,Pending),'code':str(exc) if isinstance(exc,(Pending,Blocked)) else type(exc).__name__}))
+        print(json.dumps({'ok':False,'pending':isinstance(exc,Pending),'stopped':isinstance(exc,emergency.Stopped),'code':str(exc) if isinstance(exc,(Pending,Blocked,emergency.Stopped)) else type(exc).__name__}))
 
 
 if __name__=='__main__': main()

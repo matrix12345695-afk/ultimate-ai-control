@@ -3,6 +3,7 @@ import hashlib
 import json
 import secrets
 import sqlite3
+import emergency_control as emergency
 from datetime import datetime, timedelta, timezone
 
 def canonical_digest(payload: dict) -> str:
@@ -17,36 +18,55 @@ def init_approvals(conn: sqlite3.Connection):
         requested_at TEXT NOT NULL, decided_by TEXT, decided_at TEXT
     )""")
     conn.commit()
+    emergency.initialize(conn)
+    conn.execute('INSERT OR IGNORE INTO approval_control_epochs(approval_id,epoch) SELECT id,0 FROM approvals')
+    conn.commit()
 
 def request_approval(conn, task_id:int, action:str, environment:str, payload:dict, ttl_minutes=30, *, commit=True):
     if type(commit) is not bool or (not commit and not conn.in_transaction):
         raise ValueError('approval transaction required')
     if not action or not environment or ttl_minutes<=0:
         raise ValueError("invalid approval request")
-    now=datetime.now(timezone.utc)
-    req_id=secrets.token_urlsafe(18)
-    conn.execute("INSERT INTO approvals VALUES (?,?,?,?,?,?,?,?,?,?)",
-                 (req_id,task_id,action,environment,canonical_digest(payload),
-                  "pending",(now+timedelta(minutes=ttl_minutes)).isoformat(),
-                  now.isoformat(),None,None))
-    if commit: conn.commit()
-    return req_id
+    owns=not conn.in_transaction
+    if owns: conn.execute('BEGIN IMMEDIATE')
+    try:
+        epoch=emergency.require_open(conn)
+        now=datetime.now(timezone.utc);req_id=secrets.token_urlsafe(18)
+        conn.execute("INSERT INTO approvals VALUES (?,?,?,?,?,?,?,?,?,?)",(req_id,task_id,action,environment,canonical_digest(payload),"pending",(now+timedelta(minutes=ttl_minutes)).isoformat(),now.isoformat(),None,None))
+        conn.execute('INSERT INTO approval_control_epochs VALUES(?,?)',(req_id,epoch))
+        if commit: conn.commit()
+        return req_id
+    except BaseException:
+        if owns: conn.rollback()
+        raise
+
 
 def decide(conn, request_id:str, approver_id:str, allowed_admin_id:str, approve:bool):
-    if not allowed_admin_id or approver_id != allowed_admin_id:
-        raise PermissionError("not an administrator")
-    row=conn.execute("SELECT status,expires_at FROM approvals WHERE id=?",(request_id,)).fetchone()
-    if not row or row[0]!="pending":
-        raise ValueError("approval missing or already decided")
-    if datetime.now(timezone.utc)>=datetime.fromisoformat(row[1]):
-        raise ValueError("approval expired")
-    status="approved" if approve else "rejected"
-    conn.execute("UPDATE approvals SET status=?,decided_by=?,decided_at=? WHERE id=? AND status='pending'",
-                 (status,approver_id,datetime.now(timezone.utc).isoformat(),request_id))
-    conn.commit()
-    return status
+    if not allowed_admin_id or approver_id != allowed_admin_id: raise PermissionError("not an administrator")
+    if type(approve) is not bool: raise ValueError('invalid approval decision')
+    owns=not conn.in_transaction
+    if owns: conn.execute('BEGIN IMMEDIATE')
+    try:
+        if approve:
+            epoch=emergency.require_open(conn)
+            saved=conn.execute('SELECT epoch FROM approval_control_epochs WHERE approval_id=?',(request_id,)).fetchone()
+            if not saved or saved[0]!=epoch: raise emergency.Stopped('approval_control_epoch_changed')
+        row=conn.execute('SELECT status,expires_at FROM approvals WHERE id=?',(request_id,)).fetchone()
+        if not row or row[0]!='pending': raise ValueError('approval missing or already decided')
+        if datetime.now(timezone.utc)>=datetime.fromisoformat(row[1]): raise ValueError('approval expired')
+        status='approved' if approve else 'rejected'
+        conn.execute("UPDATE approvals SET status=?,decided_by=?,decided_at=? WHERE id=? AND status='pending'",(status,approver_id,datetime.now(timezone.utc).isoformat(),request_id));conn.commit();return status
+    except BaseException:
+        if owns: conn.rollback()
+        raise
+
 
 def is_authorized(conn, request_id:str, task_id:int, action:str, environment:str, payload:dict) -> bool:
+    try:
+        epoch=emergency.require_open(conn)
+        saved=conn.execute('SELECT epoch FROM approval_control_epochs WHERE approval_id=?',(request_id,)).fetchone()
+        if not saved or saved[0]!=epoch: return False
+    except (emergency.Stopped,sqlite3.Error): return False
     row=conn.execute("SELECT task_id,action,environment,artifact_sha256,status,expires_at FROM approvals WHERE id=?",
                      (request_id,)).fetchone()
     return bool(row and row[0]==task_id and row[1]==action and row[2]==environment

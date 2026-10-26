@@ -8,6 +8,7 @@ import subprocess
 import sys
 import time
 from artifact_pr_broker import Pending,Blocked
+import emergency_control as emergency
 
 
 def request(path,job,timeout=25):
@@ -41,6 +42,7 @@ def request(path,job,timeout=25):
         if result.get('ok') is not True:
             code=result.get('code','artifact_pr_failed')
             if not isinstance(code,str) or not code.replace('_','').isalnum() or len(code)>100: code='artifact_pr_failed'
+            if result.get('stopped') is True: raise emergency.Stopped(code)
             raise Pending(code) if result.get('pending') is True else Blocked(code)
         return result['result']
     except (OSError,ValueError,KeyError) as exc:

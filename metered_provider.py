@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import stat
 import time
+import emergency_control as emergency
 import urllib.error
 import urllib.request
 import budget_gate as budget
@@ -66,6 +67,7 @@ def initialize(conn):
     if conn.in_transaction: raise RuntimeError('independent provider transaction required')
     budget.initialize(conn)
     inbox.initialize(conn)
+    emergency.initialize(conn)
     conn.execute("""CREATE TABLE IF NOT EXISTS metered_requests(
       request_key TEXT PRIMARY KEY,fingerprint TEXT NOT NULL,reservation_id TEXT NOT NULL UNIQUE,
       state TEXT NOT NULL CHECK(state IN ('pending','unknown','completed')),
@@ -149,7 +151,9 @@ def notice(conn,kind,title,reason,key):
                  'Открой /provider4 и /budget4. Ключи не отправляй в Telegram или ChatGPT.',event_key=key)
 
 
-def generate(conn,policy_path,key_path,request_key,prompt,*,project='control',agent='planner',job_id=None,transport=None,purpose='advisory'):
+def generate(conn,policy_path,key_path,request_key,prompt,*,project='control',agent='planner',job_id=None,transport=None,purpose='advisory',lease_token=None):
+    if not conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").fetchone(): initialize(conn)
+    control_epoch=emergency.require_open(conn)
     cfg=policy(policy_path)
     if not cfg['enabled']: raise ProviderBlocked('provider_disabled')
     today=datetime.now(timezone.utc).date().isoformat()
@@ -163,6 +167,7 @@ def generate(conn,policy_path,key_path,request_key,prompt,*,project='control',ag
     if not isinstance(request_key,str) or not re.fullmatch(r'[A-Za-z0-9_.:-]{1,150}',request_key) or SECRET.search(request_key): raise ProviderBlocked('request_key')
     if not isinstance(prompt,str) or not prompt.strip() or len(prompt.encode())>12000 or '\x00' in prompt or SECRET.search(prompt):
         raise ProviderBlocked('invalid_or_sensitive_prompt')
+    if job_id is not None: emergency.check_job(conn,job_id,lease_token)
     key=private_read(key_path,512).decode('ascii').strip()
     if not re.fullmatch(r'sk-[A-Za-z0-9_-]{20,300}',key): raise ProviderBlocked('invalid_private_key')
     payload={'model':cfg['model'],'input':prompt,'instructions':BUNDLE_INSTRUCTIONS if purpose=='python_bundle' else INSTRUCTIONS,'max_output_tokens':cfg['max_output_tokens'],
@@ -180,6 +185,7 @@ def generate(conn,policy_path,key_path,request_key,prompt,*,project='control',ag
         if (conn.execute("SELECT count(*) FROM provider_costs WHERE state!='settled'").fetchone()[0] or
                 conn.execute("SELECT count(*) FROM metered_requests WHERE state!='completed'").fetchone()[0]):
             raise ProviderBlocked('unresolved_usage_no_new_calls')
+        admission=emergency.admit(conn,'provider_dispatch','sha256:'+fingerprint,job_id=job_id,lease_token=lease_token,expected_epoch=control_epoch,commit=False)
         reservation=budget.reserve_locked(conn,project,agent,cfg['model'],quote(cfg),job_id=job_id,
                                          limit_microusd=cfg['monthly_limit_microusd'])
         if reservation is None: raise ProviderBlocked('monthly_budget_exhausted')
@@ -206,11 +212,13 @@ def generate(conn,policy_path,key_path,request_key,prompt,*,project='control',ag
         changed=conn.execute("UPDATE metered_requests SET state='completed',response_id=?,result=?,completed_at=? WHERE request_key=? AND state='pending'",
                      (usage['response_id'],json.dumps(result,ensure_ascii=False),time.time(),request_key))
         if changed.rowcount!=1: raise ProviderBlocked('request_changed_during_call')
+        emergency.acknowledge(conn,admission,commit=False)
         conn.commit()
     except BaseException:
         conn.rollback()
         conn.execute("UPDATE provider_costs SET state='unknown' WHERE id=? AND state='reserved'",(reservation,))
         conn.execute("UPDATE metered_requests SET state='unknown',error_code='ambiguous_send_or_receipt' WHERE request_key=? AND state='pending'",(request_key,))
+        emergency.acknowledge(conn,admission,unknown=True,commit=False)
         conn.commit()
         notice(conn,'critical','Расход API требует проверки','Квитанция запроса неоднозначна. Резерв сохранён; новые вызовы этого провайдера заблокированы до ручной сверки.','provider-unknown-'+reservation)
         raise ProviderBlocked('ambiguous_send_or_receipt') from None

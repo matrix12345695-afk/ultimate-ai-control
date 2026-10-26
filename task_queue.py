@@ -8,6 +8,7 @@ import json
 import math
 import secrets
 import time
+import emergency_control as emergency
 
 PROJECTS = {"control", "nova", "kinder", "sap", "qualisift", "iiko-loader", "sap-mb51"}
 KINDS = {"inspect_repository", "plan_change", "test_release", "check_site", "review_change", "daily_report"}
@@ -36,7 +37,10 @@ def initialize(conn):
         worker TEXT NOT NULL, category TEXT NOT NULL CHECK(category IN ('active','testing','waiting')),
         started_at REAL NOT NULL, ended_at REAL NOT NULL CHECK(ended_at>started_at));
     """)
+    columns={row[1] for row in conn.execute('PRAGMA table_info(agent_jobs)')}
+    if 'control_epoch' not in columns: conn.execute('ALTER TABLE agent_jobs ADD COLUMN control_epoch INTEGER NOT NULL DEFAULT 0')
     conn.commit()
+    emergency.initialize(conn)
 
 
 def _now(value):
@@ -106,6 +110,7 @@ def configure(conn, *, paused=None, concurrency=None, reason="owner control", no
     now = _now(now)
     _text(reason,1000)
     with _write(conn):
+        if paused is False: emergency.require_open(conn)
         if paused is not None: conn.execute("UPDATE agent_queue_control SET paused=? WHERE singleton=1", (int(paused),))
         if concurrency is not None: conn.execute("UPDATE agent_queue_control SET concurrency=? WHERE singleton=1", (concurrency,))
         conn.execute("UPDATE agent_queue_control SET reason=? WHERE singleton=1", (reason,))
@@ -132,7 +137,8 @@ def claim(conn, worker, capabilities, *, lease_seconds=120, now=None):
     with _write(conn):
         _recover(conn,now)
         paused, maximum=conn.execute("SELECT paused,concurrency FROM agent_queue_control WHERE singleton=1").fetchone()
-        if paused or conn.execute("SELECT count(*) FROM agent_jobs WHERE state='running'").fetchone()[0] >= maximum:
+        current=emergency.state(conn)
+        if current['latched'] or paused or conn.execute("SELECT count(*) FROM agent_jobs WHERE state='running'").fetchone()[0] >= maximum:
             return None
         if conn.execute("SELECT 1 FROM agent_jobs WHERE state='running' AND worker=?", (worker,)).fetchone():
             return None
@@ -141,7 +147,7 @@ def claim(conn, worker, capabilities, *, lease_seconds=120, now=None):
         if row is None: return None
         token=secrets.token_hex(24)
         conn.execute("""UPDATE agent_jobs SET state='running',worker=?,lease_token=?,lease_until=?,attempt_started=?,
-                        attempts=attempts+1,updated_at=? WHERE id=?""", (worker,token,now+lease_seconds,now,now,row[0]))
+                        attempts=attempts+1,updated_at=?,control_epoch=? WHERE id=?""", (worker,token,now+lease_seconds,now,now,current['epoch'],row[0]))
         _event(conn,row[0],now,"claimed",worker)
         return {"id":row[0],"project":row[1],"kind":row[2],"payload":json.loads(row[3]),
                 "attempt":row[4]+1,"lease_token":token,"lease_until":now+lease_seconds}

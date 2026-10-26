@@ -31,6 +31,8 @@ def seed(conn,now=None):
 
 def tick(conn,now=None):
     now=time.time() if now is None else now
+    import emergency_control
+    if emergency_control.state(conn)['latched']: return []
     if conn.execute("SELECT paused FROM agent_queue_control WHERE singleton=1").fetchone()[0]: return []
     due=conn.execute("SELECT name,project,kind,payload,interval_seconds,next_due FROM agent_schedules WHERE enabled=1 AND next_due<=? ORDER BY next_due LIMIT 10",(now,)).fetchall()
     ids=[]

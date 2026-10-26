@@ -9,6 +9,7 @@ import sys
 import time
 from model_broker import PROTOCOL,MAX_REPLY_BYTES,BrokerDeferred,BrokerFailed,parse_bundle
 from isolated_python import manifest
+import emergency_control as emergency
 
 
 def request(path,job,timeout=23):
@@ -36,6 +37,7 @@ def request(path,job,timeout=23):
         if not reply['ok']:
             code=reply.get('code')
             if not isinstance(code,str) or not code.replace('_','').isalnum() or len(code)>100: code='broker_rejected'
+            if reply.get('stopped') is True: raise emergency.Stopped(code)
             if reply.get('deferred') is True: raise BrokerDeferred(code)
             raise BrokerFailed(code)
         bundle=reply['bundle']

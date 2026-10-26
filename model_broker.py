@@ -9,6 +9,7 @@ import resource
 import sqlite3
 import sys
 import time
+import emergency_control as emergency
 import metered_provider as api
 from isolated_python import manifest,validate_files
 
@@ -86,6 +87,7 @@ def authorize(conn,request,*,min_lease=30):
     row=conn.execute("SELECT project,kind,payload,state,worker,lease_token,lease_until FROM agent_jobs WHERE id=?",(request['job_id'],)).fetchone()
     if not row or row[0:2]!=('control','review_change') or row[3]!='running' or row[4]!='operations-1' or row[5]!=request['lease_token'] or row[6]<time.time()+min_lease:
         raise BrokerFailed('unauthorized_or_expired_job')
+    emergency.check_job(conn,request['job_id'],request['lease_token'])
     if conn.execute('SELECT paused FROM agent_queue_control WHERE singleton=1').fetchone()[0]: raise BrokerDeferred('queue_paused')
     payload=json.loads(row[2])
     if not isinstance(payload,dict) or not set(payload)<= {'ai_task','broker_demo','source'}: raise BrokerFailed('developer_payload')
@@ -129,7 +131,7 @@ def process(conn,folder,request,*,transport=None):
         try:
             response=api.generate(conn,Path(folder)/'provider-policy.json',KEY_PATH,request_key,task,
                                   project='control',agent='developer',job_id=request['job_id'],
-                                  purpose='python_bundle',transport=transport)
+                                  purpose='python_bundle',transport=transport,lease_token=request['lease_token'])
         except FileNotFoundError: raise BrokerDeferred('private_provider_configuration_missing') from None
         except api.ProviderBlocked as exc:
             if str(exc) in ('provider_disabled','pricing_review_expired','monthly_budget_exhausted'):
@@ -182,6 +184,8 @@ def main():
         request=json.loads(raw,object_pairs_hook=no_duplicates)
         with sqlite3.connect(path,timeout=5) as conn:
             reply={'ok':True,'bundle':process(conn,path.parent,request)}
+    except emergency.Stopped as exc:
+        reply={'ok':False,'stopped':True,'deferred':False,'code':str(exc)}
     except BrokerDeferred as exc:
         reply={'ok':False,'deferred':True,'code':str(exc)}
     except BaseException as exc:

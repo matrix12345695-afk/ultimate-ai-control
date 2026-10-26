@@ -22,6 +22,8 @@ import locked_build_ci
 import nova_deploy
 import nova_recovery_ci
 import nova_private_copy_ci
+import emergency_control as emergency
+import emergency_selftest
 import chat_binding
 import budget_gate
 import offline_developer
@@ -48,6 +50,7 @@ def handle(text,connect,source_key=None):
     known.update(('/owner_later','/owner_item'))
     known.update(('/projects4','/repo_check'))
     known.update(('/analytics4','/weekly','/cost4'))
+    known.update(('/emergency','/emergency_stop','/emergency_reset','/emergency_test'))
     known.add('/readiness4')
     known.add('/acceptance4')
     known.update(('/memory_log','/memory_item'))
@@ -219,7 +222,23 @@ def handle(text,connect,source_key=None):
                 chat_binding.bind(conn,args[1])
                 return "Ссылка возврата в этот чат сохранена. Чтение сообщений ChatGPT автоматически не включено."
             if op=="/chat_link": return chat_binding.action(conn)+"\nПлан из текущего чата импортирован явно; автоматического доступа к его новым сообщениям нет."
+            if op=='/emergency': return emergency_selftest.describe(conn)
+            if op=='/emergency_test':
+                if len(args)!=1: return 'Использование: /emergency_test'
+                ident=queue.enqueue(conn,'control','test_release',{'target':emergency_selftest.PROFILE},event_key=source_key)
+                return f'Самопроверка #{ident} сохранена в очереди. /emergency. Рабочая блокировка не меняется.'
+            if op=='/emergency_stop':
+                if len(args)!=1: return 'Использование: /emergency_stop'
+                emergency.stop(conn,source_key=source_key)
+                return emergency.describe(conn)
+            if op=='/emergency_reset':
+                if len(args)!=2 or not args[1].isascii() or not args[1].isdigit() or len(args[1])>19: return 'Использование: /emergency_reset НОМЕР_ПОКОЛЕНИЯ из /emergency'
+                try: emergency.reset(conn,int(args[1]),source_key=source_key)
+                except emergency.Stopped as exc:
+                    return 'Текущие задания ещё завершаются. Проверь /emergency.' if str(exc)=='emergency_jobs_still_running' else 'Состояние изменилось; сброс не выполнен. Проверь /emergency.'
+                return 'Аварийная блокировка снята. Очередь остаётся на паузе: отдельно /resume. Старые согласования не возобновляются.'
             if op in ("/pause","/resume"):
+                if op=='/resume' and emergency.state(conn)['latched']: return 'Аварийная блокировка включена. Обычная /resume её не снимает. Проверь /emergency.' 
                 queue.configure(conn,paused=op=="/pause",reason="Telegram owner request")
                 return "Новые задания приостановлены. Текущие безопасные проверки завершаются. Inventory не затрагивается." if op=="/pause" else "Очередь возобновлена."
             if op=="/project":
