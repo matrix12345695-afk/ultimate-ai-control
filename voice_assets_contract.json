@@ -46,5 +46,6 @@
       "sha256": "116a95c2ef71057d86f1e20c378247d34a0c8cfa257aecd0f4f36f75fc338de2",
       "url": "https://archive.ubuntu.com/ubuntu/pool/main/libo/libogg/libogg0_1.3.5-0ubuntu3_amd64.deb"
     }
-  ]
+  ],
+  "build_profile": "cpu-native-host-v2"
 }

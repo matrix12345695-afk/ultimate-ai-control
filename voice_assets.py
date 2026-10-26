@@ -83,8 +83,7 @@ def prepare(destination):
             archive.extractall(cmake)
         binary=cmake/'cmake/data/bin/cmake';binary.chmod(0o700)
         folder=source/('whisper.cpp-'+contract()['whisper_commit']);build=temp/'build'
-        flags=['-DCMAKE_BUILD_TYPE=Release','-DBUILD_SHARED_LIBS=OFF','-DGGML_OPENMP=OFF','-DGGML_NATIVE=OFF','-DGGML_BLAS=OFF','-DWHISPER_CURL=OFF','-DWHISPER_BUILD_TESTS=OFF','-DWHISPER_BUILD_SERVER=OFF',
-               '-DGGML_AVX=OFF','-DGGML_AVX2=OFF','-DGGML_FMA=OFF','-DGGML_F16C=OFF','-DGGML_SSE42=OFF']
+        flags=['-DCMAKE_BUILD_TYPE=Release','-DBUILD_SHARED_LIBS=OFF','-DGGML_OPENMP=OFF','-DGGML_NATIVE=ON','-DGGML_BLAS=OFF','-DWHISPER_CURL=OFF','-DWHISPER_BUILD_TESTS=OFF','-DWHISPER_BUILD_SERVER=OFF']
         _run([str(binary),'-S',str(folder),'-B',str(build),*flags])
         _run([str(binary),'--build',str(build),'--target','whisper-cli','-j1'])
         shutil.copyfile(build/'bin/whisper-cli',out/'whisper-cli');shutil.copyfile(temp/'model.bin',out/'model.bin')

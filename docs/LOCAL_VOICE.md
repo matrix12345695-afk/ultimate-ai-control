@@ -16,7 +16,12 @@ MIT license is declared by its public repository; model weights originate from O
 Whisper. No third-party autonomous agent, plugin, tools or secret access is installed.
 Public upstream advisory list was read and empty at review time; this does not establish
 absence of vulnerabilities. Only the command-line target is built; server, curl, GPU,
-OpenMP, BLAS and host-specific SIMD are disabled. Build uses one CPU/lowered priority,
+OpenMP and BLAS are disabled. The reviewed v2 build enables compiler-native CPU features
+on the same host where its binary will run; the resulting binary hash is pinned in the
+private manifest. Do not transfer that compiled binary to a different CPU. The first
+portable/no-SIMD build failed on the VPS (SIGILL during graph initialization); it was never
+activated. Local scalar-only inference also exceeded the CPU cap. v2 uses a new private
+runtime/policy and retains the failed candidate without overwriting it. Build uses one CPU/lowered priority,
 one make job,1.5GiB address-space limit and bounded compiler time, with no global packages.
 CMake3.31.6 portable wheel SHA is matched to PyPI release metadata; it is build-only.
 

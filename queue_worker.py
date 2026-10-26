@@ -200,7 +200,7 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                 if not project_registry.valid_result(job['project'],result):
                     raise project_registry.RepositoryScopeError('repository_result_scope_mismatch')
         elif job['kind']=='test_release' and job['payload'].get('target')==local_voice.PROFILE:
-            with connect(path) as conn: result=local_voice.save(conn,job,local_voice.observe(Path(path).parent/'voice-policy.json'))
+            with connect(path) as conn: result=local_voice.save(conn,job,local_voice.observe(Path(path).parent/'voice-candidate-policy-v2.json'))
         elif job['kind']=='test_release' and job['payload'].get('target')==emergency_selftest.PROFILE:
             with connect(path) as conn: result=emergency_selftest.save(conn,job,emergency_selftest.acceptance())
         elif job['kind']=='test_release' and job['payload'].get('target')==nova_private_copy_ci.PROFILE:
