@@ -3,12 +3,33 @@ import hashlib,importlib.util,json,os,re,shutil,subprocess,tempfile,urllib.reque
 from pathlib import Path
 HERE=Path(__file__).resolve().parent
 BASE='a3c3e77e0e74d33241935d25dd3bdfdd306ccd90'
-CANDIDATE='d09def38a54991af7ef97f88987a28440b0bcba6'
+CANDIDATE='9df2a1c9fcc35e83f1a2fe35bee2480afac3254f'
 REPO='matrix12345695-afk/nova-web-agency'
 IMAGE='postgres@sha256:9770878138a2e83abcb10856d30cc3f24dae0d317bb956db6ab9159de6c3c80d'
 CHANGED=['PRIVATE_COPY.md','scripts/export-private-copy.js','scripts/private-copy.js','scripts/restore-private-copy.js','tests/private-copy.test.js']
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self,*a,**k): raise RuntimeError('source_redirect_denied')
+
+def diagnostic_tests(command,cwd,env):
+    import selectors,signal,time
+    proc=subprocess.Popen(command,cwd=cwd,env=env,stdin=subprocess.DEVNULL,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,start_new_session=True)
+    output=b'';deadline=time.monotonic()+180
+    try:
+        with selectors.DefaultSelector() as selector:
+            selector.register(proc.stdout,selectors.EVENT_READ)
+            while selector.get_map():
+                if time.monotonic()>=deadline: raise RuntimeError('private_copy_test_timeout')
+                for key,_ in selector.select(.1):
+                    chunk=os.read(key.fileobj.fileno(),8192)
+                    if not chunk: selector.unregister(key.fileobj);continue
+                    output+=chunk
+                    if len(output)>512000: raise RuntimeError('private_copy_output_limit')
+        text=output.decode();print(text,flush=True)
+        assert proc.wait(timeout=3)==0,'private_copy_tests_failed'
+        return text
+    finally:
+        if proc.poll() is None: os.killpg(proc.pid,signal.SIGKILL)
+        proc.wait(timeout=3);proc.stdout.close()
 
 def main():
     if os.environ.get('GITHUB_ACTIONS')!='true' or os.environ.get('RUNNER_ENVIRONMENT')!='github-hosted': raise RuntimeError('hosted_disposable_only')
@@ -40,7 +61,7 @@ def main():
         node=shutil.which('node');npm=shutil.which('npm');assert utility.bounded([node,'--version'],source,env).strip()=='v24.21.0'
         openssl=utility.bounded(['openssl','version'],source,env).strip();assert openssl.startswith('OpenSSL 3.')
         utility.bounded([npm,'ci','--omit=dev','--ignore-scripts','--no-audit','--no-fund'],source,env,90)
-        output=utility.bounded([node,'--test','--test-reporter=tap','--test-concurrency=1','--test-timeout=60000','--test-force-exit','tests/private-copy.test.js',str(HERE/'fixture.test.cjs')],source,env,180)
+        output=diagnostic_tests([node,'--test','--test-reporter=tap','--test-concurrency=1','--test-timeout=60000','--test-force-exit','tests/private-copy.test.js',str(HERE/'fixture.test.cjs')],source,env)
         print(output,flush=True);counts={}
         for field in ('tests','pass','fail','cancelled','skipped','todo'):
             rows=re.findall(r'^# '+field+r' (\d+)$',output,re.M);assert len(rows)==1;counts[field]=int(rows[0])
