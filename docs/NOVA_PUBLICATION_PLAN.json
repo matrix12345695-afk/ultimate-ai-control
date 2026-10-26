@@ -34,7 +34,8 @@
     "current owner-confirmed Render workspace/service/repository/main/live deploy identity",
     "current platform settings and deploy queue; no conflicting release",
     "baseline retained build eligibility and compatibility with current external state",
-    "recovery/backup access and least-privilege exact-commit publication/rollback adapter"
+    "recovery/backup access and least-privilege exact-commit publication/rollback adapter",
+    "implement and audit live exact-scope provider adapter; current fixture-only prototype rejects real transports"
   ],
   "approval_must_bind": [
     "project",
@@ -83,5 +84,22 @@
     "screenshots": 15,
     "production_access": false,
     "Render_rollback_executed": false
+  },
+  "protocol_prototype": {
+    "app_commit": "45ddce6aed88e2dd2fc4f23aa072d20415efcc11",
+    "mode": "fixture_only",
+    "simulated_scenarios": 3,
+    "real_Render_calls": 0,
+    "live_executor_enabled": false,
+    "may_request_approval": false,
+    "read_only_report_command": "/nova_deploy",
+    "refresh_ci_and_calculation_command": "/test_nova_deploy",
+    "Render_snapshot_automatically_refreshed": false,
+    "tests": {
+      "new_machine_and_plan": 33,
+      "full_local_with_sandbox": 498
+    },
+    "scope": "exact candidate/service/workspace/baseline/settings/CI/expiry",
+    "ambiguity": "durable intent; unknown write response stops without automatic retry"
   }
 }

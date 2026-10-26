@@ -182,4 +182,13 @@ def completed_work(conn):
         except (TypeError,ValueError): passed=False
         if passed:
             details[9]=details.get(9,'')+' ✅ Draft PR16: версии/сборка закреплены,83 проверки. /nova_build.'
+    if 'nova_publication_plans' in tables:
+        import nova_deploy
+        row=conn.execute('SELECT report,report_sha256 FROM nova_publication_plans ORDER BY id DESC LIMIT 1').fetchone()
+        try:
+            report=json.loads(row[0]) if row else None
+            checked=row and nova_deploy.valid(report) and nova_deploy.util.digest(report)==row[1]
+        except (TypeError,ValueError): checked=False
+        if checked:
+            details[9]=details.get(9,'')+' ✅ Протокол/симулятор выпуска проверен; реальная запись отключена. /nova_deploy.'
     return details
