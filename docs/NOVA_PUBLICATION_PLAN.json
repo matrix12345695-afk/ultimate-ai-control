@@ -5,8 +5,8 @@
   "workspace_id": "tea-d52kjcur433s73ca9810",
   "service_id": "srv-dbbhm5k9v7es73f9kf10",
   "repository": "matrix12345695-afk/nova-web-agency",
-  "draft_pr": 15,
-  "reviewed_candidate": "495a7f1a1a3a25c45fd98101fffa9c02e58f3970",
+  "draft_pr": 16,
+  "reviewed_candidate": "a3c3e77e0e74d33241935d25dd3bdfdd306ccd90",
   "baseline_commit": "1a23239a0a9c7d79905c91505a8741d8350d7e75",
   "baseline_deploy_reference": "dep-dbchlhqvcj2c738paun0",
   "baseline_artifact_eligibility_verified": false,
@@ -18,15 +18,19 @@
     "auto_deploy": {
       "observed": "commit",
       "proposed": "off"
+    },
+    "build_command": {
+      "observed": "npm install --omit=dev",
+      "proposed": "npm ci --omit=dev --ignore-scripts --no-audit --no-fund"
     }
   },
   "settings_approval_required": true,
   "publication_approval_required": true,
   "production_backup_verified": false,
-  "new_revision_needed_for_dependency_lock": true,
+  "new_revision_needed_for_dependency_lock": false,
   "must_revalidate_before_owner_request": [
-    "exact updated source diff and immutable dependency lock",
-    "candidate-specific unit, PostgreSQL, browser and restart acceptance",
+    "exact current candidate diff and committed production dependency/runtime lock; any source change requires new acceptance",
+    "fresh candidate-specific app/PostgreSQL/browser/restart evidence and platform runtime/configuration compatibility",
     "current owner-confirmed Render workspace/service/repository/main/live deploy identity",
     "current platform settings and deploy queue; no conflicting release",
     "baseline retained build eligibility and compatibility with current external state",
@@ -60,5 +64,24 @@
     "do not reenable automatic deploys without a deliberate owner-authorized decision"
   ],
   "baseline_html_git_blob": "00d76b471b3675ab052bbe30526fb0f2e350ac42",
-  "candidate_html_git_blob": "3453ee7fa6794d207c5f9f41967752da1bba1f47"
+  "candidate_html_git_blob": "3453ee7fa6794d207c5f9f41967752da1bba1f47",
+  "production_lock_sha256": "9db9b93b90b4fbeabb5fb780eefe6345e5f87a08d9e2b530cd93335f46efafcf",
+  "locked_draft_runtime": {
+    "node": "24.21.0",
+    "pg": "8.23.1",
+    "engine_strict": true,
+    "dependency_packages": 14
+  },
+  "platform_settings_applied": false,
+  "exact_acceptance": {
+    "harness_commit": "7d4081e9bdc86cdc620656b44cadb40067d12331",
+    "run_id": 40270398506,
+    "attempt": 1,
+    "application_tests": 34,
+    "http_postgres_tests": 15,
+    "chromium_tests": 34,
+    "screenshots": 15,
+    "production_access": false,
+    "Render_rollback_executed": false
+  }
 }

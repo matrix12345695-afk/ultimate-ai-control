@@ -11,11 +11,12 @@ from artifact_pr_broker import Pending,Blocked
 
 
 def request(path,job,timeout=25):
-    import nova_ci,browser_ci,browser_candidate_ci,nova_release_ci
+    import nova_ci,browser_ci,browser_candidate_ci,nova_release_ci,locked_build_ci
     script='nova_ci_broker.py' if job.get('kind')=='test_release' and job.get('payload')=={'target':nova_ci.PROFILE} else 'artifact_pr_broker.py'
     if job.get('kind')=='test_release' and job.get('payload')=={'target':browser_ci.PROFILE}: script='browser_ci_broker.py'
     if job.get('kind')=='test_release' and job.get('payload')=={'target':browser_candidate_ci.PROFILE}: script='browser_candidate_broker.py'
     if job.get('kind')=='test_release' and job.get('payload')=={'target':nova_release_ci.PROFILE}: script='nova_release_broker.py'
+    if job.get('kind')=='test_release' and job.get('payload')=={'target':locked_build_ci.PROFILE}: script='locked_build_broker.py'
     command=[sys.executable,str(Path(__file__).with_name(script)),'--once',str(Path(path).resolve())]
     env={'HOME':str(Path.home()),'PATH':'/usr/bin:/bin','LANG':'C.UTF-8','PYTHONDONTWRITEBYTECODE':'1'}
     proc=subprocess.Popen(command,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,

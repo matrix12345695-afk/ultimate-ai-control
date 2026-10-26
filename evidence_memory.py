@@ -63,7 +63,7 @@ def sha(value):
 
 def evidence(conn,reference):
     """Re-read only explicitly referenced SQLite rows, never files or network sources."""
-    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','artifact_pr_id','release_check_id','resource_sample_id','nova_ci_id','browser_ci_id','browser_candidate_id','nova_release_ci_id','result'}
+    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','artifact_pr_id','release_check_id','resource_sample_id','nova_ci_id','browser_ci_id','browser_candidate_id','nova_release_ci_id','locked_build_ci_id','result'}
             or type(reference.get('event_id')) is not int or type(reference.get('job_id')) is not int):
         raise ValueError('invalid memory reference')
     event=conn.execute('SELECT id,job_id,at,event,detail FROM agent_job_events WHERE id=?',
@@ -124,6 +124,12 @@ def evidence(conn,reference):
         if not row or row[0]!=job[0] or job[1]!='nova' or not browser_candidate_ci.valid(json.loads(row[1])) or browser_candidate_ci.util.digest(json.loads(row[1]))!=row[2]:
             raise ValueError('Browser CI evidence changed or outside scope')
         source['browser_candidate_ci']=row
+    if 'locked_build_ci_id' in reference:
+        import locked_build_ci
+        row=conn.execute('SELECT job_id,report,report_sha256 FROM locked_build_ci_runs WHERE id=?',(reference['locked_build_ci_id'],)).fetchone()
+        if not row or row[0]!=job[0] or job[1]!='nova' or not locked_build_ci.valid(json.loads(row[1])) or locked_build_ci.util.digest(json.loads(row[1]))!=row[2]:
+            raise ValueError('Browser CI evidence changed or outside scope')
+        source['locked_build_ci']=row
     if 'nova_release_ci_id' in reference:
         import nova_release_ci
         row=conn.execute('SELECT job_id,report,report_sha256 FROM nova_release_ci_runs WHERE id=?',(reference['nova_release_ci_id'],)).fetchone()
@@ -234,6 +240,13 @@ def observation(conn,event):
                 report=json.loads(row[1])
                 fact['browser_candidate_ci']={key:report[key] for key in ('ci_url','harness_commit','source_revision','status','screenshots','advisories','backend_mocked','vps_local_execution')}
                 reference.update(browser_candidate_id=result['browser_candidate_id'],result=True)
+        if result and kind=='test_release' and project=='nova' and type(result.get('locked_build_ci_id')) is int:
+            import locked_build_ci
+            row=conn.execute('SELECT job_id,report,report_sha256 FROM locked_build_ci_runs WHERE id=?',(result['locked_build_ci_id'],)).fetchone()
+            if row and row[0]==job_id and locked_build_ci.valid(json.loads(row[1])) and locked_build_ci.util.digest(json.loads(row[1]))==row[2]==result.get('report_sha256'):
+                report=json.loads(row[1])
+                fact['locked_build_ci']={key:report[key] for key in ('ci_url','harness_commit','source_revision','status','counts','dependency_lock_sha256','screenshots','advisories','backend_mocked','vps_local_execution')}
+                reference.update(locked_build_ci_id=result['locked_build_ci_id'],result=True)
         if result and kind=='test_release' and project=='nova' and type(result.get('nova_release_ci_id')) is int:
             import nova_release_ci
             row=conn.execute('SELECT job_id,report,report_sha256 FROM nova_release_ci_runs WHERE id=?',(result['nova_release_ci_id'],)).fetchone()
@@ -324,6 +337,7 @@ def summary(conn,project,page=1):
                 lines.append(f'Черновик #{artifact["id"]}: тесты {artifact["test_status"]}; публикация не подтверждена.')
             if fact.get('repository'): lines.append('Файлы закреплённой версии прочитаны; код и тесты не запускались.')
             if fact.get('project_test'): lines.append('Выполнен выбранный набор тестов Node; PostgreSQL и браузер не проверялись. /nova_tests')
+            if fact.get('locked_build_ci'): lines.append('Сверена закреплённая сборка:83 проверки и15 снимков; Blueprint не применён, публикация отключена. /nova_build')
             if fact.get('nova_release_ci'): lines.append('Сверена репетиция HTTP/PG и сохранности тестовых данных; откат Render не выполнялся, публикация отключена. /nova_release')
             if fact.get('browser_candidate_ci'): lines.append('Сверен исправленный черновик NOVA;34 браузерные проверки, публикации нет. /nova_candidate')
             if fact.get('browser_ci'): lines.append('Сверен браузерный CI со скриншотами и замечаниями; API подставной, исполнение на GitHub. /nova_browser')
