@@ -41,6 +41,7 @@ import nova_release_ci
 import locked_build_ci
 import nova_deploy
 import nova_recovery_ci
+import nova_private_copy_ci
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -84,6 +85,7 @@ def initialize(conn):
     locked_build_ci.initialize(conn)
     nova_deploy.initialize(conn)
     nova_recovery_ci.initialize(conn)
+    nova_private_copy_ci.initialize(conn)
 
 
 def send_event(conn,kind,title,reason,event_key,task=None):
@@ -190,6 +192,9 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                 result=repository_inspector(job['project'],job['payload'])
                 if not project_registry.valid_result(job['project'],result):
                     raise project_registry.RepositoryScopeError('repository_result_scope_mismatch')
+        elif job['kind']=='test_release' and job['payload'].get('target')==nova_private_copy_ci.PROFILE:
+            nova_private_copy_ci.scope(job)
+            result=artifact_pr_client.request(path,job)
         elif job['kind']=='test_release' and job['payload'].get('target')==nova_recovery_ci.PROFILE:
             nova_recovery_ci.scope(job)
             result=artifact_pr_client.request(path,job)
@@ -275,6 +280,11 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                            'Кодовый черновик проверен' if result['test_status']=='passed' else 'Проверка кодового черновика не прошла',
                            f"Артефакт #{result['artifact_id']}, SHA-256 {result['source_digest']}. Тесты: {result['test_status']}. Независимая приёмка: {result.get('independent_acceptance','not_configured')}. Просмотр: /artifact {result['artifact_id']}. Движок: {label}. "+('Восстановлен сохранённый результат; тесты повторно не запускались. ' if result.get('tests_reused') else '')+'Публикации не было.',
                            'artifact-'+str(job['id'])+'-'+result['source_digest'],job['id'])
+            elif result.get('nova_private_copy_ci_id'):
+                send_event(conn,'info' if result['test_status']=='passed' else 'critical',
+                           'Черновик приватной копии NOVA проверен' if result['test_status']=='passed' else 'Черновик приватной копии не прошёл',
+                           result['ci_url']+' · '+('Draft PR17:30 проверок,5003 синтетические заявки/4 таблицы. Шифрование и изолированное восстановление проверены. Реальная копия не получена; на Free нет консоли, нужен согласованный путь запуска и получатель/хранилище. /nova_copy' if result['test_status']=='passed' else 'Шифрование/восстановление не подтверждены. Публикация отключена. /nova_copy'),
+                           'nova-private-copy-job-'+str(job['id']),job['id'])
             elif result.get('nova_recovery_ci_id'):
                 send_event(conn,'info' if result['test_status']=='passed' else 'critical',
                            'Тест восстановления NOVA проверен' if result['test_status']=='passed' else 'Тест восстановления NOVA не прошёл',
@@ -352,11 +362,12 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                 ci_check=job['kind']=='test_release' and job['payload']=={'target':nova_ci.PROFILE}
                 rehearsal_check=job['kind']=='test_release' and job['payload']=={'target':nova_release_ci.PROFILE}
                 locked_check=job['kind']=='test_release' and job['payload']=={'target':locked_build_ci.PROFILE}
+                copy_check=job['kind']=='test_release' and job['payload']=={'target':nova_private_copy_ci.PROFILE}
                 recovery_check=job['kind']=='test_release' and job['payload']=={'target':nova_recovery_ci.PROFILE}
                 plan_check=job['kind']=='test_release' and job['payload']=={'target':nova_deploy.PROFILE}
-                send_event(conn,'critical','Сверка восстановления остановлена' if recovery_check else 'Проверка плана выпуска остановлена' if plan_check else 'Сверка закреплённой сборки остановлена' if locked_check else 'Сверка репетиции выпуска остановлена' if rehearsal_check else 'Сверка браузерного CI остановлена' if browser_check else 'Сверка PostgreSQL CI остановлена' if ci_check else 'Подготовка Draft PR остановлена',
+                send_event(conn,'critical','Сверка приватной копии остановлена' if copy_check else 'Сверка восстановления остановлена' if recovery_check else 'Проверка плана выпуска остановлена' if plan_check else 'Сверка закреплённой сборки остановлена' if locked_check else 'Сверка репетиции выпуска остановлена' if rehearsal_check else 'Сверка браузерного CI остановлена' if browser_check else 'Сверка PostgreSQL CI остановлена' if ci_check else 'Подготовка Draft PR остановлена',
                            'Требуется проверка доступа, исходной версии или CI. Сохранённый запрос оставлен для сверки; merge и публикации нет.',
-                           ('nova-recovery-stopped-' if recovery_check else 'nova-deploy-plan-stopped-' if plan_check else 'locked-build-stopped-' if locked_check else 'nova-release-stopped-' if rehearsal_check else 'browser-ci-stopped-' if browser_check else 'nova-ci-stopped-' if ci_check else 'artifact-pr-stopped-')+str(job['id']),job['id'])
+                           ('nova-private-copy-stopped-' if copy_check else 'nova-recovery-stopped-' if recovery_check else 'nova-deploy-plan-stopped-' if plan_check else 'locked-build-stopped-' if locked_check else 'nova-release-stopped-' if rehearsal_check else 'browser-ci-stopped-' if browser_check else 'nova-ci-stopped-' if ci_check else 'artifact-pr-stopped-')+str(job['id']),job['id'])
         return {'id':job['id'],'state':'failed' if failed else 'queued'}
     except project_registry.RepositoryScopeError as exc:
         with connect(path) as conn:
