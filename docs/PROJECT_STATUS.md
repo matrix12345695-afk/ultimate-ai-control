@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `a37642bfd9a2c19a86ed92ea2c33e7dee53ef947`, draft
-[PR #51](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/51), stacked on PR #50.
+Application: `b8ed9187d4919c37db7cd48460a9bddb8c33b6ab`, draft
+[PR #52](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/52), stacked on PR #51.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -29,7 +29,37 @@ runtime before attempting installation. The hourly development automation remain
 
 ## Evidence
 
-Latest increment: [durable UAC emergency control](EMERGENCY_CONTROL.md), deployed26 October
+Latest increment: [offline speech acceptance pilot](LOCAL_VOICE.md), deployed26 October
+at22:33 Asia/Tashkent. [Rollout record](LOCAL_VOICE_ROLLOUT.md). Installed native-host v2
+app b8ed9187; exact source CI40303932769 and40303941488 pass. Local/VPS full suites565/565,
+zero skips, including all17 host-dependent checks and14 new voice checks. Hosted baseline
+skips17; transport70/70. First portable build failed closed during graph initialization
+(SIGILL), without app activation; separate host-native v2 preparation40304032348 succeeds.
+Source/model/decoder pins retained; compiled binary is host-specific and manifest-pinned.
+Old candidate/policy retained. First activation40368389716 stopped before replacing the app
+at its restored-copy stage-transition check; corrected gate now passes even with a freshly
+planned voice stage. Final activation40369057736/job121734547934 succeeds; dispatcher2195006,
+credential-free worker2194680; Inventory PID67760/source/config metadata unchanged.
+Backup/restore: /home/maksim/.ultimate-review-data/backups/before-uac4-1793035912154328711.sqlite3.
+Private assets /home/maksim/.ultimate-tools/voice-4979-tiny-q5-v2;600 policy
+/home/maksim/.ultimate-review-data/live/voice-candidate-policy-v2.json (acceptance_only),
+contractb66bd548624e82e1a41d6c7b47a303fa039d93b24c7a33d5931aebce4d189722.
+Real queue job1056 runs the fixed public English OGG/Opus8-second fixture; recognition7.8751s,
+report2d28565a56143cd1b41f699eacf351283077239dcca8f9a9123bc5c2804fd647,
+manifest1bffbfd6f48f912da6e303f9b89f9c8131e205cc29a1e008f636bc2bfb04228b, typed memory1057.
+Telegram accepted announcement390 and result391; not owner reading/approval. /voice4,
+/test_voice4 and «Голос4.0» show the measured candidate. Plan10 remains active, with a completed
+pilot subtask. **Owner Telegram voice ingestion, RU/UZ accuracy and transcript-confirmed
+creation of a real task remain pending.** The present wrapper accepts only its pinned public
+fixture; no arbitrary user-audio input or paid provider. Read-only native stages use network/
+fork/host-file denial,1CPU/768MiB virtual-space caps and bounded time/output. The original
+emergency implementation hash314aa918... remains unchanged, live epoch0/unlatched. Existing
+owner follow-up157/Telegram380, approvals, candidates and deferred API setup unchanged; zero
+live costs/holds and no new schedule. Independent verification40370142991/job121738363286
+succeeds at22:36 Asia/Tashkent; exact report/manifest, queue/memory/Telegram and process IDs
+match. Documentation checkpoint is separate from installed app source.
+
+Preceding increment: [durable UAC emergency control](EMERGENCY_CONTROL.md), deployed26 October
 at14:17 Asia/Tashkent. [Rollout record](EMERGENCY_ROLLOUT_RECORD.md). Exact-app CI40297441230
 and40297445882 pass. Local and VPS full suites551/551, zero skips (all15 sandbox checks
 executed); hosted baseline intentionally skips15. Transport67/67. Isolated activation
@@ -957,6 +987,11 @@ URL is still unknown; do not invent one or claim the chat is subscribed to Teleg
 
 ## Required progress updates
 
+Completed subtask of stage10: [offline OGG/Opus speech candidate](LOCAL_VOICE.md), native
+hash-pinned build, real isolated English fixture recognition and compiled sandbox canary,
+queue report/typed memory/Telegram receipt/partial Plan. Full voice control is not complete;
+private owner audio capture, RU/UZ quality and explicit transcript/task confirmation remain.
+
 Completed increment: [durable emergency control](EMERGENCY_CONTROL.md), including persistent
 stop, separate epoch-specific reset, ordinary-resume refusal, old-capability invalidation,
 new-action admission journal, notification-outbox retry and source replay protection. Local,
@@ -1049,7 +1084,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 7. Multiple projects | NOVA/Kinder pinned read scopes and real queue observations live; other mappings, isolated execution and change preparation pending. |
 | 8. Draft PRs | VPS broker created and exact-diff/CI verified a real Draft PR from a tested control recipe; broader project/model patches pending. |
 | 9. Publication approval | Exact-version candidates plus GET-only live artifact/diff/base/head/CI and existing approval preflight implemented, with durable reports and Telegram receipts; real owner decision, publisher and tested deployment rollback pending. |
-| 10. Voice | Pending transcription choice, budget accounting and task confirmation. |
+| 10. Voice | Offline speech candidate verified on VPS: pinned OGG/Opus public English fixture, isolated native inference, hashed report/memory/receipts and partial Plan; owner audio intake, RU/UZ quality and transcript-confirmed task creation pending. No paid API. |
 | 11. Analytics | Daily/weekly measured work, role/project/worker grouping, logged task waiting and per-task receipts/holds live; full idle observation and external billing reconciliation pending. |
 | 12. Memory | Rules, owner follow-ups and append-only source-verified job/artifact/repository history live; semantic retrieval, controlled business-rule editing and model learning pending. |
 | 13. Design/browser | Hosted Chromium:27 frontend checks/3 emulated viewport sizes/15 screenshots with source-bound CI/archive verification on VPS. Two localization/touch findings retained; fixes, cross-browser/real-device/pixel/full accessibility pending. |
@@ -1063,7 +1098,9 @@ The original audit itself granted no access; the current registry permits only i
 public source reads. No inspected project was modified, installed or deployed. Unknown
 project mappings remain unassigned; Inventory remains denied. Stage 7 is not complete.
 
-Next priorities: extend the read-only preflight toward a separately reviewed publisher and
+Next independent priority: connect bounded owner-only voice transport to transcript preview and
+explicit project/task confirmation; see LOCAL_VOICE_ROLLOUT.md. Keep stage10 in progress until
+a real owner voice round-trip is verified. Other priorities: extend the read-only preflight toward a separately reviewed publisher and
 tested deployment rollback; no live merge/deployment before exact owner approval. Extend resource observation toward measured capacity planning and extend project coverage
 without model access. Do not automatically stop or clean independent services. NOVA now has a separate disposable hosted PostgreSQL/pg gate; the24-test VPS-local profile
 still does not cover PG or browser. The separate hosted browser profile is now live; next prepare reviewable fixes for UZ
@@ -1080,7 +1117,17 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_emergency_rollback`, only for installeda37642bf, restores
+Current UAC rollback: `uac4_voice_rollback`, only for installedb8ed9187, restores previous
+emergency-aware app `a37642bfd9a2c19a86ed92ea2c33e7dee53ef947`; state
+`.ultimate-review-data/live/uac4-local-voice-rollout.json`. It drains only UAC, preserves
+owner pauses/emergency state and retains private voice assets/policy/reports/typed memory/
+receipts/accounting. It cancels only unsupported queued voice-local-v1 acceptance jobs.
+No live DB restore, schedule or independent service change; no live rollback executed.
+Older readers need the newer code for voice evidence references. After any owner control
+change, reassess compatibility and do not override the pause/latch. Next downgrade from
+emergency-aware code to legacy remains prohibited after any real emergency epoch change.
+
+Preceding UAC rollback: `uac4_emergency_rollback`, only for installeda37642bf, restores
 `cd8aa26964d27c2cea06360fc92a88b8fa2a3275` only while the control epoch is0 and unlatched.
 State: `.ultimate-review-data/live/uac4-emergency-rollout.json`. The downgrade gate holds the
 writer lock through UAC dispatcher/worker replacement, refusing any concurrent stop. After
