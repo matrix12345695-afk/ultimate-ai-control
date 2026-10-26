@@ -46,6 +46,10 @@ def main():
         subprocess.run([npm,'ci','--omit=dev','--ignore-scripts','--no-audit','--no-fund'],cwd=source,env=env,check=True,timeout=90,stdout=subprocess.DEVNULL)
         for database in ('nova_recovery_source','nova_recovery_target','nova_recovery_negative'):
             call('createdb','-U','postgres',database)
+            if database!='nova_recovery_source':
+                # PG18 custom dumps include CREATE SCHEMA public. Remove only the
+                # just-created empty fixture namespace, never any application object.
+                call('psql','-U','postgres','-d',database,'-v','ON_ERROR_STOP=1','-c','DROP SCHEMA public RESTRICT')
         def fixture(action,database='nova_recovery_source'):
             local=dict(env,DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:15432/'+database)
             proc=subprocess.run([node,str(HERE/'fixture.cjs'),action,database],cwd=source,env=local,capture_output=True,timeout=40)
