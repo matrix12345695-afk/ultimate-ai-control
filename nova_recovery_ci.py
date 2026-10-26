@@ -113,7 +113,7 @@ def describe(conn):
                               'Проверено ограничение старого /backup: не более5000 заявок; JSON не заменяет дамп всей схемы.',report['archive']['url']])
                 if expires(report['archive']['expires_at'])<=time.time(): lines.append('Архив истёк; отчёт исторический.')
     else: lines.append('CI восстановления ещё не сверен на VPS.')
-    lines.extend(['Снимок Render '+SNAPSHOT['observed_utc']+': '+SNAPSHOT['database_name']+', Free, PostgreSQL18, срок до19.11.2026 08:40 UTC.',
+    lines.extend(['Снимок Render '+SNAPSHOT['observed_utc']+': '+SNAPSHOT['database_name']+', Free, PostgreSQL18, срок до19.11.2026 13:40 (Ташкент).',
                   'У бесплатного тарифа нет управляемого PITR/экспортов. Подключённый SQL-инструмент заблокирован пустым внешним allowlist; доступ не расширялся.',
                   'База указана в старом runbook NOVA; текущее подключение приложения без чтения секрета не подтверждено.',
                   'Реальная приватная копия/её восстановление и доступность сборки отката Render ещё НЕ подтверждены. Публикация отключена.',
