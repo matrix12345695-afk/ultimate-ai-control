@@ -44,6 +44,7 @@ import nova_recovery_ci
 import nova_private_copy_ci
 import emergency_control as emergency
 import emergency_selftest
+import local_voice
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -88,6 +89,7 @@ def initialize(conn):
     nova_deploy.initialize(conn)
     nova_recovery_ci.initialize(conn)
     nova_private_copy_ci.initialize(conn)
+    local_voice.initialize(conn)
     emergency_selftest.initialize(conn)
 
 
@@ -197,6 +199,8 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                 result=repository_inspector(job['project'],job['payload'])
                 if not project_registry.valid_result(job['project'],result):
                     raise project_registry.RepositoryScopeError('repository_result_scope_mismatch')
+        elif job['kind']=='test_release' and job['payload'].get('target')==local_voice.PROFILE:
+            with connect(path) as conn: result=local_voice.save(conn,job,local_voice.observe(Path(path).parent/'voice-policy.json'))
         elif job['kind']=='test_release' and job['payload'].get('target')==emergency_selftest.PROFILE:
             with connect(path) as conn: result=emergency_selftest.save(conn,job,emergency_selftest.acceptance())
         elif job['kind']=='test_release' and job['payload'].get('target')==nova_private_copy_ci.PROFILE:
@@ -287,6 +291,9 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                            'Кодовый черновик проверен' if result['test_status']=='passed' else 'Проверка кодового черновика не прошла',
                            f"Артефакт #{result['artifact_id']}, SHA-256 {result['source_digest']}. Тесты: {result['test_status']}. Независимая приёмка: {result.get('independent_acceptance','not_configured')}. Просмотр: /artifact {result['artifact_id']}. Движок: {label}. "+('Восстановлен сохранённый результат; тесты повторно не запускались. ' if result.get('tests_reused') else '')+'Публикации не было.',
                            'artifact-'+str(job['id'])+'-'+result['source_digest'],job['id'])
+            elif result.get('voice_local_id'):
+                send_event(conn,'info','Локальное распознавание голоса проверено','3 проверки: закреплённая модель, декодирование OGG/Opus и распознавание публичной английской записи8 секунд. Без API/сети в изоляции. Приём ваших голосовых задач и подтверждение текста ещё не подключены. /voice4',
+                           'voice-local-'+str(job['id']),job['id'])
             elif result.get('emergency_test_id'):
                 send_event(conn,'info','Аварийная защита ULTIMATE проверена',
                            '8 сценариев остановки/сброса, блокировки новых допусков и старых согласований прошли на отдельной базе в памяти. Рабочая блокировка не включалась; Inventory не затрагивался. /emergency',
