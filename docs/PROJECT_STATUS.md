@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `95b172f38cfefe93e9dd31c2ebcf027f65a50940`, draft
-[PR #47](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/47), stacked on PR #46.
+Application: `45ddce6aed88e2dd2fc4f23aa072d20415efcc11`, draft
+[PR #48](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/48), stacked on PR #47.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -28,6 +28,52 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest increment: NOVA fixture-only publication protocol and a live read-only readiness report.
+[Draft PR48](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/48) adds
+`/nova_deploy`, `/test_nova_deploy`, “🧭 План выпуска”, immutable report storage and typed
+memory. Read-only App GETs revalidate the existing exact83-check CI/archive; three separate
+in-memory fixtures exercise success, conditional rollback and an uncertain accepted write.
+24 machine fault tests plus9 report/integration tests cover stale/foreign scope, concurrency,
+restart, rollback limits, immutable evidence, delivery and no live approval side effects.
+Local full sandbox-enabled suite:498 tests, no skips. Exact-app Safe unit CI40274845407
+succeeds with15 host-dependent cases skipped; the separate real-host run is required.
+Transport suite:55 tests. Protocol definition SHA256
+419cd01001b024121dabbbd3462779b3711b879a4fed5f67c23e5cfb0d13f639.
+
+The production planner is permanently dry_run_only in this revision. It never loads a Render
+credential, sends Render requests, requests/consumes owner approval, or creates simulation
+approvals/tables in live SQLite. Every plan is blocked with production_mutations=0 and
+publish_allowed/may_request_approval/published=false. Its committed Render/repository snapshot
+is a dated read-only observation, stale after15 minutes, not refreshed automatically by the
+command. A20-deploy sample is not a complete queue proof. Real backup/retained build eligibility,
+provider access, an audited live adapter and exact owner release approval remain outstanding.
+Simulations and the existing PostgreSQL rehearsal do not prove a real Render rollback.
+See [NOVA_PUBLICATION_PROTOCOL.md](../NOVA_PUBLICATION_PROTOCOL.md).
+
+[UAC-only activation40275026458](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40275026458)
+passed55 transport and498 app tests on VPS. Default app pass skips15 host-dependent
+cases; full explicit sandbox-enabled pass executes all15 with zero skips. Actual read-only
+App authentication and restored-copy immutable-plan/memory/approval-isolation probes pass.
+VPS job814 saved report05663d69b28db209dd738097774050c262c42608a622e002326dbe5deab2c229,
+scope9c2e80309df8550cd1cbb00dafe0592c1067a9913fce872f3ff39bc5c7201eaa, memory815.
+Telegram accepted activation376/result377; this is delivery acceptance, not owner approval/read.
+Plan9 remains active with verified protocol subtask. Sole dispatcher1453710, one credential-
+free worker1453229, Inventory67760 and source/config metadata unchanged. Deferred API setup
+and disabled paid policies remain; no paid request/hold/spend, new service or hourly coding
+automation. Own backup/restore check:
+/home/maksim/.ultimate-review-data/backups/before-uac4-1792993058814833351.sqlite3.
+Transport commitb8010712daa0e8788d9581b56c985a4517e153d3, bridge agenta25ab4b7ba87a918eb51e8f1f4af004448c601d9.
+Committed Render snapshot05:32:16 UTC still shows original1a23239a/live deploy and unchanged
+settings. Public domain and Render origin GETs05:36 return original homepage Git blob
+00d76b471b3675ab052bbe30526fb0f2e350ac42 and healthy PostgreSQL contract. Platform settings,
+NOVA main, public site and business data were not written. Installed app45ddce6a; subsequent
+checkpoint documentation does not change installed code.
+[Independent verify40275467233](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40275467233)
+passed with the same installed source/report/scope, Telegram receipt, typed memory, Plan and
+unchanged Inventory metadata. No additional publication or owner approval was performed.
+
+The following locked-build checkpoint is historical evidence from the preceding application:
 
 Latest [locked NOVA build reporting rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40271090255)
 passed52 transport tests and465 app tests on VPS. Its default pass skipped15 host-dependent
@@ -896,7 +942,15 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_locked_build_rollback`, only for installed95b172f3, restores
+Current UAC rollback: `uac4_nova_deploy_rollback`, only for installed45ddce6a, restores
+`95b172f38cfefe93e9dd31c2ebcf027f65a50940`; state
+`.ultimate-review-data/live/uac4-nova-deploy-protocol-rollout.json`. It drains only UAC,
+restores its worker/dispatcher, cancels only unsupported queuednova-deploy-plan-v1 jobs,
+retains owner pauses and all reports/typed refs/receipts/policy/accounting. No schedule,
+Render or independent service change; no live rollback executed. Older code requires
+newer readers for publication-plan references.
+
+Preceding UAC rollback (only when that app is current): `uac4_locked_build_rollback`, restores
 `9d0360570284a7c18b39246af4cad1632dc2fb94`; state
 `.ultimate-review-data/live/uac4-locked-build-rollout.json`. It drains/pauses only UAC,
 restores its own worker/dispatcher and cancels only unsupported queuednova-locked-build-v1

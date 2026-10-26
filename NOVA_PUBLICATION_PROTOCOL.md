@@ -16,7 +16,7 @@ The real platform observation is a timestamped, committed snapshot collected thr
 
 ## Render reference checked
 
-Official documentation: https://render.com/docs/deploys , https://render.com/docs/health-checks , https://render.com/docs/rollbacks . API reference pages returned HTTP 403 in this environment. Payload shapes were checked against official render-oss/cli generated sources at fa6219b4a167ff3094deafef2209f8a33bf670ed (`pkg/client/client.gen.go` and `types.gen.go`; original source blob IDs 56d8888cddefe4cbbc7703b083c01742584d83a2 and 2d391fa75307ae646ca996f078f5329042cc4e54). No upstream SDK is installed or vendored.
+Official documentation: https://render.com/docs/deploys , https://render.com/docs/health-checks , https://render.com/docs/rollbacks . API reference pages returned HTTP 403 in this environment. Payload shapes were checked against official render-oss/cli generated sources at fa6219b4a167ff3094deafef2209f8a33bf670ed (`pkg/client/client_gen.go` and `pkg/client/types_gen.go`; original source blob IDs 56d8888cddefe4cbbc7703b083c01742584d83a2 and 2d391fa75307ae646ca996f078f5329042cc4e54). No upstream SDK is installed or vendored.
 
 Proposed restricted writes: PATCH `/services/{id}` for autoDeployTrigger=off, healthCheckPath=/health and the exact npm-ci build command; POST `/services/{id}/deploys` with exact commitId; POST `/services/{id}/rollback` with baseline deployId. The API commit/rollback endpoints do not themselves turn off auto deploy. No API idempotency guarantee was observed. A rollback uses retained build artifacts and does not restore databases, persistent disks or external writes; current environment/configuration may differ from the target build. The simulator does not claim otherwise.
 
