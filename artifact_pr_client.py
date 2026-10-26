@@ -11,7 +11,7 @@ from artifact_pr_broker import Pending,Blocked
 
 
 def request(path,job,timeout=25):
-    import nova_ci,browser_ci,browser_candidate_ci,nova_release_ci,locked_build_ci,nova_deploy,nova_recovery_ci
+    import nova_ci,browser_ci,browser_candidate_ci,nova_release_ci,locked_build_ci,nova_deploy,nova_recovery_ci,nova_private_copy_ci
     script='nova_ci_broker.py' if job.get('kind')=='test_release' and job.get('payload')=={'target':nova_ci.PROFILE} else 'artifact_pr_broker.py'
     if job.get('kind')=='test_release' and job.get('payload')=={'target':browser_ci.PROFILE}: script='browser_ci_broker.py'
     if job.get('kind')=='test_release' and job.get('payload')=={'target':browser_candidate_ci.PROFILE}: script='browser_candidate_broker.py'
@@ -19,6 +19,7 @@ def request(path,job,timeout=25):
     if job.get('kind')=='test_release' and job.get('payload')=={'target':locked_build_ci.PROFILE}: script='locked_build_broker.py'
     if job.get('kind')=='test_release' and job.get('payload')=={'target':nova_deploy.PROFILE}: script='nova_deploy_broker.py'
     if job.get('kind')=='test_release' and job.get('payload')=={'target':nova_recovery_ci.PROFILE}: script='nova_recovery_broker.py'
+    if job.get('kind')=='test_release' and job.get('payload')=={'target':nova_private_copy_ci.PROFILE}: script='nova_private_copy_broker.py'
     command=[sys.executable,str(Path(__file__).with_name(script)),'--once',str(Path(path).resolve())]
     env={'HOME':str(Path.home()),'PATH':'/usr/bin:/bin','LANG':'C.UTF-8','PYTHONDONTWRITEBYTECODE':'1'}
     proc=subprocess.Popen(command,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,

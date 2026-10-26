@@ -126,5 +126,26 @@
     "managed_pitr_available": false,
     "managed_exports_available": false,
     "retained_Render_build_verified": false
+  },
+  "private_copy_draft": {
+    "draft_pr": 17,
+    "source_revision": "9df2a1c9fcc35e83f1a2fe35bee2480afac3254f",
+    "harness_commit": "3901bc71308f1f473a02b519bf1c6c55e05789a4",
+    "ci_run": 40290801445,
+    "tests": 30,
+    "native_fault_tests": 18,
+    "postgres_integration_tests": 12,
+    "fixture_leads": 5003,
+    "cipher": "AES-256-GCM",
+    "key_wrap": "RSA-OAEP-SHA256",
+    "format": "OpenSSL CMS DER",
+    "production_backup_verified": false,
+    "production_key_generated": false,
+    "durable_retention_verified": false,
+    "Render_execution_path_available": false,
+    "published": false,
+    "release_candidate_binding_unchanged": true,
+    "artifact_id": 12636252081,
+    "artifact_contains_backup_or_key": false
   }
 }

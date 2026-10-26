@@ -1,0 +1,17 @@
+{
+  "schema": "nova-private-copy-ci-v1",
+  "repository": "matrix12345695-afk/ultimate-ai-control",
+  "harness_commit": "3901bc71308f1f473a02b519bf1c6c55e05789a4",
+  "workflow_path": ".github/workflows/nova-private-copy.yml",
+  "workflow_name": "NOVA encrypted private-copy acceptance",
+  "gate_step": "Run and verify encrypted private copy",
+  "upload_step": "Upload private-copy evidence only",
+  "artifact_name_prefix": "nova-private-copy-",
+  "source_revision": "9df2a1c9fcc35e83f1a2fe35bee2480afac3254f",
+  "source_manifest_sha256": "625080dec4cdce53139b8d5692ab8143a93413b919d45beb9ce67b35d5e33ca1",
+  "dependency_lock_sha256": "9db9b93b90b4fbeabb5fb780eefe6345e5f87a08d9e2b530cd93335f46efafcf",
+  "postgres_major": 18,
+  "expected_tests": 30,
+  "postgres_image": "postgres@sha256:9770878138a2e83abcb10856d30cc3f24dae0d317bb956db6ab9159de6c3c80d",
+  "platform_snapshot_sha256": "1253d853077b25e718f25f824f32bd7d07c08546815afc070c13b3bb1c4deacf"
+}
