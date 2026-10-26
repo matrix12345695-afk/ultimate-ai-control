@@ -143,12 +143,14 @@ def release_scope(identity,remote):
 
 def request_release(conn,ident):
     with q._write(conn):
+        import emergency_control
+        epoch=emergency_control.require_open(conn)
         identity,remote,_=record(conn,ident);scope=release_scope(identity,remote);sha=digest(scope)
         from datetime import datetime,timezone
         existing=conn.execute('''SELECT c.id,c.approval_id FROM artifact_release_candidates c
-            JOIN approvals a ON a.id=c.approval_id WHERE c.scope_sha256=?
+            JOIN approvals a ON a.id=c.approval_id JOIN approval_control_epochs e ON e.approval_id=a.id WHERE c.scope_sha256=? AND e.epoch=?
             AND a.status IN ('pending','approved') AND a.expires_at>? ORDER BY c.id DESC LIMIT 1''',
-            (sha,datetime.now(timezone.utc).isoformat())).fetchone()
+            (sha,epoch,datetime.now(timezone.utc).isoformat())).fetchone()
         if existing: return existing[0],existing[1],scope
         # Reuse owner-authenticated approval primitives atomically; no decision is made here.
         aid=approval.request_approval(conn,ident,'publish_exact_version','production',scope,ttl_minutes=60,commit=False)

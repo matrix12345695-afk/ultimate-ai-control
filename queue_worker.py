@@ -42,6 +42,8 @@ import locked_build_ci
 import nova_deploy
 import nova_recovery_ci
 import nova_private_copy_ci
+import emergency_control as emergency
+import emergency_selftest
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -86,6 +88,7 @@ def initialize(conn):
     nova_deploy.initialize(conn)
     nova_recovery_ci.initialize(conn)
     nova_private_copy_ci.initialize(conn)
+    emergency_selftest.initialize(conn)
 
 
 def send_event(conn,kind,title,reason,event_key,task=None):
@@ -165,6 +168,7 @@ def record_failed_interval(conn,job,start,tick):
 def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project_registry.inspect_remote):
     with connect(path) as conn:
         evidence_memory.sync(conn)
+        emergency.flush_notifications(conn)
         scheduler.tick(conn)
         conn.execute("INSERT INTO agent_worker_status VALUES(?,?,?,?) ON CONFLICT(worker) DO UPDATE SET heartbeat=excluded.heartbeat,state=excluded.state,detail=excluded.detail",(WORKER,time.time(),"idle",""))
         conn.commit()
@@ -180,6 +184,7 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
     result=None
     waiting=False
     try:
+        with connect(path) as conn: emergency.check_job(conn,job['id'],job['lease_token'])
         if job["kind"]=="check_site": result=site_checker(job["payload"])
         elif job["kind"]=="inspect_repository":
             if job['payload'].get('target')==vps_resources.TARGET:
@@ -192,6 +197,8 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                 result=repository_inspector(job['project'],job['payload'])
                 if not project_registry.valid_result(job['project'],result):
                     raise project_registry.RepositoryScopeError('repository_result_scope_mismatch')
+        elif job['kind']=='test_release' and job['payload'].get('target')==emergency_selftest.PROFILE:
+            with connect(path) as conn: result=emergency_selftest.save(conn,job,emergency_selftest.acceptance())
         elif job['kind']=='test_release' and job['payload'].get('target')==nova_private_copy_ci.PROFILE:
             nova_private_copy_ci.scope(job)
             result=artifact_pr_client.request(path,job)
@@ -280,6 +287,10 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                            'Кодовый черновик проверен' if result['test_status']=='passed' else 'Проверка кодового черновика не прошла',
                            f"Артефакт #{result['artifact_id']}, SHA-256 {result['source_digest']}. Тесты: {result['test_status']}. Независимая приёмка: {result.get('independent_acceptance','not_configured')}. Просмотр: /artifact {result['artifact_id']}. Движок: {label}. "+('Восстановлен сохранённый результат; тесты повторно не запускались. ' if result.get('tests_reused') else '')+'Публикации не было.',
                            'artifact-'+str(job['id'])+'-'+result['source_digest'],job['id'])
+            elif result.get('emergency_test_id'):
+                send_event(conn,'info','Аварийная защита ULTIMATE проверена',
+                           '8 сценариев остановки/сброса, блокировки новых допусков и старых согласований прошли на отдельной базе в памяти. Рабочая блокировка не включалась; Inventory не затрагивался. /emergency',
+                           'emergency-selftest-'+str(job['id']),job['id'])
             elif result.get('nova_private_copy_ci_id'):
                 send_event(conn,'info' if result['test_status']=='passed' else 'critical',
                            'Черновик приватной копии NOVA проверен' if result['test_status']=='passed' else 'Черновик приватной копии не прошёл',
@@ -369,6 +380,11 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                            'Требуется проверка доступа, исходной версии или CI. Сохранённый запрос оставлен для сверки; merge и публикации нет.',
                            ('nova-private-copy-stopped-' if copy_check else 'nova-recovery-stopped-' if recovery_check else 'nova-deploy-plan-stopped-' if plan_check else 'locked-build-stopped-' if locked_check else 'nova-release-stopped-' if rehearsal_check else 'browser-ci-stopped-' if browser_check else 'nova-ci-stopped-' if ci_check else 'artifact-pr-stopped-')+str(job['id']),job['id'])
         return {'id':job['id'],'state':'failed' if failed else 'queued'}
+    except emergency.Stopped as exc:
+        with connect(path) as conn:
+            record_failed_interval(conn,job,start,tick)
+            queue.finish(conn,job['id'],job['lease_token'],{'blocked':str(exc),'implemented':False,'published':False,'needs_owner_review':True},awaiting_owner=True)
+        return {'id':job['id'],'state':'awaiting_owner','error':str(exc)}
     except project_registry.RepositoryScopeError as exc:
         with connect(path) as conn:
             record_failed_interval(conn,job,start,tick)

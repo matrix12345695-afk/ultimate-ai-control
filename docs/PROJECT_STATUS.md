@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `cd8aa26964d27c2cea06360fc92a88b8fa2a3275`, draft
-[PR #50](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/50), stacked on PR #49.
+Application: `a37642bfd9a2c19a86ed92ea2c33e7dee53ef947`, draft
+[PR #51](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/51), stacked on PR #50.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -29,7 +29,28 @@ runtime before attempting installation. The hourly development automation remain
 
 ## Evidence
 
-Latest increment: exact encrypted application-copy draft and UAC read-only acceptance report.
+Latest increment: [durable UAC emergency control](EMERGENCY_CONTROL.md), deployed26 October
+at14:17 Asia/Tashkent. [Rollout record](EMERGENCY_ROLLOUT_RECORD.md). Exact-app CI40297441230
+and40297445882 pass. Local and VPS full suites551/551, zero skips (all15 sandbox checks
+executed); hosted baseline intentionally skips15. Transport67/67. Isolated activation
+40297890272/job121488316872 succeeds. Dispatcher1681469, credential-free worker1681143;
+Inventory PID67760, source/config metadata unchanged. Backup/restore verified at
+`/home/maksim/.ultimate-review-data/backups/before-uac4-1793006158200625461.sqlite3`.
+Live selftest job890 succeeded, report113c7b4d30d2ebda71639f5a497c69ac59acea04d4f7d41022f46bea508070af,
+implementation314aa918ef73dfce63523abdb0aa345ca71e93403fca695aa4289fb6f05e118f,
+typed memory891. Announcement Telegram388 and result389 are persisted API acceptances,
+not owner reading or approval. `/emergency`, `/emergency_test`, emergency stop/status buttons
+and evidence-derived completed Plan subtask verified. Actual stop/reset ran only on the
+restored disposable DB and the eight-case in-memory acceptance; live latch remains false,
+epoch0. New claims and GitHub/paid mutation admissions are fenced, old approval epochs stay
+invalid after reset, and `/resume` cannot clear a latch. Admitted external requests may
+finish; receipts and unknown outcomes are retained. Provider policy/paid broker remain
+unchanged/disabled, zero live spend; owner follow-up157/Telegram380 unchanged.
+Independent verification40298557723/job121490516058 succeeds26 October14:19 Asia/Tashkent;
+same report/implementation hashes, queue job, memory, Telegram receipt and process IDs.
+The checkpoint documentation commit is separate from the installed app SHA.
+
+Preceding increment: exact encrypted application-copy draft and UAC read-only acceptance report.
 NOVA [Draft17](https://github.com/matrix12345695-afk/nova-web-agency/pull/17) head
 9df2a1c9fcc35e83f1a2fe35bee2480afac3254f adds standalone scripts/tests/doc only over
 Draft16a3c3e77e; no server route, command, startup, schedule or dependency change. Original
@@ -936,6 +957,13 @@ URL is still unknown; do not invent one or claim the chat is subscribed to Teleg
 
 ## Required progress updates
 
+Completed increment: [durable emergency control](EMERGENCY_CONTROL.md), including persistent
+stop, separate epoch-specific reset, ordinary-resume refusal, old-capability invalidation,
+new-action admission journal, notification-outbox retry and source replay protection. Local,
+hosted and VPS gates pass; restored-copy stop/reset and live queue selftest/Plan/memory/
+Telegram receipts verified. This does not activate a publisher, model, new schedule or full
+autonomous development. Inventory is unchanged.
+
 Completed increment: [independent recipe acceptance](RECIPE_ACCEPTANCE.md), adding reviewed
 eight-test contracts to both existing offline recipes in separate sandboxes, harness-bound
 recovery and a live catalog. Legacy recipe artifacts retain their original evidence; no
@@ -1013,7 +1041,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | Stage | State and next acceptance gate |
 | --- | --- |
 | 1. Owner notifications | Live delivery, durable receipts/retries/inbox; continue connecting real agent events. |
-| 2. Scheduler/queue | Live jobs, leases, pause, serialized worker and verified complete-artifact crash recovery. |
+| 2. Scheduler/queue | Live jobs, leases, pause, serialized worker and verified complete-artifact crash recovery; durable emergency latch, separate reset/resume, stale-approval invalidation and action admission journal verified. |
 | 3. API / $30 | Transport/holds implemented; key setup explicitly deferred by owner; paid policies disabled. |
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
 | 5. Tester | Python contracts and24 local guarded read-only NOVA tests plus all34 pinned NOVA tests on disposable hosted PG16 CI with persistence/restore SQL gates; exact CI evidence is verified on VPS. Browser, production-state and broader project coverage pending. |
@@ -1052,7 +1080,18 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_private_copy_rollback`, only for installedcd8aa269, restores
+Current UAC rollback: `uac4_emergency_rollback`, only for installeda37642bf, restores
+`cd8aa26964d27c2cea06360fc92a88b8fa2a3275` only while the control epoch is0 and unlatched.
+State: `.ultimate-review-data/live/uac4-emergency-rollout.json`. The downgrade gate holds the
+writer lock through UAC dispatcher/worker replacement, refusing any concurrent stop. After
+ANY real emergency stop/reset, the old code would ignore epoch bindings: rollback must
+refuse before pausing/signalling or changing source; retain compatible code and forward-fix.
+It drains only UAC, preserves owner pauses and additive emergency/approval/receipt/memory/
+accounting history, cancels only unsupported queued emergency-control-v1 selftests and
+never restores an older live DB. No schedule/external-service action or live rollback was
+performed. Typed emergency evidence requires the new reader.
+
+Preceding UAC rollback: `uac4_private_copy_rollback`, only for installedcd8aa269, restores
 `2ee77bd4830ae242834c9ebc5baee75aca69b1b7`; state
 `.ultimate-review-data/live/uac4-nova-private-copy-rollout.json`. It drains only UAC,
 restores its own dispatcher/worker and cancels only unsupported queuednova-private-copy-ci-v1

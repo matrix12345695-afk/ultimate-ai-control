@@ -63,7 +63,7 @@ def sha(value):
 
 def evidence(conn,reference):
     """Re-read only explicitly referenced SQLite rows, never files or network sources."""
-    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','artifact_pr_id','release_check_id','resource_sample_id','nova_ci_id','browser_ci_id','browser_candidate_id','nova_release_ci_id','locked_build_ci_id','nova_deploy_report_id','nova_recovery_ci_id','nova_private_copy_ci_id','result'}
+    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','artifact_pr_id','release_check_id','resource_sample_id','nova_ci_id','browser_ci_id','browser_candidate_id','nova_release_ci_id','locked_build_ci_id','nova_deploy_report_id','nova_recovery_ci_id','nova_private_copy_ci_id','emergency_test_id','result'}
             or type(reference.get('event_id')) is not int or type(reference.get('job_id')) is not int):
         raise ValueError('invalid memory reference')
     event=conn.execute('SELECT id,job_id,at,event,detail FROM agent_job_events WHERE id=?',
@@ -136,6 +136,11 @@ def evidence(conn,reference):
         if not row or row[0]!=job[0] or job[1]!='nova' or not nova_release_ci.valid(json.loads(row[1])) or nova_release_ci.util.digest(json.loads(row[1]))!=row[2]:
             raise ValueError('Browser CI evidence changed or outside scope')
         source['nova_release_ci']=row
+    if 'emergency_test_id' in reference:
+        import emergency_selftest
+        row=conn.execute('SELECT job_id,report,report_sha256 FROM emergency_selftest_runs WHERE id=?',(reference['emergency_test_id'],)).fetchone()
+        if not row or row[0]!=job[0] or job[1]!='control' or not emergency_selftest.valid(json.loads(row[1])) or emergency_selftest.util.digest(json.loads(row[1]))!=row[2]: raise ValueError('emergency selftest evidence changed')
+        source['emergency_selftest']=row
     if 'nova_private_copy_ci_id' in reference:
         import nova_private_copy_ci
         row=conn.execute('SELECT job_id,report,report_sha256 FROM nova_private_copy_ci_runs WHERE id=?',(reference['nova_private_copy_ci_id'],)).fetchone()
@@ -272,6 +277,12 @@ def observation(conn,event):
                 report=json.loads(row[1])
                 fact['nova_release_ci']={key:report[key] for key in ('ci_url','harness_commit','candidate_revision','status','nova_test_counts','rehearsal_counts','rollback_data_preservation_verified','Render_rollback_executed','publish_allowed','blockers')}
                 reference.update(nova_release_ci_id=result['nova_release_ci_id'],result=True)
+        if result and kind=='test_release' and project=='control' and type(result.get('emergency_test_id')) is int:
+            import emergency_selftest
+            row=conn.execute('SELECT job_id,report,report_sha256 FROM emergency_selftest_runs WHERE id=?',(result['emergency_test_id'],)).fetchone()
+            if row and row[0]==job_id and emergency_selftest.valid(json.loads(row[1])) and emergency_selftest.util.digest(json.loads(row[1]))==row[2]==result.get('report_sha256'):
+                report=json.loads(row[1]);fact['emergency_selftest']={k:report[k] for k in ('counts','implementation_sha256','live_control_changed','network_calls','service_signals','paid_calls')}
+                reference.update(emergency_test_id=result['emergency_test_id'],result=True)
         if result and kind=='test_release' and project=='nova' and type(result.get('nova_private_copy_ci_id')) is int:
             import nova_private_copy_ci
             row=conn.execute('SELECT job_id,report,report_sha256 FROM nova_private_copy_ci_runs WHERE id=?',(result['nova_private_copy_ci_id'],)).fetchone()
@@ -373,6 +384,7 @@ def summary(conn,project,page=1):
                 lines.append(f'Черновик #{artifact["id"]}: тесты {artifact["test_status"]}; публикация не подтверждена.')
             if fact.get('repository'): lines.append('Файлы закреплённой версии прочитаны; код и тесты не запускались.')
             if fact.get('project_test'): lines.append('Выполнен выбранный набор тестов Node; PostgreSQL и браузер не проверялись. /nova_tests')
+            if fact.get('emergency_selftest'): lines.append('8 сценариев аварийной защиты прошли на отдельной базе; рабочая блокировка не менялась. /emergency')
             if fact.get('nova_private_copy_ci'): lines.append('Draft17:30 проверок шифрованной копии и восстановления фиктивных данных; рабочая копия не получена. /nova_copy' if fact['nova_private_copy_ci']['status']=='passed' else 'Черновик шифрованной копии не прошёл CI. /nova_copy')
             if fact.get('nova_recovery_ci'): lines.append('PostgreSQL18:24 проверки восстановления5003 фиктивных заявок/4 таблиц; реальная копия ещё не проверена. /nova_recovery')
             if fact.get('nova_deploy'): lines.append('Подготовлен точный план публикации; симулятор и три фиктивных сценария. Реальное исполнение отключено. /nova_deploy')
