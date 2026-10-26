@@ -8,8 +8,18 @@ CHANGED=['.github/workflows/checks.yml','.node-version','.npmrc','index.html','p
 REPO='matrix12345695-afk/nova-web-agency'
 
 
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self,*args,**kwargs): raise RuntimeError('Source redirect denied')
+
+
 def read(url,limit):
-    with urllib.request.urlopen(url,timeout=15) as response:
+    request=urllib.request.Request(url)
+    if url=='https://api.github.com/repos/'+REPO+'/compare/'+BASE+'...'+CANDIDATE:
+        token=os.environ.get('GH_READ_TOKEN','')
+        if not token: raise RuntimeError('Read-only CI metadata token missing')
+        request.add_header('Authorization','Bearer '+token)
+    with urllib.request.build_opener(NoRedirect()).open(request,timeout=15) as response:
+
         assert response.geturl()==url
         raw=response.read(limit+1);assert len(raw)<=limit;return raw
 
@@ -20,6 +30,7 @@ def main():
     manifest=(HERE/'source-pins.json').read_bytes();pins=json.loads(manifest)
     diff=json.loads(read('https://api.github.com/repos/'+REPO+'/compare/'+BASE+'...'+CANDIDATE,220000))
     assert diff['base_commit']['sha']==BASE and diff['merge_base_commit']['sha']==BASE and diff['commits'][-1]['sha']==CANDIDATE
+    os.environ.pop('GH_READ_TOKEN',None)
     assert sorted(row['filename'] for row in diff['files'])==CHANGED
     evidence=Path.cwd()/'locked-build-evidence';assert not evidence.exists();evidence.mkdir()
     with tempfile.TemporaryDirectory(prefix='nova-locked-ci-') as folder:

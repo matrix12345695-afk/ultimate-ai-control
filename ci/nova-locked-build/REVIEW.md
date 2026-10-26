@@ -37,3 +37,8 @@ and actual platform application/revalidation. No Render sync/config/deploy, main
 merge, production data write or publication approval. Prior495a7f1a reports remain
 historical and cannot stand in for this exact new commit. Retained artifact/access,
 backup/recovery, publisher and actual platform rollback still need verification.
+
+Initial harnessb029a202 failed on anonymous GitHub API rate limits before tests.
+Parent metadata request now uses the job read-only ephemeral token only for the exact
+public compare URL, rejects redirects, then removes it. Raw source and clean test
+children never receive it. No credential is persisted or printed; no new secret.

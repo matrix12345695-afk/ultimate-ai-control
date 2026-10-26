@@ -57,6 +57,8 @@ jobs:
       - name: Install fixed Chromium revision
         run: python -m playwright install --with-deps --only-shell chromium
       - name: Run and verify locked build acceptance
+        env:
+          GH_READ_TOKEN: ${{ github.token }}
         run: python3 ci/nova-locked-build/run.py
       - name: Upload release rehearsal evidence
         if: always()
