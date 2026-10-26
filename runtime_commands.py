@@ -20,6 +20,7 @@ import browser_candidate_ci
 import nova_release_ci
 import locked_build_ci
 import nova_deploy
+import nova_recovery_ci
 import chat_binding
 import budget_gate
 import offline_developer
@@ -50,7 +51,7 @@ def handle(text,connect,source_key=None):
     known.add('/acceptance4')
     known.update(('/memory_log','/memory_item'))
     known.update(('/test_nova','/nova_tests'))
-    known.update(('/nova_build','/test_nova_build','/nova_deploy','/test_nova_deploy'))
+    known.update(('/nova_build','/test_nova_build','/nova_deploy','/test_nova_deploy','/nova_recovery','/test_nova_recovery'))
     known.update(('/test_nova_browser','/nova_browser','/nova_candidate','/test_nova_candidate','/nova_release','/test_nova_release'))
     known.update(('/test_nova_pg','/nova_pg'))
     known.update(('/vps4','/vps_check'))
@@ -59,6 +60,11 @@ def handle(text,connect,source_key=None):
     if op not in known: return None
     with connect() as conn:
         try:
+            if op=='/nova_recovery': return nova_recovery_ci.describe(conn)
+            if op=='/test_nova_recovery':
+                if len(args)!=1: return 'Использование: /test_nova_recovery'
+                ident=queue.enqueue(conn,'nova','test_release',{'target':nova_recovery_ci.PROFILE},max_attempts=5,event_key=source_key)
+                return f'CI-сверка восстановления #{ident} в очереди. /nova_recovery. Рабочая база не читается и не изменяется.'
             if op=='/nova_deploy': return nova_deploy.describe(conn)
             if op=='/test_nova_deploy':
                 if len(args)!=1: return 'Использование: /test_nova_deploy'
