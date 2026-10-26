@@ -1,0 +1,29 @@
+{
+  "schema": "nova-recovery-platform-snapshot-v1",
+  "observed_at": 1792996358.573351,
+  "observed_utc": "2026-10-26 06:32:38 UTC",
+  "workspace": "tea-d52kjcur433s73ca9810",
+  "database_id": "dpg-dbbii4gm7kps73f41k00-a",
+  "database_name": "novaweb_crm_dev",
+  "plan": "free",
+  "postgres_major": 18,
+  "status": "available",
+  "expires_at": "2026-11-19T08:40:50.912361Z",
+  "external_sql": "blocked_by_empty_allowlist",
+  "current_service_database_binding_verified": false,
+  "historical_runbook_binding": true,
+  "managed_pitr_available": false,
+  "managed_exports_available": false,
+  "production_backup_verified": false,
+  "retained_Render_build_verified": false,
+  "live_deploy_id": "dep-dbchlhqvcj2c738paun0",
+  "live_commit": "1a23239a0a9c7d79905c91505a8741d8350d7e75",
+  "source": "read_only_Render_connectors_and_current_official_docs",
+  "deploy_listing": {
+    "count": 34,
+    "pages": 3,
+    "terminal_cursor_empty": true,
+    "active_seen": false,
+    "point_in_time_only": true
+  }
+}

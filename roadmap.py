@@ -182,6 +182,15 @@ def completed_work(conn):
         except (TypeError,ValueError): passed=False
         if passed:
             details[9]=details.get(9,'')+' ✅ Draft PR16: версии/сборка закреплены,83 проверки. /nova_build.'
+    if 'nova_recovery_ci_runs' in tables:
+        import nova_recovery_ci
+        row=conn.execute('SELECT report,report_sha256 FROM nova_recovery_ci_runs ORDER BY id DESC LIMIT 1').fetchone()
+        try:
+            report=json.loads(row[0]) if row else None
+            passed=row and nova_recovery_ci.valid(report) and nova_recovery_ci.util.digest(report)==row[1] and report['status']=='passed'
+        except (TypeError,ValueError): passed=False
+        if passed:
+            details[9]=details.get(9,'')+' ✅ PG18: восстановлены5003 фиктивные заявки/4 таблицы. Рабочая копия ещё не проверена. /nova_recovery.'
     if 'nova_publication_plans' in tables:
         import nova_deploy
         row=conn.execute('SELECT report,report_sha256 FROM nova_publication_plans ORDER BY id DESC LIMIT 1').fetchone()
