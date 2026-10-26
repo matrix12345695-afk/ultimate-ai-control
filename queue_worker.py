@@ -39,6 +39,7 @@ import browser_ci
 import browser_candidate_ci
 import nova_release_ci
 import locked_build_ci
+import nova_deploy
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -80,6 +81,7 @@ def initialize(conn):
     browser_candidate_ci.initialize(conn)
     nova_release_ci.initialize(conn)
     locked_build_ci.initialize(conn)
+    nova_deploy.initialize(conn)
 
 
 def send_event(conn,kind,title,reason,event_key,task=None):
@@ -186,6 +188,9 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                 result=repository_inspector(job['project'],job['payload'])
                 if not project_registry.valid_result(job['project'],result):
                     raise project_registry.RepositoryScopeError('repository_result_scope_mismatch')
+        elif job['kind']=='test_release' and job['payload'].get('target')==nova_deploy.PROFILE:
+            nova_deploy.scope(job)
+            result=artifact_pr_client.request(path,job)
         elif job['kind']=='test_release' and job['payload'].get('target')==locked_build_ci.PROFILE:
             locked_build_ci.scope(job)
             result=artifact_pr_client.request(path,job)
@@ -265,6 +270,10 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                            'Кодовый черновик проверен' if result['test_status']=='passed' else 'Проверка кодового черновика не прошла',
                            f"Артефакт #{result['artifact_id']}, SHA-256 {result['source_digest']}. Тесты: {result['test_status']}. Независимая приёмка: {result.get('independent_acceptance','not_configured')}. Просмотр: /artifact {result['artifact_id']}. Движок: {label}. "+('Восстановлен сохранённый результат; тесты повторно не запускались. ' if result.get('tests_reused') else '')+'Публикации не было.',
                            'artifact-'+str(job['id'])+'-'+result['source_digest'],job['id'])
+            elif result.get('nova_deploy_report_id'):
+                send_event(conn,'info','План публикации NOVA подготовлен',
+                           'Точный коммит, сервис, настройки, CI и срок связаны в одном плане. Симулятор проверил выпуск, условный откат и потерянный ответ. Реальное исполнение отключено: резервная копия, доступная сборка отката, доступ провайдера и согласование ещё не подтверждены. /nova_deploy',
+                           'nova-deploy-plan-'+str(job['id']),job['id'])
             elif result.get('locked_build_ci_id'):
                 send_event(conn,'info' if result['test_status']=='passed' else 'critical',
                            'Закреплённая сборка NOVA проверена' if result['test_status']=='passed' else 'Закреплённая сборка NOVA не прошла',
@@ -333,9 +342,10 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                 ci_check=job['kind']=='test_release' and job['payload']=={'target':nova_ci.PROFILE}
                 rehearsal_check=job['kind']=='test_release' and job['payload']=={'target':nova_release_ci.PROFILE}
                 locked_check=job['kind']=='test_release' and job['payload']=={'target':locked_build_ci.PROFILE}
-                send_event(conn,'critical','Сверка закреплённой сборки остановлена' if locked_check else 'Сверка репетиции выпуска остановлена' if rehearsal_check else 'Сверка браузерного CI остановлена' if browser_check else 'Сверка PostgreSQL CI остановлена' if ci_check else 'Подготовка Draft PR остановлена',
+                plan_check=job['kind']=='test_release' and job['payload']=={'target':nova_deploy.PROFILE}
+                send_event(conn,'critical','Проверка плана выпуска остановлена' if plan_check else 'Сверка закреплённой сборки остановлена' if locked_check else 'Сверка репетиции выпуска остановлена' if rehearsal_check else 'Сверка браузерного CI остановлена' if browser_check else 'Сверка PostgreSQL CI остановлена' if ci_check else 'Подготовка Draft PR остановлена',
                            'Требуется проверка доступа, исходной версии или CI. Сохранённый запрос оставлен для сверки; merge и публикации нет.',
-                           ('locked-build-stopped-' if locked_check else 'nova-release-stopped-' if rehearsal_check else 'browser-ci-stopped-' if browser_check else 'nova-ci-stopped-' if ci_check else 'artifact-pr-stopped-')+str(job['id']),job['id'])
+                           ('nova-deploy-plan-stopped-' if plan_check else 'locked-build-stopped-' if locked_check else 'nova-release-stopped-' if rehearsal_check else 'browser-ci-stopped-' if browser_check else 'nova-ci-stopped-' if ci_check else 'artifact-pr-stopped-')+str(job['id']),job['id'])
         return {'id':job['id'],'state':'failed' if failed else 'queued'}
     except project_registry.RepositoryScopeError as exc:
         with connect(path) as conn:

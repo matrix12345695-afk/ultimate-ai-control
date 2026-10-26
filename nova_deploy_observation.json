@@ -1,0 +1,42 @@
+{
+  "schema": "nova-publication-observation-v1",
+  "observed_at": 1792992736,
+  "observed_utc": "2026-10-26 05:32:16 UTC",
+  "origin": "control_room_read_only_connectors",
+  "workspace": "tea-d52kjcur433s73ca9810",
+  "service": "srv-dbbhm5k9v7es73f9kf10",
+  "repository": "https://github.com/matrix12345695-afk/nova-web-agency",
+  "type": "web_service",
+  "runtime": "node",
+  "suspended": "not_suspended",
+  "plan": "free",
+  "settings": {
+    "auto_deploy": "commit",
+    "health": "",
+    "build": "npm install --omit=dev"
+  },
+  "live": {
+    "id": "dep-dbchlhqvcj2c738paun0",
+    "commit": "1a23239a0a9c7d79905c91505a8741d8350d7e75",
+    "status": "live"
+  },
+  "repo": {
+    "main": "1a23239a0a9c7d79905c91505a8741d8350d7e75",
+    "head": "a3c3e77e0e74d33241935d25dd3bdfdd306ccd90",
+    "base": "495a7f1a1a3a25c45fd98101fffa9c02e58f3970",
+    "state": "open",
+    "draft": true,
+    "merged": false,
+    "id": 1426666605,
+    "full_name": "matrix12345695-afk/nova-web-agency"
+  },
+  "queue_sample": {
+    "size": 20,
+    "active_seen": false,
+    "complete": false
+  },
+  "backup_verified": false,
+  "retained_build_verified": false,
+  "provider_access_ready": false,
+  "live_execution_enabled": false
+}
