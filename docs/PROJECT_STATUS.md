@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `2ee77bd4830ae242834c9ebc5baee75aca69b1b7`, draft
-[PR #49](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/49), stacked on PR #48.
+Application: `cd8aa26964d27c2cea06360fc92a88b8fa2a3275`, draft
+[PR #50](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/50), stacked on PR #49.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -28,6 +28,65 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest increment: exact encrypted application-copy draft and UAC read-only acceptance report.
+NOVA [Draft17](https://github.com/matrix12345695-afk/nova-web-agency/pull/17) head
+9df2a1c9fcc35e83f1a2fe35bee2480afac3254f adds standalone scripts/tests/doc only over
+Draft16a3c3e77e; no server route, command, startup, schedule or dependency change. Original
+NOVA checks40290768772 pass. Required hosted gate3901bc71308f1f473a02b519bf1c6c55e05789a4 /
+push40290801445/job121465134159 passes30 checks:18 native fault/unit plus12 real PG18 cases.
+5003 synthetic leads/all4 supported tables are read in one read-only snapshot, streamed
+into standard CMS AES-256-GCM/RSA-OAEP-SHA256 and recovered to an empty loopback fixture
+with transactional text readback. Bigint/raw JSON precision, microseconds, source state,
+constraints, event sequence and Telegram/reminder dedup survive. Failed recovery rolls
+back all newly created objects. Exclusive private files, cleanup, corrupt/wrong-key inputs,
+limits, schema drift and read/commit faults are verified. These are fixture results, not
+actual production export/retention/recovery or a formal cryptographic/dependency audit.
+
+Node24.21.0/OpenSSL3.0.13/PG18.6 hosted acceptance; local native iteration used24.19.0/3.5.7
+and is not mislabeled. Initial source/harnessd09def38/bfdec31b failed on PG18 NOT NULL catalog
+differences; corrected before passing. Source manifest625080dec4cdce53139b8d5692ab8143a93413b919d45beb9ce67b35d5e33ca1.
+Production lock unchanged9db9b93b90b4fbeabb5fb780eefe6345e5f87a08d9e2b530cd93335f46efafcf.
+Verified archive12636252081/1424bytes/SHA256c290a6e7da296ac9091ee2bc0c08c45851f5c620eb693a2596efaae374a0fb3a
+expires2026-11-25T08:14:12Z; only report.json and public source pins, no copy/key material.
+Report-file SHA2564940583a2330b07d1cf0ab975bedb74dfa5ee3e9ea0c545dc73972ab6ad75850.
+
+Current verified Render Free docs exclude SSH/Dashboard shell and one-off jobs. Internal
+outbound DB access is possible subject to same workspace/region/isolation, but the current
+tools provide no invocation path; runtime OpenSSL and live service binding are unverified.
+Hosted SQL remains blocked by the empty external allowlist. Nothing was opened/upgraded.
+An approved invocation, owner recipient/key custody, private durable storage and recovery
+of the exact real object remain required before production_backup_verified can be true.
+The known Free DB expires19November13:40 Tashkent. No publication or payment is authorized.
+Existing release binding remainsa3c3e77e; Draft17 receives no implicit approval.
+
+/nova_copy, /test_nova_copy, “🔐 Копия NOVA”: exact-contract GET-only App observation, separate
+private0600 policy, immutable reports, typed memory and completed Plan9 subtask; the full
+stage stays active. /nova_recovery links it. The delivered owner follow-up157/message380
+keeps its exact original title/reason/action/receipt, with no duplicate decision. Production
+key generation, retention, execution availability, production backup and publication flags
+all remain false. See [NOVA_PRIVATE_COPY.md](NOVA_PRIVATE_COPY.md).
+Local524 app tests pass with all15 sandbox cases executed, zero skips;61 transport tests.
+Exact-app Safe unit CI40290990690 and extra private-copy acceptance40290990678 pass.
+
+[UAC-only rollout40291224949](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40291224949)
+passed61 transport and524 app tests on VPS: default pass skips15 host-dependent cases,
+full explicit sandbox-enabled pass executes all15 without skips. Actual App read-only
+CI authentication and restored-copy pending/report-tamper/memory probes pass. VPS job869,
+report9b16c0fa183b178dfa4de2e6e7d5d6d84a221fb1364ee268985533a845a31abe,
+memory870 and Telegram result384 accepted. Original owner-followup157/message380 content
+and receipt unchanged. One dispatcher1622690, one credential-free worker1622307, Inventory67760
+and source/config unchanged. Model setup deferred, paid calls/holds/spend0; no new coding
+schedule, service, production key or NOVA/Render/DB/network/payment/publication mutation.
+Own backup tested through isolated restored copy:
+/home/maksim/.ultimate-review-data/backups/before-uac4-1793002788670285838.sqlite3.
+Transportc5dcf0f53a85f6a07c793699fb1f30577846b94b; bridge-agenta468d1ae4d319efbf50695468e84ed7627a48c9a.
+Installed appcd8aa269; subsequent checkpoint documentation does not change installed code.
+[Independent verify40291828696](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40291828696)
+passed with the same source/report/archive, result receipt, typed memory/Plan, original
+owner-followup content, Inventory metadata and disabled paid policies.
+
+The following recovery checkpoint is historical evidence from the preceding application:
 
 Latest increment: PostgreSQL18 application-schema recovery fixture and private-backup readiness.
 The actual hosted [24-check recovery gate40280260616](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40280260616)
@@ -993,7 +1052,15 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_nova_recovery_rollback`, only for installed2ee77bd4, restores
+Current UAC rollback: `uac4_private_copy_rollback`, only for installedcd8aa269, restores
+`2ee77bd4830ae242834c9ebc5baee75aca69b1b7`; state
+`.ultimate-review-data/live/uac4-nova-private-copy-rollout.json`. It drains only UAC,
+restores its own dispatcher/worker and cancels only unsupported queuednova-private-copy-ci-v1
+jobs, preserving owner pauses, reports/history/typed refs/notifications/accounting/policies.
+No live DB restore, schedule change or independent service action; no live rollback executed.
+Older readers require newer code for private-copy memory references.
+
+Preceding UAC rollback (only when that app is current): `uac4_nova_recovery_rollback`, restores
 `45ddce6aed88e2dd2fc4f23aa072d20415efcc11`; state
 `.ultimate-review-data/live/uac4-nova-recovery-rollout.json`. It drains only UAC, restores
 its dispatcher/worker and cancels only unsupported queuednova-recovery-ci-v1 jobs, preserving
