@@ -1,0 +1,49 @@
+name: NOVA PostgreSQL18 recovery acceptance
+on:
+  push:
+    paths: ['ci/nova-recovery/**', '.github/workflows/nova-recovery.yml']
+  pull_request:
+    paths: ['ci/nova-recovery/**', '.github/workflows/nova-recovery.yml']
+permissions:
+  contents: read
+jobs:
+  recovery:
+    name: NOVA PostgreSQL18 recovery acceptance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres@sha256:9770878138a2e83abcb10856d30cc3f24dae0d317bb956db6ab9159de6c3c80d
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['15432:5432']
+        options: >-
+          --memory=512m --cpus=1 --pids-limit=64
+          --tmpfs /var/lib/postgresql:rw,size=256m
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - name: Checkout exact harness
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Set reviewed Node version
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.21.0'
+      - name: Set reviewed Python version
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Run and verify PostgreSQL18 recovery
+        env:
+          PG_FIXTURE_CONTAINER: ${{ job.services.postgres.id }}
+        run: python3 ci/nova-recovery/run.py
+      - name: Upload recovery evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: nova-pg18-recovery-${{ github.run_attempt }}
+          path: recovery-evidence/
+          if-no-files-found: error
+          retention-days: 30
