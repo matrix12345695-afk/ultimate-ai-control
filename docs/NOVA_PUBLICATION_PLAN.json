@@ -101,5 +101,30 @@
     },
     "scope": "exact candidate/service/workspace/baseline/settings/CI/expiry",
     "ambiguity": "durable intent; unknown write response stops without automatic retry"
+  },
+  "recovery_rehearsal": {
+    "profile": "nova-recovery-ci-v1",
+    "harness_commit": "25aeef847dd978b19a9807e147b532de6f8a57ca",
+    "ci_run": 40280260616,
+    "attempt": 1,
+    "postgres_major": 18,
+    "tests": 24,
+    "fixture_leads": 5003,
+    "tables": 4,
+    "production_backup_verified": false,
+    "artifact_id": 12632235477,
+    "artifact_digest": "sha256:cb5778e8d25951e546910a9cfccdfb1e3752e487ebf9f2f75046f8e876e9142b",
+    "contains_database_dump": false
+  },
+  "recovery_platform_snapshot": {
+    "database_id": "dpg-dbbii4gm7kps73f41k00-a",
+    "plan": "free",
+    "postgres_major": 18,
+    "expires_at": "2026-11-19T08:40:50.912361Z",
+    "external_sql": "blocked_by_empty_allowlist",
+    "current_service_database_binding_verified": false,
+    "managed_pitr_available": false,
+    "managed_exports_available": false,
+    "retained_Render_build_verified": false
   }
 }

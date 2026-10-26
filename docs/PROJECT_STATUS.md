@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `45ddce6aed88e2dd2fc4f23aa072d20415efcc11`, draft
-[PR #48](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/48), stacked on PR #47.
+Application: `2ee77bd4830ae242834c9ebc5baee75aca69b1b7`, draft
+[PR #49](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/49), stacked on PR #48.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -28,6 +28,57 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest increment: PostgreSQL18 application-schema recovery fixture and private-backup readiness.
+The actual hosted [24-check recovery gate40280260616](https://github.com/matrix12345695-afk/ultimate-ai-control/actions/runs/40280260616)
+passes for harness25aeef847dd978b19a9807e147b532de6f8a57ca and exact NOVA Draft16a3c3e77e.
+A SELECT-only export role produces a consistent custom-format public-schema dump while
+another fixture writer adds a later record. All5003 synthetic leads and4 tables restore
+with exact field/history/sequence/constraint/dedup/reminder checks. Corrupt/truncated/missing,
+unsafe-mode/manifest, nonempty and foreign destinations are refused. The old lead-only JSON
+export5000 limit is reproduced; no real production lead count is inferred. New observer
+never reads live SQL or sets production_backup_verified/Render_rollback_eligible/publish_allowed.
+Only dated Render metadata and exact GitHub CI/archive evidence are stored. /nova_recovery,
+/test_nova_recovery and “💾 Восстановление NOVA”; typed memory and completed subtask in Plan9,
+which remains active. The previous publication protocol remains unchanged/disabled.
+
+Known NOVA database dpg-dbbii4gm7kps73f41k00-a is Free/PostgreSQL18/available, expiry
+2026-11-19T08:40:50.912361Z (19November13:40 Tashkent). The historical NOVA runbook names it
+as the working CRM; current service DATABASE_URL binding was not inspected. Current Render
+docs exclude Free from managed PITR/logical exports. Hosted SQL metadata query is blocked
+by the empty external allowlist; no network/access setting was changed.34 deployment records
+were enumerated with a terminal empty cursor and no active status seen at observation;
+a live baseline deploy record does not prove its build is retained. Private production
+export/durable encrypted storage/restore of that exact export and baseline build eligibility
+remain missing. A deduplicated owner follow-up records the private export need before expiry;
+it does not authorize payment, access expansion, publication or resolve deferred model setup.
+
+Archive12632235477/1522bytes/SHA256cb5778e8d25951e546910a9cfccdfb1e3752e487ebf9f2f75046f8e876e9142b
+expires2026-11-25T06:31:20Z; ZIP/report/source pins verified. Only synthetic counts/digests
+and public source pins are uploaded. The65806-byte test dump is private and discarded.
+Report-file SHA2567c4265945ba647bda2007feb9d3a1113070963be01fea8e6cdf1de3c3af341d8.
+See [NOVA_RECOVERY.md](NOVA_RECOVERY.md) and [review](../ci/nova-recovery/REVIEW.md).
+Local515 app tests (all15 sandbox cases executed, zero skips),58 transport tests;
+exact-app Safe unit CI40280599361 and extra recovery acceptance40280599383 pass.
+
+[UAC-only rollout40280745551](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40280745551)
+passed58 transport and515 app tests on VPS: default pass skips15 host-dependent cases,
+full explicit sandbox-enabled pass executes all15 with zero skips. Actual App GET-only
+CI authentication and restored-copy pending/tamper/typed-memory probes pass. VPS job835,
+report8bcd9e6f93d53584a7e2fd0639c543a88a182076154821c94b69795ce356286f,
+memory836; Telegram result382 and owner-followup157/message380 accepted. Delivery acceptance
+is not owner approval/read. Sole dispatcher1516410 and one credential-free worker1516056;
+Inventory67760 and source/config metadata unchanged. Paid calls/holds/spend0 and model setup
+deferred. No new service, coding schedule, provider access or live NOVA/Render/DB mutation.
+Own backup with restored-copy verification:
+/home/maksim/.ultimate-review-data/backups/before-uac4-1792996687113260289.sqlite3.
+Transport05b6d7ac4ed7a744aa248e108dbfd31924d175be; bridge-agent21ac4f1507cef2712c7034b53aefd05116467a85.
+Installed app2ee77bd4; subsequent documentation records this checkpoint without reinstallation.
+[Independent verify40281257729](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40281257729)
+passed with same source/report/CI/archive, owner-followup and result receipts, memory/Plan,
+Inventory metadata and disabled paid policies.
+
+The following protocol checkpoint is historical evidence from the preceding application:
 
 Latest increment: NOVA fixture-only publication protocol and a live read-only readiness report.
 [Draft PR48](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/48) adds
@@ -942,7 +993,15 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_nova_deploy_rollback`, only for installed45ddce6a, restores
+Current UAC rollback: `uac4_nova_recovery_rollback`, only for installed2ee77bd4, restores
+`45ddce6aed88e2dd2fc4f23aa072d20415efcc11`; state
+`.ultimate-review-data/live/uac4-nova-recovery-rollout.json`. It drains only UAC, restores
+its dispatcher/worker and cancels only unsupported queuednova-recovery-ci-v1 jobs, preserving
+owner pauses, recovery reports/archive metadata, owner follow-up, typed references, policy,
+receipts and accounting. No live DB restore, schedule or independent service change; no
+live rollback executed. Older readers require newer code for recovery memory references.
+
+Preceding UAC rollback (only when that app is current): `uac4_nova_deploy_rollback`, restores
 `95b172f38cfefe93e9dd31c2ebcf027f65a50940`; state
 `.ultimate-review-data/live/uac4-nova-deploy-protocol-rollout.json`. It drains only UAC,
 restores its worker/dispatcher, cancels only unsupported queuednova-deploy-plan-v1 jobs,
