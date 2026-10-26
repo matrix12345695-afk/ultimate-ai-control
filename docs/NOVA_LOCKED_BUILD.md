@@ -59,8 +59,54 @@ adds explicit engine/backend/upload contracts, with old profile defaults unchang
 The mixed gate is83 total including34 browser checks, not83 browser-only tests.
 
 Local465 app tests pass with15 actual Python/Node sandbox cases,0 skips under reviewed
-policies. VPS activation/receipt are pending verification in this source commit.
+policies. VPS activation/receipt are verified below; independent recheck follows in the checkpoint.
 Remaining: fresh service/retained-build/backup/recovery checks, approved actual build/
 health/auto-deploy settings, exact-version least-privilege publisher and precise owner
 publication approval. Draft lock/Blueprint success does not change deployed dependencies
 or platform settings and cannot transfer approval across source revisions/projects.
+
+## Verified VPS activation,2026-10-26 UTC
+
+Installed app95b172f38cfefe93e9dd31c2ebcf027f65a50940 / UAC Draft PR47 stacked on46.
+Rollout40271090255 passed52 transport tests and465 app tests. First default pass
+skipped15 host-dependent cases; full sandbox-enabled pass included all15 actual
+Python/Node cases with0 skips. Exact-app Safe unit CI40270832706/40270836147 and
+locked acceptance PR40270836000 succeed. Existing App read-only authentication
+verified immutable83-check CI/archive before activation; pending/tamper/memory
+invalidation probes ran only on a restored DB copy, retaining owner notes/rules.
+
+VPS job798 saved report00660427e84c91454de0cf23c93d8a8657459f69021c175b4ce5045d1a5b73dc.
+Telegram accepted activation374/result375; typed evidence memory799 binds it.
+Plan9 stays active, marking only the locked Draft component complete. No production
+approval/candidate created/consumed, key/policy budget override or hourly coding
+schedule enabled. Existing browser/PG/rehearsal/Node/resources/recipe/PR/approval
+preflight proof reverified with unchanged historical contracts and report hashes.
+Sole poller1405948 and one credential-free worker verified. InventoryPID67760/source/
+config metadata unchanged; paid calls/holds/spend0, provider setup still deferred.
+No browser/SDK/pg package/database installed on VPS; no Render or NOVA deployment.
+
+Backup/home/maksim/.ultimate-review-data/backups/before-uac4-1792990335786495219.sqlite3.
+Transportdcb6f8ebe22d7c7dcf5d6a3ffae3c48e35d1ddba; state
+.ultimate-review-data/live/uac4-locked-build-rollout.json. UAC-only rollback
+uac4_locked_build_rollback requires exact95b172f3, drains only UAC, restores9d036057,
+cancels only unsupported queuednova-locked-build-v1 checks and preserves owner pauses,
+additive report/archive/policy/receipt/history/typed refs/accounting and external
+services. Older readers need this newer code for locked-build memory references.
+No DB restore or actual live rollback executed; this is not a Render rollback.
+
+At04:51 UTC, control-room Render GETs still showed original live deploy
+ dep-dbchlhqvcj2c738paun0/1a23239a, empty HTTP health path, auto-deploycommit and
+npm install --omit=dev build. Public homepageGET200/35735 bytes matched original
+blob00d76b471b3675ab052bbe30526fb0f2e350ac42. Proposed lock/build/health/off settings
+remain un-applied. NOVA_PUBLICATION_PLAN.json now binds candidate16 and lock/83-check
+evidence, but remains non-executable and requires fresh platform/retained-build/
+backup/recovery/access checks and exact owner authorization before action.
+
+Independent verification40271650507 at04:57 UTC repeated exact run40270398506/attempt1,
+harness7d4081e9/sourcea3c3e77e, contract/archive/report hashes, receipt375, memory799,
+partial Plan9 and source95b172f3. Poller1405948/one clean worker and Inventory/config
+were unchanged; paid policy remained disabled and hourly coding automation disabled.
+Fresh control-room Render reads at05:00 UTC still showed empty health path, commit
+auto-deploy and old npm install build; NOVA main remained1a23239a. Public homepage
+GET200 again matched original35735-byte blob00d76b47. These are separate timestamped
+observations, not an automatic VPS Render feed or permission to change settings.

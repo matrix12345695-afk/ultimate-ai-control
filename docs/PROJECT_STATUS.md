@@ -1,12 +1,12 @@
 # ULTIMATE AI CONTROL 4.0 — current checkpoint
 
-Updated 2026-10-25 UTC. This is the resume point for later owner-authorized development. Historical
+Updated 2026-10-26 UTC. This is the resume point for later owner-authorized development. Historical
 deployment records retain their original observations; this file identifies the latest state.
 
 ## Installed state
 
-Application: `9d0360570284a7c18b39246af4cad1632dc2fb94`, draft
-[PR #46](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/46), stacked on PR #45.
+Application: `95b172f38cfefe93e9dd31c2ebcf027f65a50940`, draft
+[PR #47](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/47), stacked on PR #46.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -28,6 +28,65 @@ Private setup may resume only when the owner returns to it; then review the help
 runtime before attempting installation. The hourly development automation remains disabled.
 
 ## Evidence
+
+Latest [locked NOVA build reporting rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40271090255)
+passed52 transport tests and465 app tests on VPS. Its default pass skipped15 host-dependent
+cases; full sandbox-enabled pass included all15 real Python/Node cases without skips.
+Exact-app Safe unit CI40270832706/40270836147 and83-check PR40270836000 succeed.
+Actual App read-only authentication and restored-copy pending/tamper/memory probes passed.
+
+NOVA Draft PR16(head a3c3e77e0e74d33241935d25dd3bdfdd306ccd90) is stacked on interface
+PR15/495a7f1a. Six build/config files pin Node24.21.0, pg8.23.1 and the unchanged reviewed
+14-package integrity tree; engine-strict plus production npm ci reject mismatches. Main/live
+application/business code is unchanged. Blueprint proposes npm ci and auto-deployoff with
+existing source/health; current Render JSON Schema validation passes. It is not platform
+validation/sync or approval. Higher-priorityNODE_VERSION is not inspected/changed; build
+fails safely on an incompatible runtime. Actual npm11.19.0 recorded; audit0 known advisories
+at run, not a permanent security guarantee. NOVA project checks40269808859 succeed.
+
+Combined hosted harness7d4081e9bdc86cdc620656b44cadb40067d12331 / push40270398506 and
+PR40270404161 pass34 original app tests,15 real HTTP/PostgreSQL transition/data checks and
+34 Chromium checks:83 total,0 skips,15 PNGs. Candidate installs its own committed production
+lock; installed versions/integrity match all14 reviewed packages. Actual invalid lock/runtime
+installs fail EUSAGE/EBADENGINE. Four fixture CRM tables survive baseline->candidate->baseline
+including candidate-era writes, no DB restore. Browser form API is mocked; restart HTTP is
+real. No production data, actual Render rollback, real-device/full-accessibility or zero-
+downtime acceptance. Initial anonymous metadata rate-limit failure occurred before tests;
+fixed parent scopes the ephemeral read-only token to exact compare URL and never to children.
+
+Archive12628940071/12842301 bytes/digestab2beb587d10fef44c010ac9b4b3402d9e8cdb0a9c75b06065c7c802166d8953
+expires2026-11-25T04:43:30Z. Downloaded ZIP/report hash and all15 PNG hashes/dimensions verified.
+Report-file SHA256fd2f9385f4248bc6ba1e2becc4657cbe8bb9e74be87e21e0a1a9bdd9af812ec3.
+Production lock SHA2569db9b93b90b4fbeabb5fb780eefe6345e5f87a08d9e2b530cd93335f46efafcf.
+
+VPS job798 saved report00660427e84c91454de0cf23c93d8a8657459f69021c175b4ce5045d1a5b73dc.
+Telegram accepted activation374/result375; memory799 binds report/contract/source/lock/archive.
+/nova_build or 📦 Сборка NOVA shows83-check split and proposal status; /test_nova_build only
+GET-revalidates fixed run/attempt/archive. Separate600policy/scope/lease before key use,
+immutable report and typed memory. Shared CI observer explicitly supports mixed engine,
+backend and upload-step contracts, with old defaults/history unchanged. /nova_release now
+labels495a7f1a as the previous version and links the new build. Plan9 stays active; only
+verified Draft work is completed. No production approval/candidate created/consumed.
+
+Sole dispatcher1405948 and one credential-free worker verified; Inventory67760/source/config
+metadata unchanged. Paid calls/holds/spend0, model setup deferred. No hourly coding schedule,
+provider grant/key, new service, VPS browser/DB/dependency or live NOVA/Render change.
+At04:51 UTC Render still usesdep-dbchlhqvcj2c738paun0/1a23239a, empty health path, commit
+auto-deploy and npm install build; public homepage200/35735 bytes matches original00d76b47.
+Backup/home/maksim/.ultimate-review-data/backups/before-uac4-1792990335786495219.sqlite3.
+See [NOVA_LOCKED_BUILD.md](NOVA_LOCKED_BUILD.md) and non-executable
+[NOVA_PUBLICATION_PLAN.json](NOVA_PUBLICATION_PLAN.json) for exact source/lock/evidence,
+proposed actual build/health/off settings and remaining fresh platform/artifact/recovery/
+access/owner approval. Lock is fixed in Draft, not deployed. Actual Render rollback and a
+least-privilege exact-version publisher remain unverified/unconnected. Installed app95b172f3;
+subsequent documentation commits record this checkpoint without changing installed code.
+
+[Independent verify40271650507](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40271650507)
+passed04:57 UTC with same report/archive/receipt/memory/Plan/source and Inventory state.
+Fresh Render/main/public HTML observations05:00 UTC still show original service settings
+and baseline1a23239a; all proposed build/health/off changes remain un-applied.
+
+The following release-rehearsal checkpoint is historical evidence from the preceding application:
 
 Latest [NOVA release-rehearsal reporting rollout](https://github.com/matrix12345695-afk/inventory-bot/actions/runs/40234805546)
 passed49 transport tests and456 app tests on VPS. The default pass skipped15 host-dependent
@@ -837,7 +896,15 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_nova_release_rollback`, only for installed9d036057, restores
+Current UAC rollback: `uac4_locked_build_rollback`, only for installed95b172f3, restores
+`9d0360570284a7c18b39246af4cad1632dc2fb94`; state
+`.ultimate-review-data/live/uac4-locked-build-rollout.json`. It drains/pauses only UAC,
+restores its own worker/dispatcher and cancels only unsupported queuednova-locked-build-v1
+checks, retaining owner pauses, additive reports/archive/policy/receipts/history/typed refs
+and accounting. No DB restore, schedule/external-service change or actual Render rollback;
+no live rollback executed. Older readers require newer code for locked-build memory refs.
+
+Preceding UAC rehearsal rollback (only when that app is current): `uac4_nova_release_rollback`, restores
 `a03e1cfd22b8e807a2afa41ea6a92d6b578c3141`; state
 `.ultimate-review-data/live/uac4-nova-release-rollout.json`. It drains/pauses only UAC,
 restores its dispatcher/worker and cancels only unsupported queuednova-release-rehearsal-v1
