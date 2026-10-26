@@ -24,6 +24,7 @@ import nova_recovery_ci
 import nova_private_copy_ci
 import emergency_control as emergency
 import emergency_selftest
+import local_voice
 import chat_binding
 import budget_gate
 import offline_developer
@@ -51,6 +52,7 @@ def handle(text,connect,source_key=None):
     known.update(('/projects4','/repo_check'))
     known.update(('/analytics4','/weekly','/cost4'))
     known.update(('/emergency','/emergency_stop','/emergency_reset','/emergency_test'))
+    known.update(('/voice4','/test_voice4'))
     known.add('/readiness4')
     known.add('/acceptance4')
     known.update(('/memory_log','/memory_item'))
@@ -64,6 +66,11 @@ def handle(text,connect,source_key=None):
     if op not in known: return None
     with connect() as conn:
         try:
+            if op=='/voice4': return local_voice.describe(conn)
+            if op=='/test_voice4':
+                if len(args)!=1: return 'Использование: /test_voice4'
+                ident=queue.enqueue(conn,'control','test_release',{'target':local_voice.PROFILE},event_key=source_key)
+                return f'Проверка локального распознавания #{ident} в очереди. Только публичная тестовая запись; приём ваших голосовых пока отключён. /voice4'
             if op=='/nova_copy': return nova_private_copy_ci.describe(conn)
             if op=='/test_nova_copy':
                 if len(args)!=1: return 'Использование: /test_nova_copy'
