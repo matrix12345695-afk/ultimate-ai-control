@@ -28,6 +28,7 @@ import developer_pipeline
 import health_incidents
 import project_registry
 import work_analytics
+import worker_observer
 import weekly_reports
 import readiness_monitor
 import evidence_memory
@@ -74,6 +75,7 @@ def initialize(conn):
     queue.initialize(conn)
     scheduler.initialize(conn)
     weekly_reports.initialize(conn)
+    worker_observer.initialize(conn)
     roadmap.initialize(conn)
     init_inbox(conn)
     budget_gate.initialize(conn)
@@ -173,13 +175,14 @@ def record_failed_interval(conn,job,start,tick):
         pass  # Expired work is never assigned to another worker's lease.
 
 
-def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project_registry.inspect_remote):
+def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project_registry.inspect_remote,observer=None):
     with connect(path) as conn:
         voice_intake.cleanup(conn,Path(path).parent)
         evidence_memory.sync(conn)
         emergency.flush_notifications(conn)
         scheduler.tick(conn)
         conn.execute("INSERT INTO agent_worker_status VALUES(?,?,?,?) ON CONFLICT(worker) DO UPDATE SET heartbeat=excluded.heartbeat,state=excluded.state,detail=excluded.detail",(WORKER,time.time(),"idle",""))
+        if observer is not None:observer.touch(conn)
         conn.commit()
         job=queue.claim(conn,WORKER,queue.KINDS,lease_seconds=60)
         expired=conn.execute("SELECT id FROM agent_jobs WHERE state='failed' AND last_error='lease_expired' ORDER BY id DESC LIMIT 20").fetchall()
@@ -466,15 +469,22 @@ def main():
     signal.signal(signal.SIGTERM,stop)
     signal.signal(signal.SIGINT,stop)
     signal.signal(signal.SIGALRM,timed_out)
-    while not stopping:
-        try:
-            signal.alarm(30)
-            run_once(path)
-        except Exception as exc: print("queue_tick_error="+type(exc).__name__,flush=True)
-        finally: signal.alarm(0)
-        for _ in range(5):
-            if stopping: break
-            time.sleep(1)
+    with connect(path) as conn:observer=worker_observer.Observer.start(conn,WORKER)
+    try:
+        while not stopping:
+            failed=False
+            try:
+                signal.alarm(30)
+                run_once(path,observer=observer)
+            except worker_observer.SessionLost:break
+            except Exception as exc:
+                failed=True;print("queue_tick_error="+type(exc).__name__,flush=True)
+            finally:signal.alarm(0)
+            try:worker_observer.wait_cycle(path,observer,lambda:stopping,failed=failed)
+            except worker_observer.SessionLost:break
+            except Exception as exc:print('worker_observation_error='+type(exc).__name__,flush=True)
+    finally:
+        with connect(path) as conn:observer.close(conn)
 
 
 if __name__=="__main__": main()

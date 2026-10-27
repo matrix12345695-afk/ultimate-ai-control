@@ -126,6 +126,11 @@ def completed_work(conn):
                 weekly_reports.record(conn,row[0])
                 details[11]=details.get(11,'')+' ✅ Календарный недельный отчёт сохранён. /weekly_report.'
         except (ValueError,TypeError):pass
+    if 'worker_observer_waits' in tables:
+        import worker_observer
+        now=time.time()
+        if worker_observer.report(conn,now-86400,now)['observed_wait_seconds']>0:
+            details[11]=details.get(11,'')+' ✅ Интервалы ожидания исполнителя записываются. /worker4.'
     if 'agent_work_spans' in tables:
         count=conn.execute('SELECT count(*) FROM agent_work_spans').fetchone()[0]
         if count: details[11]=(details.get(11,'')+f' ✅ Записано интервалов работы: {count}.').strip()

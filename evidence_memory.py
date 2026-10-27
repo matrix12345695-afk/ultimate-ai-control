@@ -242,6 +242,12 @@ def observation(conn,event):
                 fact['project_test']={key:report[key] for key in
                     ('profile','revision','source_digest','test_counts','database_integration','browser_test','published')}
                 reference.update(project_test_id=ident,result=True)
+        if result and kind=='daily_report' and project=='control' and isinstance(result.get('analytics'),dict):
+            import worker_observer
+            observed=result['analytics'].get('worker_observation')
+            if worker_observer.valid_report(observed):
+                fact['worker_observation']={k:observed[k] for k in ('worker','since','until','observed_wait_seconds','unobserved_seconds','invalid_rows')}
+                reference['result']=True
         if result and kind=='daily_report' and project=='control' and type(result.get('weekly_report_id')) is int:
             import weekly_reports
             end=result['weekly_report_id']
