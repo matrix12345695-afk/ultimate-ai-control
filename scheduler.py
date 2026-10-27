@@ -2,6 +2,7 @@
 import json
 import time
 import task_queue as queue
+import weekly_reports
 
 
 def initialize(conn):
@@ -34,8 +35,8 @@ def tick(conn,now=None):
     import emergency_control
     if emergency_control.state(conn)['latched']: return []
     if conn.execute("SELECT paused FROM agent_queue_control WHERE singleton=1").fetchone()[0]: return []
-    due=conn.execute("SELECT name,project,kind,payload,interval_seconds,next_due FROM agent_schedules WHERE enabled=1 AND next_due<=? ORDER BY next_due LIMIT 10",(now,)).fetchall()
-    ids=[]
+    ids=weekly_reports.tick(conn,now)
+    due=conn.execute("SELECT name,project,kind,payload,interval_seconds,next_due FROM agent_schedules WHERE enabled=1 AND next_due<=? AND name<>? ORDER BY next_due LIMIT ?",(now,weekly_reports.NAME,10-len(ids))).fetchall()
     for name,project,kind,payload,interval,scheduled_at in due:
         ident=queue.enqueue(conn,project,kind,json.loads(payload),event_key=f"schedule:{name}:{scheduled_at:.6f}",now=now)
         conn.execute("UPDATE agent_schedules SET next_due=? WHERE name=? AND next_due=?",(now+interval,name,scheduled_at))

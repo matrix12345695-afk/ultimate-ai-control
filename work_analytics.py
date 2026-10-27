@@ -4,7 +4,7 @@ Task waiting is not worker execution or idle time. Missing observations stay unk
 Reports make no provider requests and never settle, release or enlarge a reservation.
 """
 from collections import defaultdict
-from datetime import datetime,timezone
+from datetime import datetime,timezone,timedelta
 import json
 import time
 import task_queue as queue
@@ -104,8 +104,8 @@ def describe(conn,days=1,*,now=None):
     if type(days) is not int or days not in (1,7): raise ValueError('days must be 1 or 7')
     now=queue._now(time.time() if now is None else now)
     result=report(conn,now-days*86400,now)
-    stamp=lambda at:datetime.fromtimestamp(at,timezone.utc).strftime('%d.%m %H:%M')
-    lines=[f'📊 Работа за {"24 часа" if days==1 else "7 дней"} · UTC',
+    stamp=lambda at:datetime.fromtimestamp(at,timezone(timedelta(hours=5),'Asia/Tashkent')).strftime('%d.%m %H:%M')
+    lines=[f'📊 Работа за {"24 часа" if days==1 else "7 дней"} · Asia/Tashkent',
            stamp(result['since'])+' — '+stamp(result['until']),
            'Измерено работы: '+duration(result['work_seconds'])+'.',
            'Активное выполнение: '+duration(result['measured_seconds']['active'])+' Тестирование: '+duration(result['measured_seconds']['testing']),

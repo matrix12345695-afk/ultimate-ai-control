@@ -28,6 +28,7 @@ import developer_pipeline
 import health_incidents
 import project_registry
 import work_analytics
+import weekly_reports
 import readiness_monitor
 import evidence_memory
 import nova_project_tests
@@ -72,6 +73,7 @@ def connect(path):
 def initialize(conn):
     queue.initialize(conn)
     scheduler.initialize(conn)
+    weekly_reports.initialize(conn)
     roadmap.initialize(conn)
     init_inbox(conn)
     budget_gate.initialize(conn)
@@ -265,6 +267,8 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
             with connect(path) as conn:
                 result=developer_pipeline.test_bundle(conn,job,Path(path).parent)
             waiting=result['test_status']=='passed'
+        elif job['kind']=='daily_report' and job['payload'].get('target')==weekly_reports.PROFILE:
+            with connect(path) as conn:result={'weekly_observation':weekly_reports.observe(conn,job)}
         elif job["kind"]=="daily_report":
             with connect(path) as conn:
                 result={"report":queue.report(conn,start-86400,start),"budget":budget_gate.summary(conn),
@@ -278,7 +282,9 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
         # Record only the measured handler interval. Time waiting in the queue is not work.
         with connect(path) as conn:
             queue.add_work_span(conn,job["id"],job["lease_token"],category(job),start,end,now=max(time.time(),end))
-            if result.get('resource_observation'):
+            if result.get('weekly_observation'):
+                result=weekly_reports.complete(conn,job,result['weekly_observation'],now=max(time.time(),end))
+            elif result.get('resource_observation'):
                 result=vps_resources.complete(conn,job,result['resource_observation'],now=max(time.time(),end))
             elif waiting and result.get('blocked') and roadmap.setting(conn,'provider_setup_deferred')!='true':
                 send_event(conn,"decision","Нужен исполнитель для текстовых задач",
@@ -356,7 +362,7 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                            'project-test-'+str(job['id'])+'-'+result['source_digest'],job['id'])
             elif job["kind"]=="check_site":
                 result=health_incidents.complete(conn,job,result,observed_at=end)
-            elif job["kind"]=="daily_report":
+            elif job["kind"]=="daily_report" and not result.get("weekly_report_id"):
                 metrics=result["report"]
                 seconds=sum(row["seconds"] for row in metrics["measured_seconds"] if row["category"] in ("active","testing"))
                 send_event(conn,"info","Суточный отчёт ULTIMATE",
@@ -381,7 +387,7 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                       {'target':'developer-bundle','generation_job_id':job['id'],'source_digest':result['source_digest']},
                       event_key='developer-test:'+str(job['id'])+':'+result['source_digest'])
                 result['followup_job_id']=child
-            elif job['kind']!='check_site' and not result.get('resource_sample_id'):
+            elif job['kind']!='check_site' and not result.get('resource_sample_id') and not result.get('weekly_report_id'):
                 queue.finish(conn,job["id"],job["lease_token"],result,awaiting_owner=waiting)
             conn.execute("UPDATE agent_worker_status SET heartbeat=?,state=?,detail=? WHERE worker=?",(time.time(),"waiting_owner" if waiting else "idle",str(job["id"]),WORKER))
             conn.commit()
