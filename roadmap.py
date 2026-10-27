@@ -102,7 +102,7 @@ def completed_work(conn):
         checks=counts.get(('check_site','succeeded'),0)
         if checks: details[6]=f'✅ Выполнено проверок доступности: {checks}.'
         reports=counts.get(('daily_report','succeeded'),0)
-        if reports: details[11]=f'✅ Сформировано суточных отчётов: {reports}.'
+        if reports: details[11]=f'✅ Сформировано аналитических отчётов: {reports}.'
         last=conn.execute('SELECT id,kind,state,result FROM agent_jobs ORDER BY updated_at DESC,id DESC LIMIT 1').fetchone()
         if last:
             ident,kind,state,raw=last
