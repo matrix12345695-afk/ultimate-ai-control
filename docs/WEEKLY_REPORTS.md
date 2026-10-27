@@ -28,7 +28,9 @@ has a separate durable receipt; API acceptance is not reading, task approval or 
 An ambiguous Telegram outcome may still cause duplicate delivery of the same persisted notice.
 No voice/transcript, source code, credential or arbitrary task text is copied into analytics.
 
-Rollback disables only this reviewed weekly schedule and cancels only its queued unsupported
+The final display-caption correction first uses its own compatible rollback, preserving
+the calendar feature. After that exact transition, full calendar rollback disables only
+this reviewed weekly schedule and cancels only its queued unsupported
 calendar jobs before restoring the previous voice-aware UAC app. Reports/history, confirmed
 voice tasks, private policies, the old daily/monitor schedules and owner pauses are retained.
 No live database restore or independent service action is performed. Older readers may need

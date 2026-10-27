@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `bc9a8b06277e6382fb24d5b635e143a9cacfe53f`, draft
-[PR #53](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/53), stacked on PR #52.
+Application: `6ad68431f420e0a871fdfbf7041382e6016a4a2e`, draft
+[PR #54](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/54), stacked on PR #53.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -29,7 +29,54 @@ runtime before attempting installation. The hourly development automation remain
 
 ## Evidence
 
-Latest increment: [owner voice intake and explicit confirmation](OWNER_VOICE.md), deployed27 October
+Latest increment: [calendar weekly analytics](WEEKLY_REPORTS.md), deployed27 October,
+initial source421acd3b at13:35 and final display correction6ad68431 at13:43 Asia/Tashkent.
+[Rollout record](WEEKLY_REPORTS_ROLLOUT.md). Local full631-test suite passes with zero skips;
+17 new weekly cases cover period boundaries, atomic queue/outbox/success, concurrency/replay,
+pause/epoch, unknown schedule isolation, immutable/reopened snapshot, typed memory and tamper.
+VPS631/631 full native tests on421acd3b pass in104.963 seconds with zero skips, all18
+host-dependent checks executed. Exact-source CI40473602905/40473607683 passes. Final source
+6ad68431 differs only by one reviewed display literal inroadmap.py; its gate compares old/new
+bytes and permits no other file/change. All45 affected plan/weekly/analytics/runtime tests
+pass locally and on VPS; exact-source CI40474996902/40475003219 also passes. Native execution
+code is unchanged by that caption patch; the631-case native proof is retained, not relabeled
+as a second full native run on6ad68431. Transport84 initially/85 final tests pass.
+
+Initial activation40474134650/job122088055472 succeeds; final literal patch40475251117/
+job122091776519 succeeds. Restored DB report/replay/typed-memory/unchanged-state probes pass;
+backup before calendar installation
+/home/maksim/.ultimate-review-data/backups/before-uac4-1793090025330924166.sqlite3;
+backup before caption patch
+/home/maksim/.ultimate-review-data/backups/before-uac4-1793090506450263877.sqlite3.
+Own credential-free worker3138409 and Telegram dispatcher3138760 under the existing rootless
+supervisors; Inventory PID67760/source/config unchanged. Existing daily/monitor schedule
+definitions, voice policy/gate and original owner follow-up157/Telegram380 are preserved.
+Only reviewed weekly-analytics-v1 is added to the operations queue. Monday09:00 Asia/Tashkent
+covers the preceding closed Monday00:00–Monday00:00 week. Late restart admits the latest
+eligible week only; exact period keys and atomic schedule advance prevent duplicate jobs.
+Unknown definitions are not overwritten, and owner disable/pause/emergency are respected.
+
+Live report job1359, period1792954800 (19–25 October), measured work918.8121018409729 seconds;
+immutable snapshot5bfb65e564ea28afd6cb6babca6f30e926adc193d5c55e932f31e3114e584edd,
+typed memory1360. Snapshot, one period-scoped INFO notice and job success commit together
+under the lease/current epoch. Waiting is summed by task; idle remains unknown. Costs are
+known settled receipts, while holds/incomplete receipts are separate and snapshot-timed.
+A report is not evidence of a full model-agent team. Telegram accepted announcement404,
+report405 and final caption verification406; receipts do not prove reading or approval.
+The same report/job/memory/hash/receipt survives the caption update. Next scheduled report:
+02.11.2026 09:00 Asia/Tashkent. /weekly_report reads saved calendar data, /weekly_auto shows
+schedule status; /weekly remains a rolling7-day view. Rolling report dates now use Tashkent.
+Plan11 remains active with the saved-calendar-report part completed; full observed idle,
+model-agent work and external invoice reconciliation remain pending. Voice stage10 remains
+active, genuine confirmed voice/task pairs0; its sample request168 is not duplicated.
+Provider/broker policies remain disabled/deferred, zero costs/holds and no new model key.
+Hourly coding automation stays disabled; no Inventory/NOVA production or publishing change.
+Independent final verification40475590945/job122092908320 succeeds at13:45 Asia/Tashkent.
+Final app, process IDs, original snapshot/job/memory/Telegram receipt and next scheduled
+time match. Inventory metadata/source/PID unchanged; zero paid requests; first voice sample
+still pending. Documentation checkpoint is separate from installed app.
+
+Preceding increment: [owner voice intake and explicit confirmation](OWNER_VOICE.md), deployed27 October
 at12:39 Asia/Tashkent. [Rollout record](OWNER_VOICE_ROLLOUT.md). Installed appbc9a8b06,
 exact-source CI40465293362 and40465297588 pass. Local full suite614/614, zero skips; VPS full
 native suite614/614 in270.315 seconds, zero skips, all18 host-dependent checks executed.
@@ -1125,15 +1172,15 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 2. Scheduler/queue | Live jobs, leases, pause, serialized worker and verified complete-artifact crash recovery; durable emergency latch, separate reset/resume, stale-approval invalidation and action admission journal verified. |
 | 3. API / $30 | Transport/holds implemented; key setup explicitly deferred by owner; paid policies disabled. |
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
-| 5. Tester | Python contracts and24 local guarded read-only NOVA tests plus all34 pinned NOVA tests on disposable hosted PG16 CI with persistence/restore SQL gates; exact CI evidence is verified on VPS. Browser, production-state and broader project coverage pending. |
+| 5. Tester | Pinned NOVA read-only subset plus hosted PostgreSQL, browser, locked-build and recovery fixtures have source-bound evidence; production-state, other projects and wider stacks remain pending. |
 | 6. Monitoring | Separate NOVA page/API readiness plus VPS CPU/MemAvailable/data-volume/inode observations, confirmed alarms/recovery and telemetry checks; full business checks and more targets pending. |
 | 7. Multiple projects | NOVA/Kinder pinned read scopes and real queue observations live; other mappings, isolated execution and change preparation pending. |
 | 8. Draft PRs | VPS broker created and exact-diff/CI verified a real Draft PR from a tested control recipe; broader project/model patches pending. |
 | 9. Publication approval | Exact-version candidates plus GET-only live artifact/diff/base/head/CI and existing approval preflight implemented, with durable reports and Telegram receipts; real owner decision, publisher and tested deployment rollback pending. |
-| 10. Voice | Offline speech candidate verified on VPS: pinned OGG/Opus public English fixture, isolated native inference, hashed report/memory/receipts and partial Plan; owner audio intake, RU/UZ quality and transcript-confirmed task creation pending. No paid API. |
-| 11. Analytics | Daily/weekly measured work, role/project/worker grouping, logged task waiting and per-task receipts/holds live; full idle observation and external billing reconciliation pending. |
+| 10. Voice | Owner-private10-second intake, local recognition, preview and exact project/code confirmation are enabled; native public-English and synthetic state cases are verified. Genuine incoming owner confirmation and RU/UZ quality remain pending. No paid API. |
+| 11. Analytics | Daily/rolling weekly views and delivered immutable calendar-week reports live, with measured work, logged waiting, typed memory and receipt/hold separation. Next Monday09:00 Tashkent; full idle observation and external billing reconciliation pending. |
 | 12. Memory | Rules, owner follow-ups and append-only source-verified job/artifact/repository history live; semantic retrieval, controlled business-rule editing and model learning pending. |
-| 13. Design/browser | Hosted Chromium:27 frontend checks/3 emulated viewport sizes/15 screenshots with source-bound CI/archive verification on VPS. Two localization/touch findings retained; fixes, cross-browser/real-device/pixel/full accessibility pending. |
+| 13. Design/browser | Hosted Chromium/viewport/screenshots with source-bound evidence; localization/touch fixes are prepared in Draft15 and retained in later candidates. Cross-browser, real-device, pixel and full accessibility coverage remain pending. No production publication. |
 | 14. Open source | Initial research exists; choose only after license/security/dependency/resource review. |
 | 15. Autonomous cycle | Operations run on VPS; general development, approvals/recovery and measured end-to-end acceptance pending. |
 | 16. NOVA commerce | Requirements retained; no NOVA production changes authorized by this checkpoint. |
@@ -1144,13 +1191,15 @@ The original audit itself granted no access; the current registry permits only i
 public source reads. No inspected project was modified, installed or deployed. Unknown
 project mappings remain unassigned; Inventory remains denied. Stage 7 is not complete.
 
-Next independent priority: connect bounded owner-only voice transport to transcript preview and
-explicit project/task confirmation; see LOCAL_VOICE_ROLLOUT.md. Keep stage10 in progress until
-a real owner voice round-trip is verified. Other priorities: extend the read-only preflight toward a separately reviewed publisher and
-tested deployment rollback; no live merge/deployment before exact owner approval. Extend resource observation toward measured capacity planning and extend project coverage
-without model access. Do not automatically stop or clean independent services. NOVA now has a separate disposable hosted PostgreSQL/pg gate; the24-test VPS-local profile
-still does not cover PG or browser. The separate hosted browser profile is now live; next prepare reviewable fixes for UZ
-placeholders and small language controls, then broader accessibility/device/cross-browser coverage.
+Owner-private voice intake and exact transcript/project confirmation are now installed; keep
+stage10 active until a genuine owner round-trip and speech quality are checked. The stable
+first-sample request is already delivered; do not send duplicate requests or reopen deferred
+API setup. Independent next priorities include observed worker-idle/reason intervals (never
+infer idle time from task age), broader read-only project coverage and a separately reviewed
+publication/rollback adapter. Exact owner approval is still mandatory before any real merge
+or deployment of another project. Do not stop or clean independent services. NOVA hosted
+PostgreSQL/browser/locked-build/recovery fixture gates and Draft UI fixes are retained;
+production backup and platform publication/retained-artifact conditions remain blockers.
 Pinned repository-registry observations remain reads; executed subset reports are separate. [Private model setup](PRIVATE_MODEL_SETUP.md) is explicitly deferred by the owner.
 After the owner resumes it, a single bounded real generation → exact-bundle tests → owner
 notification with an actual financial receipt will be required. Artificial-response tests
@@ -1163,15 +1212,27 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_voice_rollback`, only for installedb8ed9187, restores previous
-emergency-aware app `a37642bfd9a2c19a86ed92ea2c33e7dee53ef947`; state
-`.ultimate-review-data/live/uac4-local-voice-rollout.json`. It drains only UAC, preserves
-owner pauses/emergency state and retains private voice assets/policy/reports/typed memory/
-receipts/accounting. It cancels only unsupported queued voice-local-v1 acceptance jobs.
-No live DB restore, schedule or independent service change; no live rollback executed.
-Older readers need the newer code for voice evidence references. After any owner control
-change, reassess compatibility and do not override the pause/latch. Next downgrade from
-emergency-aware code to legacy remains prohibited after any real emergency epoch change.
+Current UAC rollback: `uac4_weekly_reports_label_rollback`, only for installed6ad68431,
+restores calendar/voice-aware app421acd3b while retaining its weekly schedule/report, voice
+inputs, history and owner pauses. State `.ultimate-review-data/live/uac4-weekly-report-label-patch.json`.
+To remove the calendar feature after that exact transition, `uac4_weekly_reports_rollback`
+accepts only421acd3b, disables its recognized weekly schedule, cancels only unsupported queued
+calendar jobs and restoresbc9a8b06; state `.ultimate-review-data/live/uac4-weekly-reports-rollout.json`.
+Immutable report/history remain; older readers require the newer app for typed weekly refs.
+No live rollback/DB restore, independent service action or unrelated schedule change performed.
+
+Preceding UAC rollback: `uac4_owner_voice_rollback`, only for
+installedbc9a8b06, restores voice-pilot appb8ed9187. State
+`.ultimate-review-data/live/uac4-owner-voice-rollout.json`. It disables voice intake, drains
+UAC work, terminates its own in-flight transport and expires unconfirmed private inputs;
+confirmed ordinary tasks, receipts/history/assets and owner pause/emergency state remain.
+See OWNER_VOICE_ROLLOUT.md. No live DB restore or independent-service action.
+
+Preceding UAC rollback: `uac4_voice_rollback`, only for installedb8ed9187, restores the preceding
+emergency-aware appa37642bf; state `.ultimate-review-data/live/uac4-local-voice-rollout.json`.
+It drains only UAC and retains private assets/policy/evidence, cancelling only unsupported
+queued public-pilot jobs. Older readers need newer code for voice evidence references.
+After any owner control change, retain compatible code and never override the pause/latch.
 
 Preceding UAC rollback: `uac4_emergency_rollback`, only for installeda37642bf, restores
 `cd8aa26964d27c2cea06360fc92a88b8fa2a3275` only while the control epoch is0 and unlatched.
