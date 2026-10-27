@@ -15,7 +15,7 @@ FRESH=45.0
 MAX_ROWS=600000
 REASONS={'empty_queue':'нет заданий','owner_pending':'нет доступных заданий; есть ожидающие решения',
     'retry_delay':'задания ждут срока повтора','capacity':'лимит параллельности занят',
-    'poll_ready':'интервал опроса; есть доступное задание','paused':'пауза владельца',
+    'poll_ready':'интервал опроса; есть доступное задание','paused':'очередь приостановлена',
     'emergency':'аварийная блокировка','changed':'состояние изменилось во время ожидания','tick_error':'пауза после ошибки цикла'}
 
 class SessionLost(RuntimeError):pass
@@ -82,7 +82,8 @@ class Observer:
         if reason not in REASONS:raise ValueError('unknown wait reason')
         with q._write(conn):
             sequence,created=self.owned(conn)
-            prior=conn.execute('SELECT MAX(ended_at) FROM worker_observer_waits WHERE session=?',(self.session,)).fetchone()[0]
+            prior_row=conn.execute('SELECT ended_at FROM worker_observer_waits WHERE session=? ORDER BY sequence DESC LIMIT 1',(self.session,)).fetchone()
+            prior=prior_row[0] if prior_row else None
             valid=(0<elapsed<=MAX_WAIT and 0<wall<=MAX_WAIT and abs(elapsed-wall)<=.25 and start>=created and (prior is None or start>=prior))
             if not valid:
                 conn.execute('UPDATE worker_observer_sessions SET dropped=dropped+1,last_seen=? WHERE id=?',(end,self.session));return False

@@ -13,7 +13,7 @@ alarm, resource limits and emergency/approval policies are preserved.
 
 Reasons come from consistent queue/control snapshots before and after the actual sleep:
 empty queue, no available jobs with owner requests pending, delayed jobs, concurrency limit,
-ready jobs during polling, owner pause, emergency latch, state transition or tick-error backoff.
+ready jobs during polling, queue pause, emergency latch, state transition or tick-error backoff.
 Reasons describe sampled boundaries; transitions between samples may be missed. Owner-pending
 requests are not claimed to be the sole cause of idle time. Task waiting and worker waits
 are different measurements. The worker status also distinguishes a current leased task from
