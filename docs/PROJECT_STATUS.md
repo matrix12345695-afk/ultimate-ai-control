@@ -29,7 +29,27 @@ runtime before attempting installation. The hourly development automation remain
 
 ## Evidence
 
-Latest increment: [public repository branch freshness](REPOSITORY_HEADS.md), deployed27 October
+Latest prepared project increment: [Kinder transactional accounting](KINDER_ACCOUNTING.md),
+Draft PR1 in Kinder-Spa-android, sourced9a63e3957a58a26bfad671c3c4b10db43b5f32e.
+Bounded work status **done: code draft and PostgreSQL acceptance**, whole Kinder/UAC
+stage7 still active. Actual category balances, reserved visits, one-time QR, strict
+previous-day19:00 pool cancellation and reasoned staff restoration/audit/superadmin
+outbox are implemented. Local44/44 and hosted CI40559051879/job122382809521, plus PR CI40559055608,44/44
+with zero skips pass. Downloaded artifact12758741901 digest and all source hashes
+match the exact commit. Android, password/HTTP authentication, physical capacity,
+real outbox-to-Telegram sender and production setup remain unfinished. Main and
+render.yaml unchanged, no live publication or UAC runtime code/permission change.
+Completion notification176/Telegram416 is persisted via bridge40559215441/
+job122383382744 at23:21 Asia/Tashkent. It marks only this bounded work complete;
+real Kinder outbox delivery and the Android app remain unfinished.
+Independent server verification40559412369/job122384079458 passes at23:23
+Asia/Tashkent: same UAC341d1277, worker3311622/dispatcher3312003, Inventory
+unchanged, original metadata jobs/reports preserved, actual paid requests0, API
+deferred, genuine voice confirmations0. No UAC source or permission activation
+was needed for this external project draft. The notification is the live bot
+completion record; this documentation checkpoint is separate from installed code.
+
+Latest installed UAC increment: [public repository branch freshness](REPOSITORY_HEADS.md), deployed27 October
 at16:25 Asia/Tashkent. [Rollout record](REPOSITORY_HEADS_ROLLOUT.md). Installed341d1277,
 exact-source CI40494650796/40494656259 passes. Local and VPS full674/674 tests with zero
 skips, all18 host-dependent checks executed; VPS146.879 seconds.21 new cases cover fixed
