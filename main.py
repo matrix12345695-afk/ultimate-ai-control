@@ -26,6 +26,9 @@ from chat_binding import current as bound_chat
 from review_bot_v45 import handle as review_handle
 from code_reviews_v48 import handle as code_review_handle
 from ai_commands_v30 import handle as ai30_handle
+import voice_intake
+import voice_native
+import telegram_voice_file
 from isolated_development_v31 import prepare as prepare_v31, format_report as report_v31
 from ai_commands_v30 import handle as ai30_handle
 
@@ -90,7 +93,7 @@ def owner_event(project, kind, title, reason, next_action):
     return ident
 def command(text,source_key=None):
     text=route(text)
-    runtime_result=runtime_handle(text,db,source_key)
+    runtime_result=runtime_handle(text,db,source_key,actor_id=ADMIN)
     if runtime_result is not None: return runtime_result
     if text.split("@")[0] == "/owner_inbox":
         with db() as conn: return format_owner_inbox(conn)
@@ -207,6 +210,14 @@ def command(text,source_key=None):
             conn.commit()
         return "Task queued (not executed)."
     return "Unknown command. Use /help"
+def accept_voice(update):
+    with db() as conn:
+        try:
+            ident=voice_intake.capture(conn,DB.parent,update,ADMIN,lambda fid:telegram_voice_file.fetch_bounded(TOKEN,fid))
+            return voice_intake.capture_response(conn,ident,ADMIN)
+        except (ValueError,PermissionError,OSError) as exc:
+            return voice_intake.error_message(exc)
+
 def main():
     if not TOKEN or not ADMIN.isdecimal(): raise SystemExit("Configure TELEGRAM_BOT_TOKEN and ADMIN_TELEGRAM_ID")
     db().close()
@@ -236,7 +247,7 @@ def main():
                         reply(chat["id"],f"Текстовая задача #{ident} сохранена. /job {ident}. Если потребуется решение, придёт уведомление.")
                     except ValueError as exc: reply(chat["id"],str(exc))
                 elif message.get("voice"):
-                    reply(chat["id"],"Распознавание голоса ещё не подключено. Отправь задачу текстом; этап есть в /roadmap.")
+                    reply(chat["id"],accept_voice(update))
                 with db() as conn: set_setting(conn,"telegram_offset",str(offset))
             if time.monotonic()>=next_owner_delivery:
                 deliver_one(db, reply, ADMIN)

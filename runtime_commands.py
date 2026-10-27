@@ -25,6 +25,8 @@ import nova_private_copy_ci
 import emergency_control as emergency
 import emergency_selftest
 import local_voice
+import voice_intake
+import voice_flow_test
 import chat_binding
 import budget_gate
 import offline_developer
@@ -42,7 +44,7 @@ def submit_text(conn,text,*,project=None,source="telegram",event_key=None):
     return queue.enqueue(conn,project,"plan_change",{"text":text.strip(),"source":source},event_key=event_key)
 
 
-def handle(text,connect,source_key=None):
+def handle(text,connect,source_key=None,actor_id=None):
     args=text.split(maxsplit=2)
     if not args: return None
     op=args[0].split("@")[0].lower()
@@ -52,7 +54,7 @@ def handle(text,connect,source_key=None):
     known.update(('/projects4','/repo_check'))
     known.update(('/analytics4','/weekly','/cost4'))
     known.update(('/emergency','/emergency_stop','/emergency_reset','/emergency_test'))
-    known.update(('/voice4','/test_voice4'))
+    known.update(('/voice4','/test_voice4','/voice','/voice_inbox','/voice_confirm','/voice_project','/voice_reject','/voice_lang','/test_voice_flow'))
     known.add('/readiness4')
     known.add('/acceptance4')
     known.update(('/memory_log','/memory_item'))
@@ -66,7 +68,26 @@ def handle(text,connect,source_key=None):
     if op not in known: return None
     with connect() as conn:
         try:
-            if op=='/voice4': return local_voice.describe(conn)
+            if op.startswith('/voice') or op=='/test_voice_flow':
+                parts=text.split();root=Path(conn.execute('PRAGMA database_list').fetchone()[2]).parent
+                if op=='/voice4': return voice_intake.describe(conn,root)
+                if op=='/test_voice_flow':
+                    ident=queue.enqueue(conn,'control','test_release',{'target':voice_flow_test.PROFILE},event_key=source_key)
+                    return f'Проверка голосовой цепочки #{ident} в очереди. Только публичный звук и отдельная тестовая база. /voice4'
+                if op=='/voice_inbox': return voice_intake.list_pending(conn,root,actor_id)
+                if op=='/voice_lang':
+                    if len(parts)!=2 or parts[1] not in ('ru','uz'):return 'Использование: /voice_lang ru или /voice_lang uz'
+                    if not actor_id or not actor_id.isdecimal():raise PermissionError('voice_owner_required')
+                    roadmap.set_setting(conn,'voice_language',parts[1]);return 'Язык новых записей: '+parts[1]+'. Уже принятые записи не меняются.'
+                if len(parts)<2 or not parts[1].isascii() or not parts[1].isdigit() or len(parts[1])>19:return 'Использование: /voice НОМЕР. /voice_inbox — список записей.'
+                ident=int(parts[1])
+                if op=='/voice' and len(parts)==2:return voice_intake.preview(conn,root,ident,actor_id)
+                if op=='/voice_reject' and len(parts)==2:return voice_intake.reject(conn,root,ident,actor_id)
+                if op=='/voice_project' and len(parts)==3:return voice_intake.change_project(conn,root,ident,parts[2],actor_id)
+                if op=='/voice_confirm' and len(parts)==4:
+                    task=voice_intake.confirm(conn,ident,parts[2],parts[3],actor_id)
+                    return f'Подтверждённая текстовая задача #{task} сохранена. /job {task}. Повтор не создаёт дубль. Генерация кода ожидает исполнителя; публикации и расходы требуют отдельного согласования.'
+                return 'Используй команду подтверждения из /voice НОМЕР.'
             if op=='/test_voice4':
                 if len(args)!=1: return 'Использование: /test_voice4'
                 ident=queue.enqueue(conn,'control','test_release',{'target':local_voice.PROFILE},event_key=source_key)
@@ -280,4 +301,5 @@ def handle(text,connect,source_key=None):
                 result=budget_gate.summary(conn)
                 return f"Месячный предел: $30.\nУчтено/зарезервировано: ${result['accounted_usd']:.4f}.\nОстаток: ${result['remaining_usd']:.4f}.\nПлатный провайдер отключён; это локальный реестр, не счёт OpenAI."
         except (ValueError,PermissionError) as exc:
+            if op.startswith('/voice'):return voice_intake.error_message(exc)
             return "Отклонено: "+str(exc)[:500]

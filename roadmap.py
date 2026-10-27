@@ -182,6 +182,14 @@ def completed_work(conn):
         except (TypeError,ValueError): passed=False
         if passed:
             details[9]=details.get(9,'')+' ✅ Draft PR16: версии/сборка закреплены,83 проверки. /nova_build.'
+    if 'voice_flow_runs' in tables:
+        import voice_flow_test
+        row=conn.execute('SELECT report,report_sha256 FROM voice_flow_runs ORDER BY id DESC LIMIT 1').fetchone()
+        try:
+            report=json.loads(row[0]) if row else None
+            passed=row and voice_flow_test.valid(report) and voice_flow_test.local_voice.util.digest(report)==row[1]
+        except (TypeError,ValueError):passed=False
+        if passed:details[10]=details.get(10,'')+' ✅ Приём/подтверждение: проверена тестовая цепочка. Ждём вашу голосовую. /voice_inbox.'
     if 'voice_local_runs' in tables:
         import local_voice
         row=conn.execute('SELECT report,report_sha256 FROM voice_local_runs ORDER BY id DESC LIMIT 1').fetchone()
@@ -189,7 +197,7 @@ def completed_work(conn):
             report=json.loads(row[0]) if row else None
             passed=row and local_voice.valid(report) and local_voice.util.digest(report)==row[1]
         except (TypeError,ValueError): passed=False
-        if passed: details[10]=details.get(10,'')+' ✅ Локальный OGG/Opus-пилот; приём голоса ещё не подключён. /voice4.'
+        if passed: details[10]=details.get(10,'')+' ✅ Локальный OGG/Opus-пилот. /voice4.'
     if 'emergency_selftest_runs' in tables:
         import emergency_selftest
         row=conn.execute('SELECT report,report_sha256 FROM emergency_selftest_runs ORDER BY id DESC LIMIT 1').fetchone()
