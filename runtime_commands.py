@@ -7,6 +7,7 @@ import health_incidents
 import owner_followups
 import project_registry
 import work_analytics
+import weekly_reports
 import readiness_monitor
 import acceptance_checks
 import evidence_memory
@@ -52,7 +53,7 @@ def handle(text,connect,source_key=None,actor_id=None):
     known.add('/monitor4')
     known.update(('/owner_later','/owner_item'))
     known.update(('/projects4','/repo_check'))
-    known.update(('/analytics4','/weekly','/cost4'))
+    known.update(('/analytics4','/weekly','/cost4','/weekly_auto','/weekly_report'))
     known.update(('/emergency','/emergency_stop','/emergency_reset','/emergency_test'))
     known.update(('/voice4','/test_voice4','/voice','/voice_inbox','/voice_confirm','/voice_project','/voice_reject','/voice_lang','/test_voice_flow'))
     known.add('/readiness4')
@@ -180,6 +181,10 @@ def handle(text,connect,source_key=None,actor_id=None):
                 if len(args)!=1: return 'Использование: /readiness4'
                 ident=queue.enqueue(conn,'nova','check_site',{'target':readiness_monitor.TARGET},event_key=source_key)
                 return f'Проверка API и готовности хранилища NOVA WEB #{ident} в очереди. Только GET /health, без записи в приложение. Результат: /job {ident} и /monitor4.'
+            if op=='/weekly_auto':return weekly_reports.status(conn)
+            if op=='/weekly_report':
+                if len(args)>2:return 'Использование: /weekly_report [номер]'
+                return weekly_reports.describe(conn,owner_followups.number(args[1]) if len(args)==2 else None)
             if op in ('/analytics4','/weekly','/daily'):
                 if op=='/analytics4' and (len(args)>2 or (len(args)==2 and args[1] not in ('24h','7d'))):
                     return 'Использование: /analytics4 24h или /analytics4 7d'

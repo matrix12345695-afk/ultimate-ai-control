@@ -63,7 +63,7 @@ def sha(value):
 
 def evidence(conn,reference):
     """Re-read only explicitly referenced SQLite rows, never files or network sources."""
-    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','artifact_pr_id','release_check_id','resource_sample_id','nova_ci_id','browser_ci_id','browser_candidate_id','nova_release_ci_id','locked_build_ci_id','nova_deploy_report_id','nova_recovery_ci_id','nova_private_copy_ci_id','emergency_test_id','voice_local_id','voice_flow_id','voice_input_id','result'}
+    if (not isinstance(reference,dict) or set(reference)-{'event_id','job_id','artifact_id','project_test_id','artifact_pr_id','release_check_id','resource_sample_id','nova_ci_id','browser_ci_id','browser_candidate_id','nova_release_ci_id','locked_build_ci_id','nova_deploy_report_id','nova_recovery_ci_id','nova_private_copy_ci_id','emergency_test_id','voice_local_id','voice_flow_id','voice_input_id','weekly_report_id','result'}
             or type(reference.get('event_id')) is not int or type(reference.get('job_id')) is not int):
         raise ValueError('invalid memory reference')
     event=conn.execute('SELECT id,job_id,at,event,detail FROM agent_job_events WHERE id=?',
@@ -73,6 +73,13 @@ def evidence(conn,reference):
     if not event or not job or event[1]!=job[0] or job[1] not in queue.PROJECTS:
         raise ValueError('memory source absent or out of scope')
     source={'event':event,'job':job}
+    if 'weekly_report_id' in reference:
+        import weekly_reports
+        end=reference['weekly_report_id']
+        snapshot,weekly_sha,notice=weekly_reports.record(conn,end)
+        record=conn.execute('SELECT job_id FROM weekly_analytics_reports WHERE period_end=?',(end,)).fetchone()
+        if record!=(job[0],) or job[1]!='control' or job[2]!='daily_report':raise ValueError('weekly report belongs to another job')
+        source['weekly_report']={'snapshot':snapshot,'sha256':weekly_sha,'notification_id':notice}
     if 'artifact_id' in reference:
         if type(reference['artifact_id']) is not int: raise ValueError('invalid artifact reference')
         artifact=conn.execute('''SELECT id,job_id,attempt,project,engine,source_digest,manifest,
@@ -235,6 +242,15 @@ def observation(conn,event):
                 fact['project_test']={key:report[key] for key in
                     ('profile','revision','source_digest','test_counts','database_integration','browser_test','published')}
                 reference.update(project_test_id=ident,result=True)
+        if result and kind=='daily_report' and project=='control' and type(result.get('weekly_report_id')) is int:
+            import weekly_reports
+            end=result['weekly_report_id']
+            snapshot,weekly_sha,notice=weekly_reports.record(conn,end)
+            row=conn.execute('SELECT job_id FROM weekly_analytics_reports WHERE period_end=?',(end,)).fetchone()
+            if row==(job_id,) and result.get('report_sha256')==weekly_sha:
+                fact['weekly_report']={'since':snapshot['since'],'until':snapshot['until'],'timezone':snapshot['timezone'],
+                    'work_seconds':snapshot['analytics']['work_seconds'],'published':False}
+                reference.update(weekly_report_id=end,result=True)
         if result and kind=='review_change' and project=='control' and type(result.get('artifact_pr_id')) is int:
             import artifact_prs
             identity,remote,_=artifact_prs.record(conn,result['artifact_pr_id'])

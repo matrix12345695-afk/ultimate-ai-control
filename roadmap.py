@@ -102,7 +102,7 @@ def completed_work(conn):
         checks=counts.get(('check_site','succeeded'),0)
         if checks: details[6]=f'✅ Выполнено проверок доступности: {checks}.'
         reports=counts.get(('daily_report','succeeded'),0)
-        if reports: details[11]=f'✅ Сформировано суточных отчётов: {reports}.'
+        if reports: details[11]=f'✅ Сформировано аналитических отчётов: {reports}.'
         last=conn.execute('SELECT id,kind,state,result FROM agent_jobs ORDER BY updated_at DESC,id DESC LIMIT 1').fetchone()
         if last:
             ident,kind,state,raw=last
@@ -118,6 +118,14 @@ def completed_work(conn):
             stage={'check_site':6,'inspect_repository':6,'review_change':4,'test_release':5,'daily_report':11}.get(kind)
             if stage:
                 details[stage]=(details.get(stage,'')+' '+f'Последняя работа #{ident}: {label}.').strip()
+    if 'weekly_analytics_reports' in tables:
+        import weekly_reports
+        row=conn.execute('SELECT period_end FROM weekly_analytics_reports ORDER BY period_end DESC LIMIT 1').fetchone()
+        try:
+            if row:
+                weekly_reports.record(conn,row[0])
+                details[11]=details.get(11,'')+' ✅ Календарный недельный отчёт сохранён. /weekly_report.'
+        except (ValueError,TypeError):pass
     if 'agent_work_spans' in tables:
         count=conn.execute('SELECT count(*) FROM agent_work_spans').fetchone()[0]
         if count: details[11]=(details.get(11,'')+f' ✅ Записано интервалов работы: {count}.').strip()
