@@ -7,6 +7,8 @@ import health_incidents
 import owner_followups
 import project_registry
 import work_analytics
+import worker_observer
+import completion_audit
 import weekly_reports
 import readiness_monitor
 import acceptance_checks
@@ -50,7 +52,7 @@ def handle(text,connect,source_key=None,actor_id=None):
     if not args: return None
     op=args[0].split("@")[0].lower()
     known={"/roadmap","/queue","/job","/work","/project","/agents","/daily","/memory","/budget4","/pause","/resume","/chat_link","/chat_bind","/job_cancel","/sandbox","/recipe","/selftest","/artifact","/artifact_code","/provider4","/broker4","/develop","/developer_demo"}
-    known.add('/monitor4')
+    known.update(('/monitor4','/worker4','/finish4'))
     known.update(('/owner_later','/owner_item'))
     known.update(('/projects4','/repo_check'))
     known.update(('/analytics4','/weekly','/cost4','/weekly_auto','/weekly_report'))
@@ -69,6 +71,10 @@ def handle(text,connect,source_key=None,actor_id=None):
     if op not in known: return None
     with connect() as conn:
         try:
+            if op=='/finish4':return completion_audit.describe(conn)
+            if op=='/worker4':
+                if len(args)>2 or (len(args)==2 and args[1] not in ('24h','7d')):return 'Использование: /worker4 24h или /worker4 7d'
+                return worker_observer.describe(conn,7 if len(args)==2 and args[1]=='7d' else 1)
             if op.startswith('/voice') or op=='/test_voice_flow':
                 parts=text.split();root=Path(conn.execute('PRAGMA database_list').fetchone()[2]).parent
                 if op=='/voice4': return voice_intake.describe(conn,root)
@@ -294,9 +300,7 @@ def handle(text,connect,source_key=None,actor_id=None):
                 row=conn.execute("SELECT project,kind,state,attempts,result,last_error FROM agent_jobs WHERE id=?",(ident,)).fetchone()
                 return f"#{ident} · {row[0]} · {row[1]}\nСтатус: {row[2]} · попыток: {row[3]}\n{row[4] or row[5] or ''}"[:3900] if row else "Задача не найдена."
             if op=="/agents":
-                rows=conn.execute("SELECT worker,heartbeat,state,detail FROM agent_worker_status").fetchall()
-                if not rows: return "Исполнитель ещё не зарегистрировался."
-                return "\n".join(f"{w}: {state}, heartbeat {max(0,time.time()-at):.0f} сек. назад, задача {detail or '—'}" for w,at,state,detail in rows)+"\nAI-разработчик, дизайнер и голосовой агент ещё не активированы."
+                return worker_observer.describe(conn)+'\nОбщий AI-разработчик и дизайнер требуют дальнейшей проверки. /finish4'
             if op=="/memory":
                 if len(args)>2: return 'Использование: /memory [проект]'
                 project=args[1] if len(args)==2 else roadmap.setting(conn,"active_project","control")

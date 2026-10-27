@@ -8,6 +8,7 @@ from datetime import datetime,timezone,timedelta
 import json
 import time
 import task_queue as queue
+import worker_observer
 
 ROLES={'review_change':'Разработка','test_release':'Тестирование',
        'inspect_repository':'Мониторинг','check_site':'Мониторинг',
@@ -82,6 +83,7 @@ def report(conn,since,until):
                 'settled_costs':costs,'settled_microusd':sum(row['microusd'] for row in costs),
                 'incomplete_receipts':incomplete,
                 'unresolved_holds':{'count':holds_count,'microusd':holds_amount},
+                'worker_observation':worker_observer.report(conn,since,until),
                 'idle_seconds':None,'unmeasured_time':'unknown; never inferred from task age or 24h minus measured work'}
     finally:
         conn.execute('RELEASE SAVEPOINT uac_analytics_read')
@@ -91,7 +93,7 @@ def summary(conn,since,until):
     result=report(conn,since,until)
     keys=('since','until','measured_seconds','work_seconds','by_role','by_project',
           'waiting_task_seconds','completed','failed','retries_scheduled','leases_expired',
-          'settled_microusd','incomplete_receipts','unresolved_holds','idle_seconds','unmeasured_time')
+          'settled_microusd','incomplete_receipts','unresolved_holds','idle_seconds','unmeasured_time','worker_observation')
     return {key:result[key] for key in keys}
 
 
@@ -131,6 +133,9 @@ def describe(conn,days=1,*,now=None):
     lines.append(f'Неразрешённые резервы сейчас: {holds["count"]} · ${holds["microusd"]/1_000_000:.6f}. Это не подтверждённый расход.')
     if result['incomplete_receipts']: lines.append('Есть неполные квитанции; показан только известный расход, итог требует сверки.')
     if waiting['unknown_tails']: lines.append('Часть ожидания неизвестна из-за неполного журнала состояний.')
+    observed=result['worker_observation']
+    lines.extend(['Наблюдавшееся ожидание operations-1: '+duration(observed['observed_wait_seconds']),
+                  'Время без наблюдений operations-1: '+duration(observed['unobserved_seconds'])+'. Подробнее: /worker4'])
     lines.extend(['Простой и незаписанное время: неизвестны. Измерения не доказывают работу полноценной команды ИИ.',
                   '/analytics4 24h · /analytics4 7d · /cost4 <номер задачи>'])
     return '\n'.join(lines)

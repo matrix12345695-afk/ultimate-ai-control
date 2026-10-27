@@ -6,6 +6,7 @@ from datetime import datetime,timedelta,timezone
 import json
 import math
 import time
+import worker_observer
 import emergency_control as emergency
 import owner_notifications as inbox
 import task_queue as q
@@ -129,6 +130,7 @@ def valid(snapshot,end):
             and q._now(snapshot['generated_at'])>=end and snapshot['published'] is False and type(snapshot['paid_calls']) is int and snapshot['paid_calls']==0
             and a['since']==end-WEEK and a['until']==end and a['idle_seconds'] is None
             and a['work_seconds']==a['measured_seconds']['active']+a['measured_seconds']['testing']
+            and ('worker_observation' not in a or worker_observer.valid_report(a['worker_observation']))
             and len(memory.canonical(snapshot).encode())<=16000)
     except (KeyError,TypeError,ValueError,OverflowError):return False
 
@@ -191,6 +193,11 @@ def describe(conn,end=None):
        'Простой и незаписанное время: неизвестны. Полноценная команда ИИ этими данными не подтверждается.',
        'Подготовлен: '+stamp(snapshot['generated_at']), 'SHA-256: '+sha])
     if w['unknown_tails']:lines.append('Есть ожидания с неполной историей; показана только известная часть.')
+    observed=a.get('worker_observation')
+    if observed:
+        lines.extend(['Наблюдавшееся ожидание operations-1: '+analytics.duration(observed['observed_wait_seconds']),
+                      'Время без наблюдений operations-1: '+analytics.duration(observed['unobserved_seconds'])+'. /worker4'])
+    else:lines.append('Этот исторический снимок не содержит новых наблюдений исполнителя; он не пересчитывается.')
     delivery=conn.execute('SELECT delivered_at,telegram_message_id FROM owner_notifications WHERE id=?',(notice,)).fetchone()
     lines.append('Telegram: '+('доставка записана' if delivery and all(delivery) else 'доставка ещё не подтверждена')+'.')
     return '\n'.join(lines)[:3900]
