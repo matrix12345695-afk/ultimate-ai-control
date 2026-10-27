@@ -55,6 +55,14 @@ files are denied; reviewed pthread flags remain allowed. Each child retains the 
 1CPU affinity/768MiB virtual-space/10CPU-second caps, decoder4s and recognizer18s wall limits,
 bounded output and no host fallback. No native dependency, model, system package or service
 is replaced by this increment. Private manifest/model/source pins are unchanged.
+Intermediate Ogg/PCM/WAV copies use sealed anonymous memfd descriptors, not named temporary
+files. Only the audio descriptor and seccomp filter are inherited by each native child;
+worker death closes the anonymous backing and Bubblewrap terminates with its parent.
+Bubblewrap may copy up to512KiB into its private input tmpfs during trusted setup. A
+root-owned system `prlimit` wrapper restores the zero hard file-size cap before decoding
+or inference; the compiled canary verifies that both ordinary and descriptor-input modes
+retain the zero cap, file/network/fork denial and memory limit. No named host intermediate
+is introduced. `prlimit`, like system shared libraries, is a trusted OS dependency.
 
 Raw audio is deleted after processing/rejection, or by cleanup when expired/interrupted.
 Cleanup runs even while the queue is paused; an offline/stopped worker can delay physical
@@ -89,11 +97,11 @@ Telegram round-trip and real owner confirmation are **not** verified by these fi
 It is immutable/hash-bound, linked to typed evidence memory and the live partial Plan.
 Historical engine evidence remains valid history without claiming incoming owner audio.
 
-The source suite adds48 tests: authentication, quotas/metadata, replay and atomicity, two
+The source suite adds49 tests: authentication, quotas/metadata, replay and atomicity, two
 SQLite connections, storage/crash/lease/tamper, stop/reset/gate behavior, cancellation and
 rollback privacy, exact project/preview binding, plain slash text, receipt/memory/Plan, URL/
 redirect/truncation/slow-stream/credential handling, real parent-death/resource limits and
-the real isolated recognition/fixture chain. Full source suite613 with all18 host-dependent
+sealed anonymous intermediates and the real isolated recognition/fixture chain. Full source suite614 with all18 host-dependent
 checks configured; hosted baseline skips those18. Rollout evidence is recorded separately.
 
 RU/UZ quality, accents/noise and an actual owner Telegram voice -> preview -> confirmation

@@ -1,7 +1,10 @@
 """Credential-free, bounded OGG/Opus -> preview text. Never executes the text."""
 import io
 import array
+from contextlib import contextmanager
+import fcntl
 import json
+import os
 from pathlib import Path
 import tempfile
 import unicodedata
@@ -14,6 +17,10 @@ MAX_BYTES=262144
 MAX_SECONDS=10
 LANGUAGES=('ru','uz')
 POLICY='voice-owner-policy-v1.json'
+# Stable Linux UAPI values; some Python builds omit the named fcntl constants.
+ADD_SEALS=getattr(fcntl,'F_ADD_SEALS',1033)
+GET_SEALS=getattr(fcntl,'F_GET_SEALS',1034)
+SEAL_WRITE=8
 
 class VoiceError(ValueError): pass
 
@@ -63,23 +70,32 @@ def clean_text(text):
     if not 1<=len(text)<=2000 or SECRET.search(text): raise VoiceError('voice_empty_large_or_sensitive_text')
     return text
 
+@contextmanager
+def _sealed_input(data):
+    fd=os.memfd_create('uac-voice-input',os.MFD_CLOEXEC|os.MFD_ALLOW_SEALING)
+    try:
+        with os.fdopen(os.dup(fd),'wb') as stream:stream.write(data);stream.flush()
+        os.lseek(fd,0,os.SEEK_SET)
+        fcntl.fcntl(fd,ADD_SEALS,15)
+        yield fd
+    finally:os.close(fd)
+
 def transcribe(data,language,path):
     # English is used only by the fixed-fixture acceptance; owner intake allows RU/UZ.
     if language not in (*LANGUAGES,'en'): raise VoiceError('voice_language')
     validate_audio(data);cfg=policy(path)
-    with tempfile.TemporaryDirectory(prefix='uac-owner-voice-') as name:
-        root=Path(name);source=root/'input.ogg';source.write_bytes(data);source.chmod(0o400)
-        pcm,decode_seconds=runner._execute(cfg,source,['/runtime/opusdec','--quiet','--rate','16000','--no-dither','/input','-'],limit=MAX_SECONDS*32000,seconds=4)
-        if len(pcm)%2 or not 1600<=len(pcm)<=MAX_SECONDS*32000: raise VoiceError('voice_decoded_duration')
-        samples=array.array('h');samples.frombytes(pcm)
-        if max(abs(x) for x in samples)<=32:raise VoiceError('voice_silent_audio')
-        wav=root/'input.wav'
-        with wave.open(str(wav),'wb') as writer:
-            writer.setnchannels(1);writer.setsampwidth(2);writer.setframerate(16000);writer.writeframes(pcm)
-        wav.chmod(0o400)
-        raw,seconds=runner._execute(cfg,wav,['/runtime/whisper-cli','-m','/runtime/model.bin','-f','/input','-t','1','-p','1','-bo','1','-bs','1','-ng','-np','-nt','-nf','-l',language],limit=16000,seconds=18)
-        try: text=clean_text(raw.decode('utf-8'))
-        except UnicodeError: raise VoiceError('voice_invalid_text') from None
+    with _sealed_input(data) as fd:
+        pcm,decode_seconds=runner._execute(cfg,Path('/proc/self/fd/'+str(fd)),['/runtime/opusdec','--quiet','--rate','16000','--no-dither','/input','-'],limit=MAX_SECONDS*32000,seconds=4,input_fd=fd)
+    if len(pcm)%2 or not 1600<=len(pcm)<=MAX_SECONDS*32000: raise VoiceError('voice_decoded_duration')
+    samples=array.array('h');samples.frombytes(pcm)
+    if max(abs(x) for x in samples)<=32:raise VoiceError('voice_silent_audio')
+    wav=io.BytesIO()
+    with wave.open(wav,'wb') as writer:
+        writer.setnchannels(1);writer.setsampwidth(2);writer.setframerate(16000);writer.writeframes(pcm)
+    with _sealed_input(wav.getvalue()) as fd:
+        raw,seconds=runner._execute(cfg,Path('/proc/self/fd/'+str(fd)),['/runtime/whisper-cli','-m','/runtime/model.bin','-f','/input','-t','1','-p','1','-bo','1','-bs','1','-ng','-np','-nt','-nf','-l',language],limit=16000,seconds=18,input_fd=fd)
+    try: text=clean_text(raw.decode('utf-8'))
+    except UnicodeError: raise VoiceError('voice_invalid_text') from None
     return {'text':text,'receipt':{'schema':'voice-recognition-v1','status':'transcribed','audio_sha256':assets.digest(data),
             'audio_bytes':len(data),'language':language,'decoded_seconds':len(pcm)/32000,
             'decode_seconds':decode_seconds,'recognize_seconds':seconds,'transcript_sha256':assets.digest(text.encode()),

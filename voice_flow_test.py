@@ -29,7 +29,8 @@ def initialize(conn):
 def implementation_digest():
     root=Path(__file__).parent
     return local_voice.util.digest({n:hashlib.sha256((root/n).read_bytes()).hexdigest() for n in
-        ('voice_native.py','voice_intake.py','telegram_voice_file.py','voice_flow_test.py','main.py','queue_worker.py','runtime_commands.py')})
+        ('voice_native.py','voice_intake.py','telegram_voice_file.py','voice_flow_test.py','main.py','queue_worker.py','runtime_commands.py',
+         'local_voice.py','voice_assets.py','isolated_python.py','isolated_node.py')})
 
 def observe(root):
     root=Path(root);audio=base64.b64decode((Path(__file__).parent/'fixtures/voice-jfk8.ogg.b64').read_bytes().strip(),validate=True)

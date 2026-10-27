@@ -181,6 +181,15 @@ class VoiceIntakeTests(unittest.TestCase):
                 with self.assertRaises(native.VoiceError):native.transcribe(AUDIO,'ru',self.root/native.POLICY)
                 self.assertEqual(execute.call_count,1)
 
+    def test_intermediate_audio_is_anonymous_sealed_and_closed_without_disk_files(self):
+        import fcntl
+        with native._sealed_input(b'fixture-private-bytes') as fd:
+            self.assertIn('memfd:',os.readlink('/proc/self/fd/'+str(fd)))
+            flags=fcntl.fcntl(fd,native.GET_SEALS);self.assertTrue(flags&native.SEAL_WRITE)
+            with self.assertRaises(OSError):os.write(fd,b'change')
+            captured_fd=fd
+        with self.assertRaises(OSError):os.fstat(captured_fd)
+
     def test_raw_file_symlink_is_not_read_or_deleted_as_a_regular_file(self):
         ident=self.capture();path=self.root/'voice-audio'/f'{ident}.ogg';path.unlink()
         outside=self.root/'outside';outside.write_text('fixture-secret');path.symlink_to(outside)
