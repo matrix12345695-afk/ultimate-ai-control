@@ -133,10 +133,14 @@ class RealVoiceSandboxTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as name:
             root=Path(name);source=root/'probe.c';binary=root/'whisper-cli';canary=root/'outside'
             canary.write_text('fixture-secret-never-visible')
-            source.write_text('#include <unistd.h>\n#include <sys/socket.h>\n#include <sys/resource.h>\n#include <fcntl.h>\n#include <stdio.h>\n#include <stdlib.h>\nint main(){if(socket(AF_INET,SOCK_STREAM,0)!=-1)return 1;if(fork()!=-1)return 2;if(open("'+str(canary)+'",O_RDONLY)!=-1)return 3;if(open("/tmp/write",O_CREAT|O_WRONLY,0600)!=-1)return 4;if(getenv("TELEGRAM_BOT_TOKEN"))return 5;struct rlimit r;getrlimit(RLIMIT_AS,&r);if(r.rlim_cur!=768ULL*1024*1024)return 6;puts("isolated");return 0;}')
+            source.write_text('#include <unistd.h>\n#include <sys/socket.h>\n#include <sys/resource.h>\n#include <fcntl.h>\n#include <stdio.h>\n#include <stdlib.h>\nint main(){if(socket(AF_INET,SOCK_STREAM,0)!=-1)return 1;if(fork()!=-1)return 2;if(open("'+str(canary)+'",O_RDONLY)!=-1)return 3;if(open("/tmp/write",O_CREAT|O_WRONLY,0600)!=-1)return 4;if(getenv("TELEGRAM_BOT_TOKEN"))return 5;struct rlimit r;getrlimit(RLIMIT_AS,&r);if(r.rlim_cur!=768ULL*1024*1024)return 6;getrlimit(RLIMIT_FSIZE,&r);if(r.rlim_cur!=0||r.rlim_max!=0)return 7;puts("isolated");return 0;}')
             subprocess.run(['gcc',str(source),'-o',str(binary)],check=True,capture_output=True,timeout=15)
             (root/'lib').mkdir()
             for name in assets.FILES:
                 if name!='whisper-cli': (root/name).write_bytes(b'fixture-not-loaded')
             output,_=voice._execute(dict(cfg,runtime=str(root)),canary,['/runtime/whisper-cli'],limit=100,seconds=2)
+            self.assertEqual(output.strip(),b'isolated')
+            import voice_native
+            with voice_native._sealed_input(b'public-fixture') as fd:
+                output,_=voice._execute(dict(cfg,runtime=str(root)),Path('/unused'),['/runtime/whisper-cli'],limit=100,seconds=2,input_fd=fd)
             self.assertEqual(output.strip(),b'isolated')

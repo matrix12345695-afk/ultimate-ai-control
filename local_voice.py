@@ -14,6 +14,7 @@ import subprocess
 import tempfile
 import time
 import wave
+from functools import partial
 import artifact_prs as util
 import isolated_python as isolation
 import isolated_node
@@ -36,16 +37,20 @@ def policy(path):
     cfg['bwrap']=isolation.load_policy(path.with_name('sandbox-policy.json'))['binary']
     return cfg
 
-def limits():
+def limits(bind_data=False):
     resource.setrlimit(resource.RLIMIT_AS,(768*1024*1024,768*1024*1024))
     resource.setrlimit(resource.RLIMIT_CPU,(10,10));resource.setrlimit(resource.RLIMIT_NOFILE,(64,64))
-    resource.setrlimit(resource.RLIMIT_CORE,(0,0));resource.setrlimit(resource.RLIMIT_FSIZE,(0,0))
+    resource.setrlimit(resource.RLIMIT_CORE,(0,0))
+    size=512*1024 if bind_data else 0
+    resource.setrlimit(resource.RLIMIT_FSIZE,(size,size))
     os.sched_setaffinity(0,{min(os.sched_getaffinity(0))})
 
-def _arguments(cfg,root,source):
+def _arguments(cfg,root,source,input_fd=None):
     args=[cfg['bwrap'],'--unshare-all','--die-with-parent','--new-session','--cap-drop','ALL','--clearenv',
-          '--dir','/runtime','--dir','/runtime/lib','--ro-bind',str(source),'/input',
-          '--proc','/proc','--dev','/dev','--remount-ro','/dev','--dir','/etc','--dir','/home',
+          '--dir','/runtime','--dir','/runtime/lib']
+    # Bind inherited data before replacing /proc (the setup helper uses host fd paths).
+    args+=['--ro-bind',str(source),'/input'] if input_fd is None else ['--ro-bind-data',str(input_fd),'/input','--ro-bind','/usr/bin/prlimit','/runtime/prlimit']
+    args+=['--proc','/proc','--dev','/dev','--remount-ro','/dev','--dir','/etc','--dir','/home',
           '--tmpfs','/tmp','--remount-ro','/tmp','--chdir','/tmp',
           '--setenv','HOME','/tmp','--setenv','LANG','C.UTF-8','--setenv','MALLOC_ARENA_MAX','1','--setenv','LD_LIBRARY_PATH','/runtime/lib']
     for name in assets.FILES: args+=['--ro-bind',str(Path(cfg['runtime'])/name),'/runtime/'+name]
@@ -53,17 +58,24 @@ def _arguments(cfg,root,source):
         if Path(path).exists(): args+=['--ro-bind',path,path]
     return args+['--remount-ro','/']
 
-def _execute(cfg,source,argv,*,limit,seconds):
+def _execute(cfg,source,argv,*,limit,seconds,input_fd=None):
     # Exact pthread clone flags only; process forks/network/mounts denied by seccomp.
     # Trusted native model code may create threads; no untrusted project code is loaded.
     started=time.monotonic();stdout=bytearray();stderr=bytearray();status=None;proc=None
+    if input_fd is not None:
+        st=Path('/usr/bin/prlimit').lstat()
+        if not stat.S_ISREG(st.st_mode) or st.st_uid!=0 or st.st_mode&0o7022:raise isolation.SandboxUnavailable('voice_limit_wrapper_unavailable')
+        # Only trusted bwrap setup may populate its private input tmpfs. Restore the
+        # zero hard file-size cap before decoding/inference, with all mounts read-only.
+        argv=['/runtime/prlimit','--fsize=0:0','--',*argv]
     with tempfile.TemporaryFile() as filt:
         filt.write(isolated_node.seccomp_filter());filt.flush();filt.seek(0)
-        args=_arguments(cfg,None,source)+['--seccomp',str(filt.fileno()),'--',*argv]
+        args=_arguments(cfg,None,source,input_fd=input_fd)+['--seccomp',str(filt.fileno()),'--',*argv]
         try:
+            inherited=(filt.fileno(),) if input_fd is None else (filt.fileno(),input_fd)
             proc=subprocess.Popen(args,stdin=subprocess.DEVNULL,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
-                                  env={'PATH':'/usr/bin:/bin','LANG':'C.UTF-8'},pass_fds=(filt.fileno(),),
-                                  preexec_fn=limits,start_new_session=True)
+                                  env={'PATH':'/usr/bin:/bin','LANG':'C.UTF-8'},pass_fds=inherited,
+                                  preexec_fn=partial(limits,input_fd is not None),start_new_session=True)
             with selectors.DefaultSelector() as selector:
                 selector.register(proc.stdout,selectors.EVENT_READ,stdout);selector.register(proc.stderr,selectors.EVENT_READ,stderr)
                 while selector.get_map() and not status:

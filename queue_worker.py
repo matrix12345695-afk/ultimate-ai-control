@@ -45,6 +45,8 @@ import nova_private_copy_ci
 import emergency_control as emergency
 import emergency_selftest
 import local_voice
+import voice_intake
+import voice_flow_test
 from isolated_python import run_bundle, SandboxUnavailable
 from sandbox_smoke import FILES as SANDBOX_SMOKE
 from owner_notifications import initialize as init_inbox,create as notify
@@ -89,6 +91,8 @@ def initialize(conn):
     nova_deploy.initialize(conn)
     nova_recovery_ci.initialize(conn)
     nova_private_copy_ci.initialize(conn)
+    voice_intake.initialize(conn)
+    voice_flow_test.initialize(conn)
     local_voice.initialize(conn)
     emergency_selftest.initialize(conn)
 
@@ -169,6 +173,7 @@ def record_failed_interval(conn,job,start,tick):
 
 def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project_registry.inspect_remote):
     with connect(path) as conn:
+        voice_intake.cleanup(conn,Path(path).parent)
         evidence_memory.sync(conn)
         emergency.flush_notifications(conn)
         scheduler.tick(conn)
@@ -187,7 +192,9 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
     waiting=False
     try:
         with connect(path) as conn: emergency.check_job(conn,job['id'],job['lease_token'])
-        if job["kind"]=="check_site": result=site_checker(job["payload"])
+        if job["kind"]=="plan_change" and "voice_input" in job["payload"]:
+            with connect(path) as conn: result=voice_intake.process(conn,Path(path).parent,job)
+        elif job["kind"]=="check_site": result=site_checker(job["payload"])
         elif job["kind"]=="inspect_repository":
             if job['payload'].get('target')==vps_resources.TARGET:
                 vps_resources.scope(job)
@@ -199,6 +206,8 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                 result=repository_inspector(job['project'],job['payload'])
                 if not project_registry.valid_result(job['project'],result):
                     raise project_registry.RepositoryScopeError('repository_result_scope_mismatch')
+        elif job['kind']=='test_release' and job['payload'].get('target')==voice_flow_test.PROFILE:
+            with connect(path) as conn: result=voice_flow_test.save(conn,job,voice_flow_test.observe(Path(path).parent))
         elif job['kind']=='test_release' and job['payload'].get('target')==local_voice.PROFILE:
             with connect(path) as conn: result=local_voice.save(conn,job,local_voice.observe(Path(path).parent/'voice-candidate-policy-v2.json'))
         elif job['kind']=='test_release' and job['payload'].get('target')==emergency_selftest.PROFILE:
@@ -291,6 +300,9 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                            'Кодовый черновик проверен' if result['test_status']=='passed' else 'Проверка кодового черновика не прошла',
                            f"Артефакт #{result['artifact_id']}, SHA-256 {result['source_digest']}. Тесты: {result['test_status']}. Независимая приёмка: {result.get('independent_acceptance','not_configured')}. Просмотр: /artifact {result['artifact_id']}. Движок: {label}. "+('Восстановлен сохранённый результат; тесты повторно не запускались. ' if result.get('tests_reused') else '')+'Публикации не было.',
                            'artifact-'+str(job['id'])+'-'+result['source_digest'],job['id'])
+            elif result.get('voice_flow_id'):
+                send_event(conn,'info','Приём и подтверждение голосовых проверены','Проверены ограничения, очередь, приватная обработка и подтверждение без дублей. Нативное распознавание проверено на публичной записи; входящий Telegram-цикл с вашей речью ещё не проверен. /voice4',
+                           'voice-flow-'+str(job['id']),job['id'])
             elif result.get('voice_local_id'):
                 send_event(conn,'info','Локальное распознавание голоса проверено','3 проверки: закреплённая модель, декодирование OGG/Opus и распознавание публичной английской записи8 секунд. Без API/сети в изоляции. Приём ваших голосовых задач и подтверждение текста ещё не подключены. /voice4',
                            'voice-local-'+str(job['id']),job['id'])
@@ -352,6 +364,10 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                            "daily-job-"+str(job["id"]),job["id"])
             elif result.get("syntax_errors"):
                 send_event(conn,"critical","Ошибки синтаксиса ULTIMATE",str(result["syntax_errors"])[:500],"syntax-job-"+str(job["id"]),job["id"])
+            if result.get('voice_recognition')=='failed':
+                conn.execute('UPDATE agent_jobs SET result=? WHERE id=?',(json.dumps(result),job['id']));conn.commit()
+                queue.fail(conn,job['id'],job['lease_token'],'voice_recognition_failed',retryable=False)
+                return {'id':job['id'],'state':'failed'}
             if result.get('test_status') not in (None,'passed'):
                 if not result.get('artifact_id') and not result.get('project_test_id') and not result.get('nova_ci_id') and not result.get('browser_ci_id') and not result.get('browser_candidate_id') and not result.get('nova_release_ci_id') and not result.get('locked_build_ci_id'):
                     send_event(conn,'critical','Изолированные тесты не прошли',result['test_status'],

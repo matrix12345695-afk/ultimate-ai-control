@@ -1,12 +1,12 @@
 # ULTIMATE AI CONTROL 4.0 — current checkpoint
 
-Updated 2026-10-26 UTC. This is the resume point for later owner-authorized development. Historical
+Updated 2026-10-27 UTC. This is the resume point for later owner-authorized development. Historical
 deployment records retain their original observations; this file identifies the latest state.
 
 ## Installed state
 
-Application: `b8ed9187d4919c37db7cd48460a9bddb8c33b6ab`, draft
-[PR #52](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/52), stacked on PR #51.
+Application: `bc9a8b06277e6382fb24d5b635e143a9cacfe53f`, draft
+[PR #53](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/53), stacked on PR #52.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -29,7 +29,53 @@ runtime before attempting installation. The hourly development automation remain
 
 ## Evidence
 
-Latest increment: [offline speech acceptance pilot](LOCAL_VOICE.md), deployed26 October
+Latest increment: [owner voice intake and explicit confirmation](OWNER_VOICE.md), deployed27 October
+at12:39 Asia/Tashkent. [Rollout record](OWNER_VOICE_ROLLOUT.md). Installed appbc9a8b06,
+exact-source CI40465293362 and40465297588 pass. Local full suite614/614, zero skips; VPS full
+native suite614/614 in270.315 seconds, zero skips, all18 host-dependent checks executed.
+The earlier baseline also passes614/614 in234.688 seconds.49 new tests cover bounded
+owner-private transport, persistent previews, exact confirmation/replay, stale epochs/TTL,
+private cleanup and anonymous sealed audio intermediates; native canary verifies the hard
+file-size0 cap for both input modes. The final single complete native gate avoids repeating
+the baseline while preserving every test. Transport79/79; activation40467710745/
+job122067040419 succeeds. Earlier source-deadline attempts never activated the app.
+Restored SQLite copy, synthetic capture/confirmation/replay and receipt tamper checks pass;
+backup /home/maksim/.ultimate-review-data/backups/before-uac4-1793086619382517885.sqlite3.
+Dispatcher3069531 and credential-free operations worker3069190 run under the existing own
+rootless supervisors; Inventory PID67760/source/config metadata unchanged.
+
+Separate0600 owner policy /home/maksim/.ultimate-review-data/live/voice-owner-policy-v1.json,
+mode owner_preview, references unchanged native v2 assets/manifest and contractb66bd548...
+The separate voice_intake_gate is explicitly enabled. Owner-only mono OGG/Opus input is
+bounded to10 seconds/256KiB,5 active inputs/30 per rolling24 hours; previews expire15 minutes
+from capture. A viewed transcript and exact project/current code are required before one
+ordinary text task is inserted. Transport gets the bot credential only through stdin in a
+bounded dedicated process; decoders/worker receive no credential. Raw source files are private
+outside SQLite and deleted after recognition/rejection/expiry; intermediate audio is anonymous.
+No transcript is treated as a Telegram command, publication/payment or business-rule approval.
+
+Real queue acceptance job1339 passes one native public-English recognition plus8 explicitly
+synthetic state-machine cases on a separate disposable DB; typed memory1340. Recognition
+7.9678 seconds, reportadb15963e76a177c55d350148766bb91330450ec932eb40dd04b7a0820630360,
+implementationf889714a1651fffceab2d623ad15f2e9dad04a0ed13fafd8d662ab20bc31bda6.
+Telegram accepted announcement401, test result402 and first-real-sample request403
+(notification168, stable event owner-voice-first-sample-v1); these receipts do not prove
+owner reading or confirmation. Zero genuine confirmed receipt/task pairs were observed.
+Plan10 stays active with the implemented pipeline subtask marked complete. Genuine incoming
+owner Telegram round-trip/confirmation and RU/UZ accuracy remain pending. Confirmed text tasks
+use the ordinary queue; general model-driven execution still waits for deferred key setup.
+Provider/broker paid policies stay disabled, zero costs/holds, hourly coding automation stays
+disabled, no publication/new schedule/Inventory or NOVA production change. Existing owner
+follow-up157/Telegram380, approvals/candidates and emergency implementation314aa918... preserved.
+Rollback uses only exact-version uac4_owner_voice_rollback: disable intake, drain its own work,
+terminate its own in-flight transport, expire unconfirmed inputs, restore preceding appb8ed9187;
+confirmed text tasks, receipts/history/assets and owner pauses remain. No live DB restore.
+Independent post-install verification40468546671/job122069773584 succeeds27 October12:41
+Asia/Tashkent. Source, report/implementation hashes, job/memory/Telegram receipt and process
+IDs match. Genuine confirmed receipt/task pairs remain0; only the first-sample request stays
+pending. Documentation checkpoint is separate from installed source.
+
+Preceding increment: [offline speech acceptance pilot](LOCAL_VOICE.md), deployed26 October
 at22:33 Asia/Tashkent. [Rollout record](LOCAL_VOICE_ROLLOUT.md). Installed native-host v2
 app b8ed9187; exact source CI40303932769 and40303941488 pass. Local/VPS full suites565/565,
 zero skips, including all17 host-dependent checks and14 new voice checks. Hosted baseline
