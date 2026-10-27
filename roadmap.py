@@ -154,6 +154,14 @@ def completed_work(conn):
         registered=project_registry.verified(conn)
         if registered:
             details[7]=f'✅ Репозиториев с проверенными файлами и хешами: {len(registered)}. Доступ только для чтения; исполнение и публикация не включены.'
+    if 'repository_head_state' in tables:
+        import repo_heads
+        for project in repo_heads.registry.REPOSITORIES:
+            try:
+                proof=repo_heads.latest(conn,project)
+                if proof and proof[0]['status']=='observed':
+                    details[7]=details.get(7,'')+' ✅ Контроль main GitHub: /repo_heads.';break
+            except (ValueError,TypeError,KeyError):pass
     if 'project_test_runs' in tables and setting(conn,'nova_tests_verified_release'):
         details[5]=(details.get(5,'')+' ✅ Закреплённые тесты NOVA без PostgreSQL и браузера подключены.').strip()
     if 'artifact_pr_requests' in tables and setting(conn,'artifact_pr_verified_release'):

@@ -27,6 +27,7 @@ import broker_client
 import developer_pipeline
 import health_incidents
 import project_registry
+import repo_heads
 import work_analytics
 import worker_observer
 import weekly_reports
@@ -74,6 +75,7 @@ def connect(path):
 def initialize(conn):
     queue.initialize(conn)
     scheduler.initialize(conn)
+    repo_heads.initialize(conn)
     weekly_reports.initialize(conn)
     worker_observer.initialize(conn)
     roadmap.initialize(conn)
@@ -201,7 +203,10 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
             with connect(path) as conn: result=voice_intake.process(conn,Path(path).parent,job)
         elif job["kind"]=="check_site": result=site_checker(job["payload"])
         elif job["kind"]=="inspect_repository":
-            if job['payload'].get('target')==vps_resources.TARGET:
+            if job['payload'].get('target')==repo_heads.PROFILE:
+                with connect(path) as conn:repo_heads.require_enabled(conn)
+                result={'repo_head_observation':repo_heads.observe(job)}
+            elif job['payload'].get('target')==vps_resources.TARGET:
                 vps_resources.scope(job)
                 result={'resource_observation':vps_resources.collect(Path(path).parent)}
             elif job['project']=='control' and job['payload']=={'target':'control'}:
@@ -285,7 +290,9 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
         # Record only the measured handler interval. Time waiting in the queue is not work.
         with connect(path) as conn:
             queue.add_work_span(conn,job["id"],job["lease_token"],category(job),start,end,now=max(time.time(),end))
-            if result.get('weekly_observation'):
+            if result.get('repo_head_observation'):
+                result=repo_heads.complete(conn,job,result['repo_head_observation'],now=max(time.time(),end))
+            elif result.get('weekly_observation'):
                 result=weekly_reports.complete(conn,job,result['weekly_observation'],now=max(time.time(),end))
             elif result.get('resource_observation'):
                 result=vps_resources.complete(conn,job,result['resource_observation'],now=max(time.time(),end))
@@ -390,11 +397,11 @@ def run_once(path,root=ROOT,site_checker=check_site,repository_inspector=project
                       {'target':'developer-bundle','generation_job_id':job['id'],'source_digest':result['source_digest']},
                       event_key='developer-test:'+str(job['id'])+':'+result['source_digest'])
                 result['followup_job_id']=child
-            elif job['kind']!='check_site' and not result.get('resource_sample_id') and not result.get('weekly_report_id'):
+            elif job['kind']!='check_site' and not result.get('resource_sample_id') and not result.get('weekly_report_id') and not result.get('repo_head_id'):
                 queue.finish(conn,job["id"],job["lease_token"],result,awaiting_owner=waiting)
             conn.execute("UPDATE agent_worker_status SET heartbeat=?,state=?,detail=? WHERE worker=?",(time.time(),"waiting_owner" if waiting else "idle",str(job["id"]),WORKER))
             conn.commit()
-        return {"id":job["id"],"state":"awaiting_owner" if waiting else "succeeded"}
+        return {"id":job["id"],"state":("failed" if result.get("repo_head_status") in ("unavailable","scope_denied") else "awaiting_owner" if waiting else "succeeded")}
     except (artifact_pr_client.Pending,artifact_pr_client.Blocked) as exc:
         with connect(path) as conn:
             record_failed_interval(conn,job,start,tick)

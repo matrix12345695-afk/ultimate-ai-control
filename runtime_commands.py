@@ -6,6 +6,7 @@ import roadmap
 import health_incidents
 import owner_followups
 import project_registry
+import repo_heads
 import work_analytics
 import worker_observer
 import completion_audit
@@ -54,7 +55,7 @@ def handle(text,connect,source_key=None,actor_id=None):
     known={"/roadmap","/queue","/job","/work","/project","/agents","/daily","/memory","/budget4","/pause","/resume","/chat_link","/chat_bind","/job_cancel","/sandbox","/recipe","/selftest","/artifact","/artifact_code","/provider4","/broker4","/develop","/developer_demo"}
     known.update(('/monitor4','/worker4','/finish4'))
     known.update(('/owner_later','/owner_item'))
-    known.update(('/projects4','/repo_check'))
+    known.update(('/projects4','/repo_check','/repo_head','/repo_heads'))
     known.update(('/analytics4','/weekly','/cost4','/weekly_auto','/weekly_report'))
     known.update(('/emergency','/emergency_stop','/emergency_reset','/emergency_test'))
     known.update(('/voice4','/test_voice4','/voice','/voice_inbox','/voice_confirm','/voice_project','/voice_reject','/voice_lang','/test_voice_flow'))
@@ -71,6 +72,10 @@ def handle(text,connect,source_key=None,actor_id=None):
     if op not in known: return None
     with connect() as conn:
         try:
+            if op=='/repo_heads':return repo_heads.describe(conn)
+            if op=='/repo_head':
+                if len(args)!=2 or args[1] not in repo_heads.registry.REPOSITORIES:return 'Использование: /repo_head nova или /repo_head kinder. Inventory исключён.'
+                ident=repo_heads.enqueue(conn,args[1]);return f'Проверка main #{ident} в очереди. /repo_heads. Повтор в15 минут использует то же задание; тесты и публикации не запускаются.'
             if op=='/finish4':return completion_audit.describe(conn)
             if op=='/worker4':
                 if len(args)>2 or (len(args)==2 and args[1] not in ('24h','7d')):return 'Использование: /worker4 24h или /worker4 7d'
