@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `40eca95aab9448969b9253fea0c31a9a9a2d7296`, draft
-[PR #55](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/55), stacked on PR #54.
+Application: `341d127784643af3b12e41cf08e9c439f9ac990e`, draft
+[PR #56](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/56), stacked on PR #55.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -29,7 +29,48 @@ runtime before attempting installation. The hourly development automation remain
 
 ## Evidence
 
-Latest increment: [observed worker waits and completion audit](WORKER_OBSERVATION.md),
+Latest increment: [public repository branch freshness](REPOSITORY_HEADS.md), deployed27 October
+at16:25 Asia/Tashkent. [Rollout record](REPOSITORY_HEADS_ROLLOUT.md). Installed341d1277,
+exact-source CI40494650796/40494656259 passes. Local and VPS full674/674 tests with zero
+skips, all18 host-dependent checks executed; VPS146.879 seconds.21 new cases cover fixed
+public identity/ref GET scope, bounded/sanitized network failures, manual/schedule admission
+and pause/gate/epoch, duplicate/late heads, scoped recovery, immutable snapshots, typed memory,
+corrupt-result isolation and views. Transport93/93; synthetic restored-copy drift/error/
+recovery/dedup/gate/tamper probes preserve original notes/context/cost/schedules/weekly data.
+Activation40495445976/job122159605470 succeeds; backup/restore at
+/home/maksim/.ultimate-review-data/backups/before-uac4-1793100211513031815.sqlite3.
+Own credential-free worker3311622 and dispatcher3312003; Inventory PID67760/source/config unchanged.
+
+Real worker NOVA metadata job1417 observes public main1a23239a0a9c7d79905c91505a8741d8350d7e75,
+report4a6d6b201ce1e2e4637fff4b699d8a8d5842e787110c4c5144d09ecc9a46f183,
+typed memory1418. Kinder job1418 observes public main0ef936334629accfd59ae33987462c3c693d33f9,
+report924bcd112d02f4ac8dafa4ee73ed604d1928a1e33eadf4bcf410f7b3f65ac952,
+typed memory1419. Both match original reviewed baselines at this read. Telegram accepts one
+consolidated notice411; not reading/approval. No live branch is moved to test a drift alert.
+Synthetic new heads exist only in unit/copy fixtures. /repo_heads reads normalized metadata;
+/repo_head nova or kinder queues one manual check per15-minute bucket. Two explicit six-hour
+operations schedules are installed; existing schedule definitions are preserved. Admission
+and advance are atomic; disabled gates/owner pause/emergency are respected. Unknown config
+is not overwritten. Out-of-order observations retain history without replacing cache/notices.
+Read failures are failed jobs/unknown snapshots, not healthy checks; repeated states stay quiet
+and recovery closes only this monitor's own proven scope notices. No credentials/source text
+are fetched; only two fixed GET endpoints per public repository are allowed. Redirects,
+identity/default-ref changes, oversized/malformed data and deadline failures fail closed.
+
+The separate repo_head_gate is enabled after gates. Source and CI pins never advance with
+main. New commits remain untested, matching commits do not execute tests, and GitHub metadata
+does not verify a deployed production version. Inventory/Mini App remain denied. Stage7 stays
+active with the verified branch-monitor part; broader mappings and execution/change preparation
+remain unfinished. Paid policies remain disabled/deferred with0 actual API spend; no model key
+request, permission expansion, code execution, GitHub write or publication. Hourly coding
+automation stays disabled. Existing owner requests157/Telegram380 and168, voice confirmation0,
+original calendar snapshot/job1359/receipt405/02.11.2026 09:00 due, observations and emergency
+implementation314aa918... are preserved. Independent final verification40496212372/
+job122162192571 succeeds at16:27 Asia/Tashkent, with matching app/PIDs, both SHA/report hashes
+and job/memory identities, preserved Telegram411 receipt and unchanged Inventory/paid policy.
+Documentation checkpoint is separate from installed source.
+
+Preceding increment: [observed worker waits and completion audit](WORKER_OBSERVATION.md),
 deployed27 October15:53 Asia/Tashkent. [Rollout record](WORKER_OBSERVATION_ROLLOUT.md).
 Installed app40eca95a; exact-source CI40491086924/40491094177 passes. Local and VPS full
 suites653/653 with zero skips, all18 host-dependent checks executed; VPS149.789 seconds.
@@ -1223,7 +1264,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
 | 5. Tester | Pinned NOVA read-only subset plus hosted PostgreSQL, browser, locked-build and recovery fixtures have source-bound evidence; production-state, other projects and wider stacks remain pending. |
 | 6. Monitoring | Separate NOVA page/API readiness plus VPS CPU/MemAvailable/data-volume/inode observations, confirmed alarms/recovery and telemetry checks; full business checks and more targets pending. |
-| 7. Multiple projects | NOVA/Kinder pinned read scopes and real queue observations live; other mappings, isolated execution and change preparation pending. |
+| 7. Multiple projects | NOVA/Kinder pinned read scopes plus credential-free main-ref watchers live, with six-hour checks, durable drift/access transitions and typed metadata evidence. Other mappings and isolated execution/change preparation remain pending. Inventory excluded. |
 | 8. Draft PRs | VPS broker created and exact-diff/CI verified a real Draft PR from a tested control recipe; broader project/model patches pending. |
 | 9. Publication approval | Exact-version candidates plus GET-only live artifact/diff/base/head/CI and existing approval preflight implemented, with durable reports and Telegram receipts; real owner decision, publisher and tested deployment rollback pending. |
 | 10. Voice | Owner-private10-second intake, local recognition, preview and exact project/code confirmation are enabled; native public-English and synthetic state cases are verified. Genuine incoming owner confirmation and RU/UZ quality remain pending. No paid API. |
@@ -1244,7 +1285,8 @@ Owner-private voice intake and exact transcript/project confirmation are now ins
 stage10 active until a genuine owner round-trip and speech quality are checked. The stable
 first-sample request is already delivered; do not send duplicate requests or reopen deferred
 API setup. Observed polling waits/reasons and /finish4 are now installed; historical and
-missing-signal time stays unknown. Independent engineering still includes the broader project
+missing-signal time stays unknown. The NOVA/Kinder branch watcher now detects changed refs without
+advancing any source/test pin. Independent engineering still includes the broader project
 execution/change preparation and a separately reviewed live publication/rollback adapter. Exact owner approval is still mandatory before any real merge
 or deployment of another project. Do not stop or clean independent services. NOVA hosted
 PostgreSQL/browser/locked-build/recovery fixture gates and Draft UI fixes are retained;
@@ -1261,7 +1303,15 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_worker_observer_rollback`, only for installed40eca95a,
+Current UAC rollback: `uac4_repo_heads_rollback`, only for installed341d1277, restores40eca95a.
+State `.ultimate-review-data/live/uac4-repository-heads-rollout.json`. It gate-fences manual/
+scheduled admissions, disables only its two recognized metadata schedules, cancels only queued
+matching jobs and restarts only UAC. Immutable metadata/memory, original weekly/voice/observer
+history/schedules, owner pauses/emergency state, accounting and policies remain. No live DB
+restore or independent service change; no live rollback performed. Older readers need the new
+code to display repository-head memory refs.
+
+Preceding UAC rollback: `uac4_worker_observer_rollback`, only for installed40eca95a,
 restores calendar/voice-aware app6ad68431. State
 `.ultimate-review-data/live/uac4-worker-observation-rollout.json`. It drains/restarts only UAC
 and retains passive observations, reports/memory, task history, weekly schedules/snapshots,
