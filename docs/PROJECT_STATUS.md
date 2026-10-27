@@ -5,8 +5,8 @@ deployment records retain their original observations; this file identifies the 
 
 ## Installed state
 
-Application: `6ad68431f420e0a871fdfbf7041382e6016a4a2e`, draft
-[PR #54](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/54), stacked on PR #53.
+Application: `40eca95aab9448969b9253fea0c31a9a9a2d7296`, draft
+[PR #55](https://github.com/matrix12345695-afk/ultimate-ai-control/pull/55), stacked on PR #54.
 No publisher or merge/deployment adapter is enabled.
 Runtime: `/home/maksim/.ultimate-review-runtime`; SQLite:
 `/home/maksim/.ultimate-review-data/live/control.db`. Own rootless cron/flock supervisors manage
@@ -29,7 +29,56 @@ runtime before attempting installation. The hourly development automation remain
 
 ## Evidence
 
-Latest increment: [calendar weekly analytics](WEEKLY_REPORTS.md), deployed27 October,
+Latest increment: [observed worker waits and completion audit](WORKER_OBSERVATION.md),
+deployed27 October15:53 Asia/Tashkent. [Rollout record](WORKER_OBSERVATION_ROLLOUT.md).
+Installed app40eca95a; exact-source CI40491086924/40491094177 passes. Local and VPS full
+suites653/653 with zero skips, all18 host-dependent checks executed; VPS149.789 seconds.
+22 new cases include a real daemon lifecycle, completed waits/clean shutdown, session takeover,
+clock/drop/gap, known-work overlap, conflicting/corrupt waits, explicit handle closure,
+read-only views and completion flags, old weekly compatibility and typed daily-result memory.
+Transport89/89 and local/VPS restored-copy synthetic gates pass. Activation40491352812/
+job122145799028 succeeds; backup/restore verified at
+/home/maksim/.ultimate-review-data/backups/before-uac4-1793098288016851645.sqlite3.
+Own credential-free worker3275993 and dispatcher3276334 under existing rootless supervisors;
+Inventory PID67760/source/config unchanged. No new schedule or independent service action.
+
+Actual daemon sessionf7a96af0258c8db3908b1b229991f62e records20 completed polling waits by
+activation verification, with100.44599962234497 observed wait seconds at that read. Real daily
+job1406 stores25.109049558639526 wait seconds and86257.35529279709 unobserved seconds in its
+24-hour snapshot; union coverage by recorded work accounts for the remainder. Saved
+observation digest9e1a255d4aebabbfe0dc9b344f96c2964f96613f5de27e9c22b23ed6a00b9460,
+typed memory1407; Telegram accepted announcement409 and report410. Receipts do not prove
+reading/approval. Live acceptance inserts no synthetic wait: only the active daemon PID/current
+session's completed intervals qualify. Synthetic clocks/session records exist only on the copy.
+
+Each process has a current-session fence; old sessions cannot pulse/write/claim through the
+instrumented worker. Completed waits require monotonic/wall agreement and at most8 seconds;
+clock jumps, unfinished crash intervals and pre-installation history remain unknown. Queue
+reasons are sampled at both boundaries; transitions between samples may be missed. Known job
+work is excluded from wait totals. Immutable hash-bound rows and bounded read projections
+avoid fabricated idle; stale/closed/missing signals are distinct and do not prove VPS downtime.
+One row per completed5-second wait; indexed last-session lookup; existing disk monitoring and
+normal worker/voice limits retained. /worker4 24h or7d and /agents expose partial observations.
+Daily and future weekly snapshots include the summary. Legacy idle_seconds remains unknown;
+the original calendar snapshot/hash/job1359/memory1360/Telegram405/next_due02.11.2026 09:00
+remains unchanged. New typed daily evidence binds the observation summary to its saved result.
+
+/finish4 reads all16 stage states and separates existing owner requests/deferred setup from
+unfinished engineering. It never treats manual done flags, fixture success, Telegram delivery
+or one confirmed voice as a complete autonomous company. Plan11 stays active with the completed
+observation subtask; complete model-agent activity, historical coverage and external invoice
+reconciliation remain pending. Provider setup remains explicitly deferred, paid policies off,
+zero paid requests/costs/holds. Owner voice confirmation remains0 and request168 is not duplicated;
+original NOVA request157/Telegram380, approvals/candidates, memory/rules, schedules and emergency
+implementation314aa918... are preserved. General multi-project/model execution and the live
+publication/rollback adapter remain unfinished engineering, not completed owner setup.
+Independent final verification40492217165/job122148689749 succeeds27 October15:56
+Asia/Tashkent. Same app/PIDs, session, saved observation digest/job/memory/Telegram receipt;
+actual wait rows increase20→54 and current observed wait100.44599962234497→271.24679923057556
+seconds. The saved daily snapshot is unchanged. Inventory unchanged, paid calls0; original
+weekly snapshot and next delivery remain intact. Documentation checkpoint is separate from source.
+
+Preceding increment: [calendar weekly analytics](WEEKLY_REPORTS.md), deployed27 October,
 initial source421acd3b at13:35 and final display correction6ad68431 at13:43 Asia/Tashkent.
 [Rollout record](WEEKLY_REPORTS_ROLLOUT.md). Local full631-test suite passes with zero skips;
 17 new weekly cases cover period boundaries, atomic queue/outbox/success, concurrency/replay,
@@ -1178,7 +1227,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 8. Draft PRs | VPS broker created and exact-diff/CI verified a real Draft PR from a tested control recipe; broader project/model patches pending. |
 | 9. Publication approval | Exact-version candidates plus GET-only live artifact/diff/base/head/CI and existing approval preflight implemented, with durable reports and Telegram receipts; real owner decision, publisher and tested deployment rollback pending. |
 | 10. Voice | Owner-private10-second intake, local recognition, preview and exact project/code confirmation are enabled; native public-English and synthetic state cases are verified. Genuine incoming owner confirmation and RU/UZ quality remain pending. No paid API. |
-| 11. Analytics | Daily/rolling weekly views and delivered immutable calendar-week reports live, with measured work, logged waiting, typed memory and receipt/hold separation. Next Monday09:00 Tashkent; full idle observation and external billing reconciliation pending. |
+| 11. Analytics | Daily/rolling weekly and delivered calendar snapshots, measured work, logged task waiting and observed polling waits/reasons with explicit unknown gaps are live. Current-session fences, typed result evidence and cost/hold separation verified; full model-agent activity/external billing reconciliation pending. |
 | 12. Memory | Rules, owner follow-ups and append-only source-verified job/artifact/repository history live; semantic retrieval, controlled business-rule editing and model learning pending. |
 | 13. Design/browser | Hosted Chromium/viewport/screenshots with source-bound evidence; localization/touch fixes are prepared in Draft15 and retained in later candidates. Cross-browser, real-device, pixel and full accessibility coverage remain pending. No production publication. |
 | 14. Open source | Initial research exists; choose only after license/security/dependency/resource review. |
@@ -1194,9 +1243,9 @@ project mappings remain unassigned; Inventory remains denied. Stage 7 is not com
 Owner-private voice intake and exact transcript/project confirmation are now installed; keep
 stage10 active until a genuine owner round-trip and speech quality are checked. The stable
 first-sample request is already delivered; do not send duplicate requests or reopen deferred
-API setup. Independent next priorities include observed worker-idle/reason intervals (never
-infer idle time from task age), broader read-only project coverage and a separately reviewed
-publication/rollback adapter. Exact owner approval is still mandatory before any real merge
+API setup. Observed polling waits/reasons and /finish4 are now installed; historical and
+missing-signal time stays unknown. Independent engineering still includes the broader project
+execution/change preparation and a separately reviewed live publication/rollback adapter. Exact owner approval is still mandatory before any real merge
 or deployment of another project. Do not stop or clean independent services. NOVA hosted
 PostgreSQL/browser/locked-build/recovery fixture gates and Draft UI fixes are retained;
 production backup and platform publication/retained-artifact conditions remain blockers.
@@ -1212,7 +1261,15 @@ ULTIMATE actions through the pinned transport, never the standard Inventory depl
 raise the $30 ceiling, buy services, disclose secrets or publish another project without its
 owner's specific approval. A model answer or a passed artifact does not authorize publication.
 
-Current UAC rollback: `uac4_weekly_reports_label_rollback`, only for installed6ad68431,
+Current UAC rollback: `uac4_worker_observer_rollback`, only for installed40eca95a,
+restores calendar/voice-aware app6ad68431. State
+`.ultimate-review-data/live/uac4-worker-observation-rollout.json`. It drains/restarts only UAC
+and retains passive observations, reports/memory, task history, weekly schedules/snapshots,
+private policies, owner pauses/emergency state and accounting. No live DB restore or
+independent service action. No live rollback performed. New observation detail requires
+newer readers, while existing daily/weekly fields remain compatible.
+
+Preceding UAC rollback: `uac4_weekly_reports_label_rollback`, only for installed6ad68431,
 restores calendar/voice-aware app421acd3b while retaining its weekly schedule/report, voice
 inputs, history and owner pauses. State `.ultimate-review-data/live/uac4-weekly-report-label-patch.json`.
 To remove the calendar feature after that exact transition, `uac4_weekly_reports_rollback`
