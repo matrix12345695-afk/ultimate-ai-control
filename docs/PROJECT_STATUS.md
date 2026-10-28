@@ -27,7 +27,96 @@ persisted on the VPS; existing setup requests were resolved as deferred, not com
 Private setup may resume only when the owner returns to it; then review the helper's pinned
 runtime before attempting installation. The hourly development automation remains disabled.
 
-## Kinder hosting correction — Render only
+## Kinder Render API/admin increment — current
+
+Date28 October2026. Owner said “Продолжай” directly after the additional$7/month
+worker-cost question. Treat this as approval of that bounded worker expense;
+never re-request the same cost approval or authorize higher plans/customer release.
+All Kinder hosting/secrets remain Render-only. No Kinder installation, token
+transfer, deployment or database probe is permitted on VPS. An existing
+ULTIMATE owner-notification may carry progress/action metadata only; it does
+not host or execute Kinder.
+
+**DONE in source:** native Render API/admin launcher, fixed Gunicorn26.2.0 gateway
+with exact MIT wheel/notice, metadata-only read-only DB preflight, role/grant/audit
+checks, repaired root API Blueprint and scoped Render-private TLS configuration.
+Kinder Draft PR6, branchfeature/render-api-pilot, source
+c5aa4dc911d1ecdf91ee8eecce3e74efc06d8280, treea5e8b9228abb7afc21b76dda406f7a15c76f1284,
+stacked on bot PR5/sourcefb313305. Local207 checks47.461s, zero skips, plus28 targeted startup/standby guards. Hosted backend push40714325561 and PR40714334823 PASS207 backend +24 browser
+checks. Artifact12827817441 SHA256cb36459569d6ab5067a73704dfa7080f503b9688b37caa2da0a9014fe32bb4db:
+both exact report revisions, all37 source hashes and both deployment hashes
+verified. Flags retain actual Render TLS/deployment/delivery=false. Native push40714325500/job122907745785 and PR40714335214/job122907819005
+PASS16 JVM+10 fixture+1 review checks on their first attempts:258 unique checks
+total. Artifact12828750114 digest090c79040d6097fdaec17ae8a9958741d859c7574a60323c924590a8783eadce:
+exact revision,36 source hashes,27 tests,APK/six images/eight-file set verified.
+APK89eb27419e0cbabe139b624b645146ed083bbc38f2df8f41d9775fed76a3f92d. Historical224-check evidence below is the preceding source.
+
+The API adapter retains exact canonical Host/Origin and current bearer/session/
+ownership rules. It sets public HTTPS from Render's documented edge topology,
+strips forwarding claims and retains actual socket-peer throttling, not verified
+end-user IPs. Private workspace callers are trusted transport peers; this is not
+an untrusted-network TLS attestation. Fixed single-worker Gunicorn bounds request
+line/headers/timeouts and suppresses raw request/exception logging. Real Gunicorn
+HTTP/login/me/header-limit flows and PostgreSQL roles/grants are fixture-tested.
+
+Read-only inspection rejects elevated/owner/member roles, schema/database CREATE,
+missing tables/per-operation grants and audit mutation rights. It checks presence/
+role/grants, not full schema/constraint/backup equivalence. --inspect may run from
+the future API or Kinder worker; only the API can serve HTTP. It prints metadata,
+never customer/account/session/password/QR rows. No migration/grant/staff bootstrap
+is executed. api-role.sql is a review-only example, not an approved live change.
+
+Current Render documentation says internal PostgreSQL uses self-signed TLS and
+does NOT support verify-ca/verify-full. The previous unconditional remote gate
+was incompatible. Explicit render-private-tls now pins databasekinder_spa_db and
+hostdpg-dbbtkol9fdbs73a7tvqg-a, requires sslmode=require/TLS1.2+, disables GSS
+fallback and checks negotiated SSL before schema queries. This relies on Render
+private-network/DNS trust, not certificate identity; external/default connections
+retain verify-full. Six scope/status fixtures are synthetic. Real Render TLS and
+actual internal endpoint confirmation remain unverified. No allowlist change.
+Reference: https://render.com/docs/postgresql-creating-connecting#ssl-modes-for-internal-connections
+
+Read-only Render list still shows no Kinder API/bot service. Kinder PostgreSQL
+metadata remains available in Frankfurt, PostgreSQL18, same instance and closed
+external allowlist; no connection credentials or actual schema were retrieved.
+Current connector has NO worker/Blueprint creation operation and cannot import
+GitHub Secrets. Supported handoff: provider New→Blueprint, Kinder repo/branch
+feature/render-api-pilot, custom pathbackend/deploy/render-telegram.yaml, private
+provider token entry. No additional Render key, cron/VPS relay or other service
+reuse is requested. Creation costs money even with live mode disabled. Root
+render.yaml separately proposes a free API pilot, no DB/disk, manual deploys;
+it sleeps on idle and is not an always-on production commitment.
+
+The final worker template starts explicit read-only inspection standby: Render
+resolves the existing Kinder connection only asKINDER_INSPECTION_DATABASE_URL,
+never as an API/polling fallback. It prints metadata once (including negotiated
+TLS flag), then waits without HTTP, Telegram/token reads or data writes even
+when the inspected role is not runtime-safe. No bot token/ID is needed for
+initial provider creation. For this pinned private host, an omitted sslmode is
+forced to require; plaintext/prefer/external fallback remains denied. Before
+polling, remove the temporary operator binding from both service and manifest
+and supply a separate reviewed runtime role/token. No such transition occurred.
+
+The parentc6cfd631 native push passed but its PR job122901525703 failed ten
+fixture cases with RootViewWithoutFocusException. Final Android test-only code
+now wakes/unlocks/collapses system UI and waits for an actual focused window
+before each activity's assertions. Bounded failure diagnostics contain booleans,
+not UI/password dumps. Existing assertions/test totals and customer APK source/
+permissions are unchanged. Historical failure is retained; final push/PR native checks pass first attempts.
+
+Provider handoff: [Russian one-time creation steps](KINDER_RENDER_START_RU.md).
+The branch is frozen pending this provider setup; use new branches for later
+changes and verify the actual Render commit before any operator/runtime actions.
+
+**PENDING:** one-time provider worker creation/secret entry, internal DB/schema/
+least-privilege role/TLS/backup/migration/bootstrap review, exact live release,
+real Telegram/QR acceptance and operational/customer admission. Owner-reported
+GitHub token storage remains unread and is NOT Render binding. No Render resources/secrets/network/data/permissions, installed application
+code, Inventory or paid API calls changed. No current Telegram plan/status
+delivery is claimed; a separate existing ULTIMATE owner notice is planned. Full Kinder/UAC stage7
+remains active; source preparation only is done.
+
+## Previous Kinder hosting correction — Render only
 
 Owner decision28 October2026: **ALL Kinder Spa hosting and secrets belong on
 Render, never the VPS.** This supersedes the older systemd/token-transfer proposal.
@@ -1646,4 +1735,5 @@ The preceding registry rollback (only when that registry release is current) tem
 cancelling unsupported queued registry reads with an audit event, restarts its worker and
 restores its own temporary pause only if the owner has not replaced it. Existing owner pauses
 and successful source-read history are preserved. Inventory is never paused or restarted.
+
 
