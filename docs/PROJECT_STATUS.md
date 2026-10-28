@@ -29,7 +29,42 @@ runtime before attempting installation. The hourly development automation remain
 
 ## Evidence
 
-Latest prepared project increment: [Kinder authenticated API](KINDER_AUTH_API.md),
+Latest prepared project increment: [Kinder RU/UZ staff panel](KINDER_ADMIN_UI.md),
+28 October2026. **Done: responsive admin-panel draft and117 actual checks**; full
+Kinder/Android and UAC stage7 remain active. Kinder PR3 source
+ e26d2eadecfce97dba25579a94f70f31914a2ff9, stacked on PR2. Clients/password reset,
+category packages, bookings, visits, reasoned restoration and audit are connected
+to the real API. Browser access opts into one exact origin/Host; sessions stay only
+in tab memory, private DOM clears on exit and delayed reads cannot repopulate it.
+Ambiguous accounting responses reuse exact keys; credential actions block blind
+retry. Dashboard numbers describe the loaded selection; queued notices are not
+shown as delivered. No public service, DB/schema change, worker permission or
+production/billing write. main/render.yaml unchanged; Android/camera/full admin
+operations, actual sender, gateway/roles/migrations/backups and owner-approved
+publication remain open.
+
+Local93 backend checks23.100s and24 real Chromium checks36.299s pass with zero
+skips. Push CI40648920945/job122684152607 and PR CI40648925674 pass:93 checks
+16.757s,24 browser checks25.109s; CI Chromium151.0.7922.34. Six synthetic desktop/
+mobile RU/UZ screenshots. Archive12799315337 SHA256079edff3f0d37a5e87d801218be432c0e9fa472036bbe47f852f6467cc71b22d,
+both report revisions, all22 source/static hashes and exact screenshot names checked.
+
+Initial VPS verification40649038530/job122684531717 stopped in a legacy anonymous
+worker assertion after earlier/calendar checks passed. Its cause is unconfirmed
+and the failure was not reproduced. The minimal operator-only change names all15
+existing checks and fails closed on false/missing/malformed flags;94 operator tests
+pass locally and on VPS. No runtime app fix or restart is inferred. Transport now
+908a47e15c42518ed64e62fbf27da45c952dc6ea; agent a83407c570f4f70a6a4e0a4aa69bd9678b862346
+(blob88e02902de0642705bda1226dea2dc2358987fba). Full repeat40649797193/
+job122686948931 passes at12:25 Asia/Tashkent, all15 flags true, invalid rows0,
+overlap0, current worker owner_pending, roadmap3228chars. Same installed341d1277,
+worker3311622/dispatcher3312003 and unchanged Inventory; actual paid calls0,
+model deferral and original report/memory/weekly/voice/repository state preserved.
+Completion notice178/Telegram418 accepted via40650132735/job122688029967 at12:27.
+This is progress delivery, not owner reading, publication consent or real Kinder
+outbox delivery. No model-key request or hourly coding automation was added.
+
+Preceding prepared project increment: [Kinder authenticated API](KINDER_AUTH_API.md),
 28 October2026. **Done: admin-issued login/password and transaction-authorized API
 draft**, not the full Android application. Kinder PR2 source07bea3ed737a41cebb360424b826f1d966096be1,
 stacked on PR1. Local83/83 PostgreSQL18 checks pass without skips (14.180s);
