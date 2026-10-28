@@ -29,7 +29,54 @@ runtime before attempting installation. The hourly development automation remain
 
 ## Evidence
 
-Latest prepared project increment: [Kinder native RU/UZ Android review client](KINDER_NATIVE_ANDROID.md),
+Latest prepared project increment: [Kinder client/staff Telegram bot](KINDER_TELEGRAM.md),
+28 October2026. **DONE: code draft,70 new Telegram cases and216 total checks.**
+The owner explicitly selected clients AND administrator. Kinder source
+fd54f2184b66a02c54b870a157f7a2200463273f is Draft PR5, stacked on Android PR4.
+The actual new Kinder bot is NOT created, configured or started; live Telegram
+and the whole Kinder/UAC stage7 remain unfinished.
+
+RU/UZ private menus, owned subscriptions/records, expiring single-use links,
+confirmed cancellation/redemption/restoration, QR photo rendering/decoding and
+leased per-superadmin outbox jobs are implemented. Reads/actions/sends fence
+current role/binding/credential version. Passwords, raw QR values and link codes
+are not persisted in delivery jobs. Accounting/result/applied action state commit
+atomically; ambiguous delivery can duplicate. No recipient is pending, not delivered.
+QR photo decode is resource-bounded; three wheel hashes and complete packaged
+licenses are committed. The separate DynamicUser service template is uninstalled.
+
+Local165 checks38.153s pass without skips (70 Telegram plus95 prior backend).
+Hosted push40688806179/job122818017713 and PR40688811581/job122818037734 pass:
+165 backend33.877s and24 browser25.904s on push. Native push40688806158/
+job122818017764 and PR40688811472/job122818034816 each pass16 JVM+11 device
+checks on first attempts. Total216; real loopback wire/multipart/native QR and
+PostgreSQL fixtures use synthetic credentials, not real Telegram accounts.
+Backend archive12816605641 SHA256b802b0373b1d52c57e4fd89efe3d046d0f166be1fb826b6339d87428072cb84d:
+both exact report revisions and all30 hashes verified. Native archive12816690805
+SHA25601f3988825e48568d89331b7c05029626d6499f76171c99ad4f0d071eef022cc:
+exact revision,35 hashes,27 checks and eight-file APK/image/report set verified.
+
+VPS verification40689032199/job122818782283 at17:36 Asia/Tashkent passes all15
+named observer checks, invalid rows0/overlap0, current worker owner_pending.
+Same UAC341d1277/worker3311622/dispatcher3312003; Inventory unchanged, paid API
+requests0. No Kinder service, DB/migration, token, Render or runtime permission
+was installed/changed. Existing model-key deferral and disabled hourly coding
+remain intact. Local test-only Docker container was removed.
+
+Owner decision notification182/Telegram424 is persisted via40689829523/
+job122821496149 at17:41 Asia/Tashkent. Stable event key
+kinder-telegram-botfather-setup-v1 records the need to create a SEPARATE BotFather
+bot and share only its username; do not request a token in chat/GitHub or resolve
+this as provisioned. This is an actual ULTIMATE progress/setup notice, not Kinder
+business-event delivery, owner reading, or publication approval. No OpenAI-key
+setup request was recreated. The owner may return to this later.
+
+Remaining: real identity/private credential provision, reviewed DB/role/migration/
+backup and pilot deployment, first genuine Kinder notification/QR workflow,
+public admission/retention/operations/device gates and exact publication approval.
+Independent engineering can continue; the whole bot/pilot/project is not done.
+
+Preceding prepared project increment: [Kinder native RU/UZ Android review client](KINDER_NATIVE_ANDROID.md),
 28 October2026. **DONE: review-client draft,146 actual checks and verified APK.**
 Current Kinder sourceee7ce3686f7d689458cd8ce3a94086e1fa848127 is Draft PR4,
 stacked on staff-panel PR3. Full Kinder and UAC stage7 remain active.
@@ -1383,7 +1430,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
 | 5. Tester | Pinned NOVA read-only subset plus hosted PostgreSQL, browser, locked-build and recovery fixtures have source-bound evidence; production-state, other projects and wider stacks remain pending. |
 | 6. Monitoring | Separate NOVA page/API readiness plus VPS CPU/MemAvailable/data-volume/inode observations, confirmed alarms/recovery and telemetry checks; full business checks and more targets pending. |
-| 7. Multiple projects | NOVA/Kinder pinned read scopes plus credential-free main-ref watchers live, with six-hour checks, durable drift/access transitions and typed metadata evidence. Kinder native client/accounting/API/admin drafts now have separate project evidence; production integration, other mappings and broad execution remain pending. Inventory excluded. |
+| 7. Multiple projects | NOVA/Kinder pinned read scopes plus credential-free main-ref watchers live, with six-hour checks, durable drift/access transitions and typed metadata evidence. Kinder native client/accounting/API/admin/Telegram drafts now have separate project evidence; production integration, other mappings and broad execution remain pending. Inventory excluded. |
 | 8. Draft PRs | VPS broker created and exact-diff/CI verified a real Draft PR from a tested control recipe; broader project/model patches pending. |
 | 9. Publication approval | Exact-version candidates plus GET-only live artifact/diff/base/head/CI and existing approval preflight implemented, with durable reports and Telegram receipts; real owner decision, publisher and tested deployment rollback pending. |
 | 10. Voice | Owner-private10-second intake, local recognition, preview and exact project/code confirmation are enabled; native public-English and synthetic state cases are verified. Genuine incoming owner confirmation and RU/UZ quality remain pending. No paid API. |
