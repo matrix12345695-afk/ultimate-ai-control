@@ -112,8 +112,18 @@ changes and verify the actual Render commit before any operator/runtime actions.
 least-privilege role/TLS/backup/migration/bootstrap review, exact live release,
 real Telegram/QR acceptance and operational/customer admission. Owner-reported
 GitHub token storage remains unread and is NOT Render binding. No Render resources/secrets/network/data/permissions, installed application
-code, Inventory or paid API calls changed. No current Telegram plan/status
-delivery is claimed; a separate existing ULTIMATE owner notice is planned. Full Kinder/UAC stage7
+code, Inventory or paid API calls changed. No current Telegram plan/status update is claimed. Existing ULTIMATE owner
+DECISION183 / Telegram425 was delivered by bridge40716620739/job122915960664
+at20:30 Asia/Tashkent on28 October2026, stable eventkinder-render-inspection-create-v1.
+The bridge's94 operator tests pass; only the owner-notification metadata was
+added to UAC. No Kinder application/token/data was installed on VPS and no
+Inventory source/config/service command was changed. First attempt40716282864
+failed the500-character inbox field bound before any delivery receipt; the
+shortened request was validated against the exact installed notification module
+in a local in-memory database, then delivered under the same event key. This is
+ULTIMATE's setup instruction, not a Kinder business-event receipt, owner reading,
+customer publication approval or completed provisioning. Latest Render service
+list still contains no Kinder service. The owner's provider creation is pending. Full Kinder/UAC stage7
 remains active; source preparation only is done.
 
 ## Previous Kinder hosting correction — Render only
