@@ -29,7 +29,30 @@ runtime before attempting installation. The hourly development automation remain
 
 ## Evidence
 
-Latest prepared project increment: [Kinder transactional accounting](KINDER_ACCOUNTING.md),
+Latest prepared project increment: [Kinder authenticated API](KINDER_AUTH_API.md),
+28 October2026. **Done: admin-issued login/password and transaction-authorized API
+draft**, not the full Android application. Kinder PR2 source07bea3ed737a41cebb360424b826f1d966096be1,
+stacked on PR1. Local83/83 PostgreSQL18 checks pass without skips (14.180s);
+push CI40638453032/job12265076977983/83 in15.510s and PR CI40638455878 succeed.
+Artifact12794706529 archive digest, exact revision and all14 component source hashes
+were independently verified. Passwords use salted scrypt; opaque8h sessions support
+logout/reset revocation; persistent throttling covers concurrent attempts. All
+accounting mutations validate current session inside the same write transaction.
+Ownership-filtered reads, bounded exact JSON bodies, no-store headers and redacted
+errors are implemented. No new dependency, public listener or production rollout.
+Android/RU-UZ and admin web UI, capacity, real outbox delivery, reviewed HTTPS gateway,
+DB roles/migrations/backups and exact release approval remain open. Main and
+render.yaml unchanged; the whole Kinder/UAC stage7 remains active.
+
+Independent preservation verification40638503743/job122650933525 succeeds at
+10:33 Asia/Tashkent: same UAC341d1277/worker3311622/dispatcher3312003, Inventory
+unchanged, paid requests0, model setup deferred, genuine voice confirmations0.
+Completion notification177/Telegram417 is persisted via40638744177/job122651678539
+at10:34. This is a completed-draft progress notice, not a Kinder outbox delivery,
+owner reading or publication approval. No UAC source/permission activation, API key
+request, external project publication or hourly development automation was added.
+
+Preceding prepared project increment: [Kinder transactional accounting](KINDER_ACCOUNTING.md),
 Draft PR1 in Kinder-Spa-android, sourced9a63e3957a58a26bfad671c3c4b10db43b5f32e.
 Bounded work status **done: code draft and PostgreSQL acceptance**, whole Kinder/UAC
 stage7 still active. Actual category balances, reserved visits, one-time QR, strict
