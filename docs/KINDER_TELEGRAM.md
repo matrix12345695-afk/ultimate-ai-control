@@ -1,7 +1,63 @@
 # Kinder Spa client/staff Telegram draft checkpoint
 
 Date:28 October2026. Owner selection: clients AND administrator.
-**DONE: review code and216-check acceptance. NOT DONE: live Kinder bot/pilot.**
+**DONE: review code, prior216-check acceptance, Render-only hosting correction
+and173 local backend/Render checks. NOT DONE: live Kinder bot/pilot.**
+
+## Current hosting decision and status
+
+Owner decision28 October2026: all Kinder hosting, credentials and database must
+be on Render; do not deploy anything for Kinder to VPS. Current source is
+`fb3133051d23d1a9a27ce4ef2f9ef92ed4341946`, tree
+`f809fdf335a7bd8318716651b9eb84dc9e310a4c`, existing Draft PR5. Removes the
+uninstalled systemd/env-file templates, reads only the dedicated Render token
+variable, refuses non-Render/wrong-service launches before token lookup and
+checks exact bot ID/token prefix. These host markers are not an attestation.
+Eight new synthetic Render startup checks plus the prior165 pass locally in
+38.584s with zero skips. Hosted backend push40694774592/job122838500779 and
+PR40694786316 pass173 backend +24 browser checks. Artifact12818128701 SHA256
+7f39feb4a678bc450260c297355b3a8d0226ff182833a4012c9fc499867e6101 is downloaded;
+both exact report revisions/all31 hashes verified, with real delivery=false.
+Native push40694774494 passes16 JVM+10 fixture+1 review emulator checks;
+224 total on the exact source. Native PR40694786339/job122838539324 failed
+first-attempt fixture checks because all ten windows lacked focus. The exact
+source push passed; only the failed job was rerun. Attempt2/job122841754383
+PASSES all27 native checks on the same source. All current CI runs succeed;
+no test was weakened and the original failure remains recorded. Artifact
+12819660735 digest9d1506d9fdb2c5c2f7826dcd86cc7723436f0843a511d9fbac5551c4b06ba499:
+exact revision,35 source hashes,27 tests,APK/six image hashes/eight-file set verified.
+APK SHA256762d328e8b5288cd679454e6205fc77c0f38b52ae0ee540b70b39912cf92e4f8. Older acceptance below belongs tofd54f218.
+
+Render read-only audit: My Workspace, matrix12345695@gmail.com,
+`tea-d52kjcur433s73ca9810`. Existing `kinder-spa-db` is available in Frankfurt,
+PostgreSQL18,1GiB/0.1c-256mb, ID `dpg-dbbtkol9fdbs73a7tvqg-a`, database
+`kinder_spa_db`. No Kinder API or bot service exists. Empty external allowlist
+prevented MCP schema inspection; no networking or data changed.
+
+Owner reports separate BotFather token creation and storage as GitHub Actions
+secret `KINDER_TELEGRAM_BOT_TOKEN`. Value/real identity is not verified, and it
+is NOT yet connected to Render. Connector cannot import/read back GitHub Secrets.
+Use the eventual Kinder Render service Environment form, **Save only**, for
+private entry after the exact service/configuration exists. Never request token
+text in chat or retrieve it through logs. No VPS token relay is permitted.
+
+`backend/deploy/render-telegram.yaml` is a reviewed-source proposal for one
+Frankfurt paid worker, manual deploys, no new DB/disk/cron. It is not applied.
+Creation costs money even with default live mode disabled. Public Render
+pricing currently lists0.5c-512mb at$7/month, additional to the existing database
+(https://render.com/pricing). Account checkout/taxes/usage must be reviewed;
+separate owner cost and exact release approval are required.
+Internal DB inspection, least-privilege
+role, verified TLS/CA, reviewed migrations/backup/restore, Render HTTPS API
+bootstrap and a real Telegram acceptance/QR round trip remain pending.
+Root render.yaml is still an unfinished API scaffold (missing Dockerfile).
+Existing-webhook handling, database singleton admission and safe Render
+rollout/rollback must be verified during the pilot; the current lock refuses
+a second process and does not implement platform rollout orchestration.
+No resource, secret, schema, deployment, UAC runtime or Inventory changed in this
+correction. No current bot-plan/owner-notification update is claimed.
+
+## Previous source checkpoint (historical)
 
 Repository: matrix12345695-afk/Kinder-Spa-android. Draft PR5, feature/telegram-bot,
 sourcefd54f2184b66a02c54b870a157f7a2200463273f, tree43721e202bfa36bd865aabf4c6c5fe5e4a6dd70d,
@@ -45,8 +101,8 @@ child decoder4s wall/2s CPU/384MiB, no token/DSN in its environment. This is
 resource confinement, not a general untrusted-code sandbox. qrcode8.2,
 Pillow13.0.0 and zxing-cpp3.1.1 wheels/hash-locked requirements plus full packaged
 licenses are committed (BSD-3-Clause/MIT-CMU/Apache-2.0 primary licenses).
-The uninstalled service template uses DynamicUser, read-only opt source,
-private systemd credentials, inaccessible home directories,512MiB/half-CPU caps.
+The earlier uninstalled DynamicUser/systemd template was removed by the
+Render-only correction above; it must never be installed on the VPS.
 No service or migration auto-installs. Existing webhooks are not deleted; a DB
 singleton lock admits one poller and Telegram401/409 stops the runner.
 
@@ -88,7 +144,8 @@ create a SEPARATE bot with /newbot in real @BotFather and share only @username.
 Do not put its token in chat, GitHub or a command argument; provision privately
 once a reviewed pilot configuration exists. Tools cannot create a BotFather
 identity. Stable event keykinder-telegram-botfather-setup-v1 avoids a new request
-on every development turn. Do not resolve this request as a real bot provision.
+on every development turn. Owner now reports token creation/storage, but do not resolve the entire
+provisioning/delivery request as complete; Render binding and live checks remain.
 This is an actual ULTIMATE notice, NOT a new Kinder bot/customer event, reading,
 release approval or authorization to enable deferred OpenAI API calls.
 
@@ -105,3 +162,4 @@ The full Kinder/UAC stage7 is active; only the bounded source increment is done.
 
 Source instructions: backend/TELEGRAM.md. No paid resources, external project
 publication, real token read, Inventory edit or independent service restart.
+

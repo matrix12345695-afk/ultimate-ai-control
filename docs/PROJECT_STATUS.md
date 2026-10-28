@@ -27,14 +27,72 @@ persisted on the VPS; existing setup requests were resolved as deferred, not com
 Private setup may resume only when the owner returns to it; then review the helper's pinned
 runtime before attempting installation. The hourly development automation remains disabled.
 
+## Kinder hosting correction — Render only
+
+Owner decision28 October2026: **ALL Kinder Spa hosting and secrets belong on
+Render, never the VPS.** This supersedes the older systemd/token-transfer proposal.
+**DONE:** Render infrastructure audit, removal of the VPS unit/token-file path,
+Render-only worker configuration and173 local tests (38.584s, zero skips).
+Source `fb3133051d23d1a9a27ce4ef2f9ef92ed4341946`, tree
+`f809fdf335a7bd8318716651b9eb84dc9e310a4c`, existing Kinder Draft PR5.
+Hosted backend push40694774592/job122838500779 and PR40694786316 pass
+173 backend and24 browser checks. Artifact12818128701 digest
+7f39feb4a678bc450260c297355b3a8d0226ff182833a4012c9fc499867e6101 is downloaded;
+both report revisions and all31 source hashes match this exact commit. Native
+push40694774494 passes16 JVM+10 fixture+1 review device checks:224 total. Native
+PR40694786339/job122838539324 failed its first emulator attempt: ten fixture
+tests reported RootViewWithoutFocusException. Its successful16 JVM checks and
+the independent full native push remain evidence, not a green PR result.
+Only the failed job was rerun: attempt2/job122841754383 PASSES all27 native
+checks on the same source. All current CI runs are successful; the original
+focus failure remains historical evidence. No test was weakened.
+Artifact12819660735 digest
+9d1506d9fdb2c5c2f7826dcd86cc7723436f0843a511d9fbac5551c4b06ba499:
+exact source,35 hashes,27 checks,APK/six image hashes/eight-file set verified.
+Historical216-check evidence below belongs to
+the previous source, not this increment. See [KINDER_TELEGRAM.md](KINDER_TELEGRAM.md).
+
+Read-only Render audit confirmed My Workspace (`tea-d52kjcur433s73ca9810`),
+account matrix12345695@gmail.com. `kinder-spa-db` is available in Frankfurt,
+PostgreSQL18, existing paid plan0.1c-256mb,1GiB, ID
+`dpg-dbbtkol9fdbs73a7tvqg-a`, database `kinder_spa_db`. No Kinder API or bot
+service exists. External schema read was refused by the empty database allowlist;
+no networking, schema, data, env, service or deploy was changed. Owner reports
+BotFather token creation and storage as GitHub Actions secret
+`KINDER_TELEGRAM_BOT_TOKEN`; value/identity/delivery are unverified and Render
+binding is pending. Never request the token in chat or extract it from logs.
+
+`backend/deploy/render-telegram.yaml` proposes a dedicated Frankfurt Render
+Background Worker, one instance, manual deploys and live mode disabled. This is
+PAID compute, currently advertised at$7/month for0.5c-512mb
+(https://render.com/pricing); its creation requires separate cost/release
+approval even while disabled. This is additional to the existing database;
+account checkout/taxes/usage charges must be reviewed before creation.
+The connector cannot import the GitHub secret. Direct private Render
+Environment entry (Save only until release) remains a supported handoff. Runtime
+reads only the dedicated Kinder variable, validates Render worker markers, exact
+bot ID/token prefix and dedicated verified-TLS DB. No file/shared-token fallback.
+Markers prevent accidental host use, not cryptographic attestation. The root API
+Blueprint is explicitly unfinished; it references a missing Dockerfile.
+The singleton gate refuses a second process; actual Render worker replacement
+and platform restart/rollback behavior remain unverified pilot gates.
+
+**PENDING:** approved worker cost/exact release, private secret binding, internal
+DB/schema/least-privilege role/backup/migration checks, Render HTTPS API/bootstrap,
+real Telegram/QR round trip and operational/customer-admission gates. No Kinder
+code/token/key was transferred to or installed on VPS. UAC runtime, Inventory,
+paid API deferral and canceled hourly coding automation remain untouched.
+No current Telegram plan/status or owner-notification delivery is claimed.
+
 ## Evidence
 
-Latest prepared project increment: [Kinder client/staff Telegram bot](KINDER_TELEGRAM.md),
+Previous prepared project increment: [Kinder client/staff Telegram bot](KINDER_TELEGRAM.md),
 28 October2026. **DONE: code draft,70 new Telegram cases and216 total checks.**
 The owner explicitly selected clients AND administrator. Kinder source
 fd54f2184b66a02c54b870a157f7a2200463273f is Draft PR5, stacked on Android PR4.
-The actual new Kinder bot is NOT created, configured or started; live Telegram
-and the whole Kinder/UAC stage7 remain unfinished.
+At that checkpoint the Kinder identity had not been provisioned. The owner now
+reports token creation/storage; runtime configuration and live delivery remain
+unverified, and the whole Kinder/UAC stage7 remains unfinished.
 
 RU/UZ private menus, owned subscriptions/records, expiring single-use links,
 confirmed cancellation/redemption/restoration, QR photo rendering/decoding and
@@ -43,7 +101,8 @@ current role/binding/credential version. Passwords, raw QR values and link codes
 are not persisted in delivery jobs. Accounting/result/applied action state commit
 atomically; ambiguous delivery can duplicate. No recipient is pending, not delivered.
 QR photo decode is resource-bounded; three wheel hashes and complete packaged
-licenses are committed. The separate DynamicUser service template is uninstalled.
+licenses are committed. Its uninstalled DynamicUser template was subsequently
+removed in the Render-only increment above.
 
 Local165 checks38.153s pass without skips (70 Telegram plus95 prior backend).
 Hosted push40688806179/job122818017713 and PR40688811581/job122818037734 pass:
@@ -1587,3 +1646,4 @@ The preceding registry rollback (only when that registry release is current) tem
 cancelling unsupported queued registry reads with an audit event, restarts its worker and
 restores its own temporary pause only if the owner has not replaced it. Existing owner pauses
 and successful source-read history are preserved. Inventory is never paused or restarted.
+
