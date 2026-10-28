@@ -1,6 +1,6 @@
 # ULTIMATE AI CONTROL 4.0 — current checkpoint
 
-Updated 2026-10-27 UTC. This is the resume point for later owner-authorized development. Historical
+Updated 2026-10-28 UTC. This is the resume point for later owner-authorized development. Historical
 deployment records retain their original observations; this file identifies the latest state.
 
 ## Installed state
@@ -29,7 +29,48 @@ runtime before attempting installation. The hourly development automation remain
 
 ## Evidence
 
-Latest prepared project increment: [Kinder RU/UZ staff panel](KINDER_ADMIN_UI.md),
+Latest prepared project increment: [Kinder native RU/UZ Android review client](KINDER_NATIVE_ANDROID.md),
+28 October2026. **DONE: review-client draft,146 actual checks and verified APK.**
+Current Kinder sourceee7ce3686f7d689458cd8ce3a94086e1fa848127 is Draft PR4,
+stacked on staff-panel PR3. Full Kinder and UAC stage7 remain active.
+
+Final native push40661006666/job122723720196 and PR40661017130/job122723753421
+both pass build/lint,16 JVM +10 fixture +1 review-device checks on first attempts.
+Backend/browser PR40661017122/job122723753228 passes95+24 on the identical Git
+tree14724b1b22da69a66f6fcbf05d099925cad52bb6 (PR merge921322adbfcb93b6bdc26499d4c0cc09fbead6b9).
+Archive12804725651 SHA25602286bcea55a9ece3fee4e07a2ad0bb133efa9161af4d94393ca540b7e08643a,
+35 native/critical-source hashes,6 image hashes and exact8-file set checked.
+All6 synthetic images reviewed, actual APK signature/INTERNET-only permission
+rechecked. APK335630bytes; SHA256ded79768c6e577a03a6fbd9101637782528d9f4a2ef3740d78e2353498ee120d.
+Source/dependency locks are verified. Review API is unconfigured and login disabled.
+Local /workspace/kinder-spa-review includes APK/report/PNGs and a standalone preview.
+
+Earlier screenshot-uninstall, frame timing, localized clipping and QR root-selector
+failures and one earlier manual CI retry are recorded honestly in the checkpoint.
+Final tests target the QR dialog, require loaded/committed screen frames and check
+complete Uzbek navigation. An older all-window focus failure has no established
+root cause; one final passing pair is not statistical stress coverage.
+
+VPS preservation40656293389/job122708013268 passes with all15 named observer
+flags true, same UAC341d1277/worker3311622/dispatcher3312003, Inventory unchanged,
+paid calls0 and model setup deferred. No UAC runtime/permission/service change,
+model-key request, hourly coding automation, Render write or publication.
+First completion179/Telegram419 is persisted via40659558245/job122718874403 at
+13:49 Asia/Tashkent; it refers to the earlier accepted25756ca0 build. Telegram
+API acceptance is not reading, release approval or real Kinder outbox delivery.
+
+Final completion181/Telegram421 is persisted via40661835521/job122726501711
+at14:08 Asia/Tashkent. Final backend archive12804490545 digest
+911d83cfb3189ceb436ebdac0857d9ce38244a212eea125552c6f121418a6e2b, both merge
+report revisions and all23 source hashes were independently checked. This records
+only the bounded client draft as done; no approval or live service is implied.
+
+Full client/guardian/catalog workflows, capacity, actual outbox delivery,
+production gateway/DB lifecycle, server binding/signing/distribution and exact
+owner release approval remain unfinished. Next independent increment: scoped
+Kinder notification sender/retry/recipient-binding acceptance with synthetic data.
+
+Preceding prepared project increment: [Kinder RU/UZ staff panel](KINDER_ADMIN_UI.md),
 28 October2026. **Done: responsive admin-panel draft and117 actual checks**; full
 Kinder/Android and UAC stage7 remain active. Kinder PR3 source
  e26d2eadecfce97dba25579a94f70f31914a2ff9, stacked on PR2. Clients/password reset,
@@ -1342,7 +1383,7 @@ Stages below describe partial capabilities, not a declaration that every accepta
 | 4. Developer | Typed broker, capsule and two-job flow installed; live model task and broader code changes pending. |
 | 5. Tester | Pinned NOVA read-only subset plus hosted PostgreSQL, browser, locked-build and recovery fixtures have source-bound evidence; production-state, other projects and wider stacks remain pending. |
 | 6. Monitoring | Separate NOVA page/API readiness plus VPS CPU/MemAvailable/data-volume/inode observations, confirmed alarms/recovery and telemetry checks; full business checks and more targets pending. |
-| 7. Multiple projects | NOVA/Kinder pinned read scopes plus credential-free main-ref watchers live, with six-hour checks, durable drift/access transitions and typed metadata evidence. Other mappings and isolated execution/change preparation remain pending. Inventory excluded. |
+| 7. Multiple projects | NOVA/Kinder pinned read scopes plus credential-free main-ref watchers live, with six-hour checks, durable drift/access transitions and typed metadata evidence. Kinder native client/accounting/API/admin drafts now have separate project evidence; production integration, other mappings and broad execution remain pending. Inventory excluded. |
 | 8. Draft PRs | VPS broker created and exact-diff/CI verified a real Draft PR from a tested control recipe; broader project/model patches pending. |
 | 9. Publication approval | Exact-version candidates plus GET-only live artifact/diff/base/head/CI and existing approval preflight implemented, with durable reports and Telegram receipts; real owner decision, publisher and tested deployment rollback pending. |
 | 10. Voice | Owner-private10-second intake, local recognition, preview and exact project/code confirmation are enabled; native public-English and synthetic state cases are verified. Genuine incoming owner confirmation and RU/UZ quality remain pending. No paid API. |
