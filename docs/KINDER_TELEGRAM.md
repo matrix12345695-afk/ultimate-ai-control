@@ -4,6 +4,42 @@ Date:28 October2026. Owner selection: clients AND administrator.
 **DONE: review code, Render gateway/inspection preparation and258 hosted checks.
 NOT DONE: live Kinder bot/pilot. Historical evidence is retained below.**
 
+## 29 October2026 — one-click Render handoff
+
+Read-only Render recheck in the previously confirmed My Workspace still finds
+no Kinder service; dedicated kinder-spa-db remains available in Frankfurt,
+PostgreSQL18, external allowlist empty. No service/env/network/data write or
+VPS action was performed. Worker creation through the current connector is
+still unsupported; the environment has no configured Render CLI credential.
+Do not extract the connector credential or introduce another API key.
+
+**DONE:** provider-supported Deploy to Render shortcut, an isolated deployment-only
+branchkinder-render-inspection-20261029, source6bce0cc67572575e7abb06d380f7fc0906ddd08b,
+parentc5aa4dc9. Only rootrender.yaml andRENDER_START_RU.md differ; all application,
+backend, Android, dependency and test source is unchanged. Root Blueprint is the
+already tested inspection worker descriptor, with its service branch pointing
+to the new frozen deployment branch. Existing application/PR6 branch is untouched.
+Current public Render price0.5c-512mb is still$7/month; that expense is already
+approved. No new DB/disk/cron/web service or automatic deploy is defined.
+
+The shortcut returns the official dashboard.render.com/blueprint/new form.
+Opening it is not an authenticated deployment. The owner needs only to select
+My Workspace and confirm the one approved worker; branch/path entry is no longer
+required. No bot secret is needed. Read-only inspection, then idle standby,
+remains the default; no Telegram polling, customer data read, migration, grants
+or staff bootstrap is added. Underlying tested sourcec5aa4dc9 and its258 checks
+remain historical source evidence; deployment-branch CI40829538517 passes207 backend +24 browser checks.
+Native checks were not rerun for the manifest/docs-only diff; the27 native
+checks belong to unchanged application sourcec5aa4dc9. No fresh Android or
+live Render acceptance is claimed.
+See the updated [Russian creation form instructions](KINDER_RENDER_START_RU.md).
+
+**PENDING:** actual provider creation and real Render TLS/schema/role report.
+Owner notice183/Telegram425 remains the existing request; its instruction URL
+now points to this updated shortcut. Do not send another duplicate setup request
+or mark live deployment/delivery as complete. The $7 approval and API-key setup
+deferral are unchanged. Full Kinder/UAC stage7 is still active.
+
 ## Kinder Render API/admin increment — current
 
 Date28 October2026. Owner said “Продолжай” directly after the additional$7/month
@@ -261,5 +297,6 @@ The full Kinder/UAC stage7 is active; only the bounded source increment is done.
 
 Source instructions: backend/TELEGRAM.md. No paid resources, external project
 publication, real token read, Inventory edit or independent service restart.
+
 
 
