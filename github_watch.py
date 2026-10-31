@@ -25,5 +25,7 @@ def inspect(label, opener=None):
     except Exception as error:
         return False, "ошибка "+type(error).__name__
 
-def scan(opener=None):
-    return {"GitHub "+label:inspect(label,opener) for label in allowed_repos()}
+def scan(opener=None,*,excluded=()):
+    from project_retirement import canonical
+    return {"GitHub "+label:inspect(label,opener) for label,name in allowed_repos().items()
+            if canonical(label) not in excluded and canonical(name.rsplit('/',1)[-1]) not in excluded}

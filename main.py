@@ -28,6 +28,7 @@ from code_reviews_v48 import handle as code_review_handle
 from ai_commands_v30 import handle as ai30_handle
 import voice_intake
 import voice_native
+import project_retirement
 import telegram_voice_file
 from isolated_development_v31 import prepare as prepare_v31, format_report as report_v31
 from ai_commands_v30 import handle as ai30_handle
@@ -65,14 +66,16 @@ def api(method,**kwargs):
         return payload["result"]
 def reply(chat,msg,show_keyboard=False):
     args={"chat_id":chat,"text":msg[:4000]}
-    if show_keyboard: args["reply_markup"]=keyboard()
+    if show_keyboard:
+        with db() as conn: args["reply_markup"]=keyboard(conn)
     elif msg.startswith("🔔 ULTIMATE AI CONTROL"):
         with db() as conn: link=bound_chat(conn)["url"]
         if link: args["reply_markup"]=json.dumps({"inline_keyboard":[[{"text":"Открыть чат Codex","url":link}]]})
     return api("sendMessage",**args)
 def check():
     results=[]
-    for url in URL:
+    with db() as conn: urls=[url for url in URL if not project_retirement.denied_url(conn,url)]
+    for url in urls:
         url=url.strip()
         if not url.startswith("https://"): continue
         try:
@@ -92,6 +95,14 @@ def owner_event(project, kind, title, reason, next_action):
         conn.commit()
     return ident
 def command(text,source_key=None):
+    text=route(text)
+    with db() as conn:
+        answer=project_retirement.before_command(conn,text)
+        if answer is not None:return answer
+    result=_command(text,source_key)
+    with db() as conn:return project_retirement.filtered(conn,result)
+
+def _command(text,source_key=None):
     text=route(text)
     runtime_result=runtime_handle(text,db,source_key,actor_id=ADMIN)
     if runtime_result is not None: return runtime_result
@@ -163,7 +174,8 @@ def command(text,source_key=None):
         try: return developer_render(developer_prepare(parts[1],parts[2]))
         except ValueError: return "Недопустимый проект или текст задачи."
     if c=="/github_check":
-        return format_report(github_scan())
+        with db() as conn: excluded=project_retirement.PROJECTS if project_retirement.enabled(conn) else ()
+        return format_report(github_scan(excluded=excluded))
     if c=="/report":
         with db() as conn:
             return project_report(conn, PROJECTS)
@@ -221,6 +233,11 @@ def accept_voice(update):
 def main():
     if not TOKEN or not ADMIN.isdecimal(): raise SystemExit("Configure TELEGRAM_BOT_TOKEN and ADMIN_TELEGRAM_ID")
     db().close()
+    with db() as conn:
+        refresh=project_retirement.enabled(conn) and not setting(conn,'retirement_menu_message_id')
+    if refresh:
+        sent=reply(ADMIN,'Меню обновлено: старые проекты удалены из управления. /projects4',show_keyboard=True)
+        with db() as conn:set_setting(conn,'retirement_menu_message_id',str(sent['message_id']))
     with db() as conn: offset=int(setting(conn,"telegram_offset","0"))
     next_check=time.monotonic()+3600
     next_backup=time.monotonic()+60
@@ -254,7 +271,8 @@ def main():
                 next_owner_delivery=time.monotonic()+5
             if time.monotonic()>=next_github:
                 try:
-                    current_github=github_scan()
+                    with db() as conn: excluded=project_retirement.PROJECTS if project_retirement.enabled(conn) else ()
+                    current_github=github_scan(excluded=excluded)
                     for alert in transitions(previous_github,current_github):
                         owner_event("control","info","Изменилось состояние GitHub",alert,"Открой /github_check в этом боте.")
                     previous_github=current_github
