@@ -120,7 +120,12 @@ HELP = (
     "/artifact_code 1 1 — показать файл черновика\n\n"
     "Мониторинг и проверка исходников работают по расписанию. AI-разработка кода ожидает отдельного исполнителя."
 )
-def keyboard():
-    return json.dumps({"keyboard":BUTTONS, "resize_keyboard":True, "is_persistent":True}, ensure_ascii=False)
+def keyboard(conn=None):
+    import project_retirement
+    buttons=BUTTONS
+    if conn is not None and project_retirement.enabled(conn):
+        buttons=[[b for b in row if 'NOVA' not in b and 'Kinder' not in b and b not in ('🌐 Проверить сайт','🩺 Проверить API','🧭 План выпуска')] for row in BUTTONS]
+        buttons=[row for row in buttons if row]
+    return json.dumps({"keyboard":buttons, "resize_keyboard":True, "is_persistent":True}, ensure_ascii=False)
 def route(text):
     return ROUTES.get(text, text)

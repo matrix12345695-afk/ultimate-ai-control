@@ -9,6 +9,7 @@ import math
 import secrets
 import time
 import emergency_control as emergency
+import project_retirement
 
 PROJECTS = {"control", "nova", "kinder", "sap", "qualisift", "iiko-loader", "sap-mb51"}
 KINDS = {"inspect_repository", "plan_change", "test_release", "check_site", "review_change", "daily_report"}
@@ -41,6 +42,7 @@ def initialize(conn):
     if 'control_epoch' not in columns: conn.execute('ALTER TABLE agent_jobs ADD COLUMN control_epoch INTEGER NOT NULL DEFAULT 0')
     conn.commit()
     emergency.initialize(conn)
+    project_retirement.initialize(conn)
 
 
 def _now(value):
@@ -91,6 +93,7 @@ def enqueue(conn, project, kind, payload, *, priority=50, max_attempts=3, event_
     if event_key is not None: _text(event_key, 200)
     now, payload = _now(now), _json(payload)
     with _write(conn):
+        project_retirement.require_open(conn,project,json.loads(payload))
         if event_key is not None:
             row=conn.execute("SELECT id,project,kind,payload FROM agent_jobs WHERE event_key=?", (event_key,)).fetchone()
             if row:

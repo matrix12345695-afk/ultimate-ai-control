@@ -1,5 +1,6 @@
 """Commands are called only after main.py authenticates the private Telegram owner."""
 import json
+import project_retirement
 import time
 import task_queue as queue
 import roadmap
@@ -49,6 +50,13 @@ def submit_text(conn,text,*,project=None,source="telegram",event_key=None):
 
 
 def handle(text,connect,source_key=None,actor_id=None):
+    with connect() as conn:
+        answer=project_retirement.before_command(conn,text)
+        if answer is not None:return answer
+    result=_handle(text,connect,source_key,actor_id)
+    with connect() as conn:return project_retirement.filtered(conn,result)
+
+def _handle(text,connect,source_key=None,actor_id=None):
     args=text.split(maxsplit=2)
     if not args: return None
     op=args[0].split("@")[0].lower()
