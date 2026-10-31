@@ -1,4 +1,32 @@
-# Operator Desk0.1.0: verified local foundation
+# Operator Desk: local preview progress
+
+## Latest:0.2.0 recovery complete
+
+Current private source: `c9ad0f4dc8e2ad829a347c46fcca11bd9f5ee49d`.
+The online backup/verify/restore CLI uses explicitly supplied paths, supports
+committed WAL data, checks the exact schema/integrity/relations/counts and publishes
+restored data only at a new exclusive path. Login sessions and visitor access are
+revoked in the restored copy; original data and backup bundle remain unchanged.
+Each company receives a recovery audit event. Existing files/sidecars, symlinks,
+unknown schemas, corrupt/truncated databases and invalid manifests are refused.
+
+All31 API/recovery checks and8 Chromium browser flows pass without skips. Typecheck
+and eve build pass. The41-file/88422-byte archive was independently extracted and
+installed; all9 recovery checks pass there, including an actual restored HTTP app.
+Archive SHA256: `522cf406838fa0132627238e52fa578f577f98af2953806bdb8cb805066a065e`.
+Local guide: `/workspace/ai-operator/docs/RECOVERY_RU.md`. Private source/package
+are not hosted in this UAC repository. The private-repository403 blocker remains.
+
+This is local recovery tooling, not production database migrations, encryption,
+off-host storage, a backup schedule or a live service switch. No provider key or
+paid call was needed. Model admission/spend and production readiness remain planned.
+
+UAC stage16 remains active; server run41203341973/job124543377187 verified Telegram
+notification456 delivery and unchanged Inventory/queue/financial/deferral controls.
+No product code was installed on VPS. Machine receipt:
+[OPERATOR_DESK_RECOVERY_20261031.json](evidence/OPERATOR_DESK_RECOVERY_20261031.json).
+
+## Historical:0.1.0 foundation acceptance
 
 Owner approved continuing the international customer-operator product and explicitly
 skipped further external old-project deletion. The already installed UAC retirement

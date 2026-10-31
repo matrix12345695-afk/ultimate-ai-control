@@ -1,6 +1,6 @@
 # ULTIMATE AI CONTROL 4.0 — current checkpoint
 
-Updated31 October2026,17:45 Asia/Tashkent. This is the current resume point.
+Updated31 October2026,17:57 Asia/Tashkent. This is the current resume point.
 Earlier checkpoints remain in Git history; their old-project instructions are superseded.
 
 ## Installed state
@@ -65,26 +65,38 @@ rollout/rollback operations. Historical bridge handlers with old application
 pins may reject this new source; prepare a reviewed compatible operator instead
 of bypassing the pins or restoring old active monitors.
 
-## Next product — Operator Desk local foundation complete
+## Next product — Operator Desk0.2.0 local recovery complete
 
 Owner approved proceeding and explicitly skipped further external project deletion.
 That deletion no longer blocks new work. Requirements and verified scope:
 [NEXT_PRODUCT_AI_OPERATOR.md](NEXT_PRODUCT_AI_OPERATOR.md),
 [OPERATOR_DESK_PREVIEW.md](OPERATOR_DESK_PREVIEW.md).
 
-Private local revision `67ecf2e981bd7fc606b1c7b117183947af9e08da` implements company
+Private local revision `c9ad0f4dc8e2ad829a347c46fcca11bd9f5ee49d` implements company
 accounts/roles, knowledge management, versioned source excerpts, embedded chat,
 confirmed requests, handoff/staff replies and EN/RU console with real analytics.
-22 API checks and8 actual browser flows pass with zero skips, as do typecheck,
-eve build and extracted-archive installation. Source package is36 files/76674 bytes,
-SHA256 `5cd85e4b80fa585bcba4e1c55999de9aaedbc14b42ee4a59243f1d78f2fa1a75`.
+31 API/recovery checks and8 actual browser flows pass with zero skips, as do
+typecheck and eve build. A separately extracted package installed successfully
+and executed all9 recovery checks. Source package is41 files/88422 bytes,
+SHA256 `522cf406838fa0132627238e52fa578f577f98af2953806bdb8cb805066a065e`.
+
+Completed recovery block: online SQLite backup of committed WAL state; checked
+SHA256/schema/integrity/foreign keys/counts; exclusive restore into a new database;
+revocation of restored login sessions and visitor access; recovery event for each
+company. A real HTTP server after restore preserves lead/source/handoff state,
+accepts a fresh login/chat and keeps companies isolated. Existing destinations,
+symlinks, incomplete bundles and corrupted or unknown databases are refused.
+No automatic backup schedule, encryption, off-host storage, schema migration or
+live service switch is included. This completes local recovery, not production readiness.
 Source/evidence stay in the workspace; commercial application code is not published
 in this UAC repository. Private GitHub creation is blocked by integration403;
 prepared product CI has not run on hosted GitHub.
 
 UAC received only a local-source milestone, not a product install. The fixed
-metadata operator passed4 checks; run41202337737/job124540441960 succeeded.
-Stage16 is active; Telegram notification455 has a persisted delivery receipt.
+metadata operator passed4 checks; run41203341973/job124543377187 succeeded.
+Stage16 is active; Telegram recovery notification456 has a persisted delivery
+receipt. Initial foundation receipt455 remains historical. See
+[evidence](evidence/OPERATOR_DESK_RECOVERY_20261031.json).
 Inventory code/config/process snapshot and queue/financial/deferral controls
 are verified unchanged. Installed UAC revision remains de7afc198400175e4441625eeb973b42c330b225.
 
