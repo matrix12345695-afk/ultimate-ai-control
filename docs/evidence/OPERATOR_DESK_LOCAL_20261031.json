@@ -1,0 +1,37 @@
+{
+  "schema": "operator-desk-local-receipt-v1",
+  "date": "2026-10-31",
+  "source_revision": "67ecf2e981bd7fc606b1c7b117183947af9e08da",
+  "source_archive_sha256": "5cd85e4b80fa585bcba4e1c55999de9aaedbc14b42ee4a59243f1d78f2fa1a75",
+  "api_tests": 22,
+  "browser_flows": 8,
+  "skips": 0,
+  "scope": "local browser/API/package verification; not a VPS product deployment",
+  "model_enabled": false,
+  "publicly_deployed": false,
+  "hosted_product_ci_run": false,
+  "private_repository_creation": "blocked403",
+  "owner_skipped_external_deletion": true,
+  "uac_stage16": "active",
+  "telegram_message_id": 455,
+  "delivery_receipt_verified": true,
+  "inventory_preserved": true,
+  "controls_unchanged": true,
+  "server": {
+    "run_id": 41202337737,
+    "job_id": 124540441960,
+    "transport_sha": "82b1ffb81e90921af28264d2dc47ac4dd8f56fdb",
+    "operator_pin": "5ce466f7e3a01a3a0f11f61afe9ea74a3484dd14",
+    "lines": [
+      "2026-10-31T12:43:11.5932007Z action=uac4_operator_progress",
+      "2026-10-31T12:43:12.5854713Z operator_progress_tests=4 PASS",
+      "2026-10-31T12:43:28.8893822Z operator_source_sha=67ecf2e981bd7fc606b1c7b117183947af9e08da",
+      "2026-10-31T12:43:28.8895176Z operator_archive_sha256=5cd85e4b80fa585bcba4e1c55999de9aaedbc14b42ee4a59243f1d78f2fa1a75",
+      "2026-10-31T12:43:28.8896635Z operator_scope=local preview reported; no product code or credentials installed on VPS",
+      "2026-10-31T12:43:28.8898171Z stage16=active; bounded source milestone done; full product unfinished",
+      "2026-10-31T12:43:28.8899083Z notification_message_id=455",
+      "2026-10-31T12:43:28.8899624Z inventory_unchanged=VERIFIED",
+      "2026-10-31T12:43:28.8900182Z queue_financial_deferral=UNCHANGED"
+    ]
+  }
+}
