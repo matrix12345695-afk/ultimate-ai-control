@@ -3,6 +3,45 @@
 Updated 2026-10-31 Asia/Tashkent. This is the resume point for later owner-authorized development. Historical
 deployment records retain their original observations; this file identifies the latest state.
 
+## 31 October2026 — NOVA and Kinder retirement requested; new product follows cleanup
+
+LATEST OWNER DECISION supersedes the previous Kinder separate-chat continuation
+and NOVA localization next-step. Delete BOTH NOVA and Kinder Spa, including their
+repositories/resources. Inventory MUST remain on VPS. ULTIMATE is retained.
+Other projects are not included by inference.
+
+**DONE:** precise inventory and authorized deletion attempt. Targets: GitHub
+nova-web-agency/ID1426666605, Kinder-Spa-android/ID1427568609, kinder_spa/ID1193473590;
+Render NOVA service srv-dbbhm5k9v7es73f9kf10, NOVA DB dpg-dbbii4gm7kps73f41k00-a,
+Kinder DB dpg-dbbtkol9fdbs73a7tvqg-a. No Kinder service in the current workspace.
+Inventory VPS and its separate older Render copy are excluded.
+
+**BLOCKED, NOT DELETED:** configured gh CLI DELETE of the identity-checked NOVA
+repository returned HTTP403 “Resource not accessible by integration”.
+Rechecks show all three repositories still exist. No further DELETE was attempted
+after that integration refusal. Render exposes no service/DB delete operation;
+no separate Render CLI/API credential is configured. No credential extraction
+or permission bypass. [Exact Russian cleanup steps](PROJECT_RETIREMENT_20261031_RU.md)
+name six resources and their provider settings links.
+
+No VPS command or fresh server verification was performed. Installed UAC341d1277
+remains the last verified source. Live monitors, schedules, read scopes and owner
+requests have NOT been retired. Telegram Plan has NOT been updated. The owner
+can use existing /pause before removal; actual pause is unverified. Retire old
+scope/menu/queue/notice paths before resuming. Local copies/history/domain/bots
+and coordination with the other Kinder chat remain pending. This is not complete
+deletion or a purge, and no Inventory process/config/source/data was changed.
+
+**APPROVED DIRECTION, IMPLEMENTATION PENDING CLEANUP:** international AI customer
+operator. Owner accepts preparing a product for sale on platforms without an
+immediate sale. [Initial requirements](NEXT_PRODUCT_AI_OPERATOR.md) cover
+source-backed answers, tenant separation, structured leads, human handoff,
+journal-based analytics, default-off paid API and a saleable documented package.
+No new app/repository/resource/account/purchase/listing or paid model call created.
+Respect “first delete old projects”. Marketplace eligibility, price/license,
+payouts and exact publication require review; no income guarantee.
+Canceled hourly coding automation stays off.
+
 ## 31 October2026 — UAC/NOVA continuation, Kinder separated
 
 Owner moved Kinder Spa into a separate chat and explicitly requested continued
