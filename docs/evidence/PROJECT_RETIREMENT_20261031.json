@@ -1,0 +1,73 @@
+{
+  "schema": "uac-project-retirement-receipt-v1",
+  "date": "2026-10-31",
+  "timezone": "Asia/Tashkent",
+  "installed_revision": "de7afc198400175e4441625eeb973b42c330b225",
+  "previous_revision": "341d127784643af3b12e41cf08e9c439f9ac990e",
+  "source_pr": 66,
+  "source_ci": {
+    "push": 41196711820,
+    "pull_request": 41196714230,
+    "result": "success"
+  },
+  "operator_pin": "db4ffc48c92292df4fe7efddf9e44adc368a1382",
+  "operator_tests": 8,
+  "preflight": {
+    "run": 41197098488,
+    "job": 124525373491,
+    "result": "success",
+    "source_tests": 684,
+    "existing_host_dependent_skips": 18,
+    "seconds": 124.853
+  },
+  "deploy": {
+    "run": 41197359053,
+    "job": 124526113610,
+    "result": "success",
+    "source_tests": 684,
+    "existing_host_dependent_skips": 18,
+    "seconds": 132.471,
+    "verified_at": "2026-10-31T11:36:49Z"
+  },
+  "independent_verification": {
+    "run": 41197719245,
+    "job": 124527163662,
+    "result": "success",
+    "verified_at": "2026-10-31T11:39:03Z"
+  },
+  "counts": {
+    "removed_schedules": 4,
+    "removed_contexts": 2,
+    "resolved_requests": 89,
+    "cancelled_jobs": 0,
+    "cancelled_voice": 0,
+    "revoked_approvals": 0
+  },
+  "telegram": {
+    "updated_keyboard_message_id": 443,
+    "completion_notification_message_id": 444,
+    "delivered": true,
+    "owner_reading_verified": false
+  },
+  "runtime": {
+    "dispatcher_pid": 1344126,
+    "worker_pid": 1343925,
+    "inventory_pid": 2590664,
+    "inventory_pid_source_env_metadata_unchanged": true,
+    "final_queue_paused": false,
+    "financial_and_deferred_state_unchanged": true
+  },
+  "scope": {
+    "uac_active_projects_removed": [
+      "nova",
+      "kinder"
+    ],
+    "sql_reseed_and_job_guards_verified": true,
+    "independent_render_resources_changed": false,
+    "github_project_repositories_changed": false,
+    "inventory_modified": false,
+    "new_paid_model_calls": false,
+    "new_cron_or_hourly_coding_schedule": false
+  },
+  "archive": "Terminal job/test/financial history, earlier receipts, passive historical readers and local backups retained; not a purge of Git or audit history."
+}

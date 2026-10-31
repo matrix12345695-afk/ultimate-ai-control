@@ -43,6 +43,6 @@ owner notification need persisted Telegram receipts. Post-activation failure
 must keep retired work fenced; do not blindly restore an old monitor-capable
 version or overwrite live accounting/history from backup.
 
-At this source checkpoint no live cleanup/deployment/Telegram receipt is claimed.
+Live cleanup/deployment is now verified; see [rollout](PROJECT_RETIREMENT_ROLLOUT.md). Telegram keyboard443 and notice444 have persisted receipts.
 An empty ledger is only backward compatibility for older databases/fixtures;
 production acceptance requires both retirement rows and their SQL guards.
