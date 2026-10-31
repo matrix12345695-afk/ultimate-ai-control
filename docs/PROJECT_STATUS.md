@@ -10,6 +10,12 @@ and NOVA localization next-step. Delete BOTH NOVA and Kinder Spa, including thei
 repositories/resources. Inventory MUST remain on VPS. ULTIMATE is retained.
 Other projects are not included by inference.
 
+**DONE, partial retirement:** closed11 project Draft PRs (NOVA14–17, Kinder1–7)
+and verified zero open PRs in all three project repositories. Also closed eight
+related UAC Draft PRs57–64 after title/draft scope checks. No merge, branch/file
+purge, runtime stop or service deletion is implied. Transition PR65 remains
+open. Actions permission reads also return403; Actions settings were not changed.
+
 **DONE:** precise inventory and authorized deletion attempt. Targets: GitHub
 nova-web-agency/ID1426666605, Kinder-Spa-android/ID1427568609, kinder_spa/ID1193473590;
 Render NOVA service srv-dbbhm5k9v7es73f9kf10, NOVA DB dpg-dbbii4gm7kps73f41k00-a,
