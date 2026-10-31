@@ -1,0 +1,164 @@
+{
+  "schema": "nova-cross-browser-acceptance-receipt-v1",
+  "date": "2026-10-31",
+  "timezone": "Asia/Tashkent",
+  "harness_repository": "matrix12345695-afk/ultimate-ai-control",
+  "harness_revision": "7e882be68a343c50443c70772ee247a31998c362",
+  "draft_pr": 63,
+  "source_repository": "matrix12345695-afk/nova-web-agency",
+  "source_revision": "9df2a1c9fcc35e83f1a2fe35bee2480afac3254f",
+  "source_draft_pr": 17,
+  "push_run": 41190426541,
+  "pr_run": 41190428897,
+  "run_attempt": 1,
+  "engines": [
+    {
+      "engine": "webkit",
+      "artifact_id": 13038881380,
+      "archive_sha256": "sha256:05ab09246993fa28922a3a26bdfb0551d1d73e0c4d079066b314889d4b6fc1ed",
+      "browser_version": "26.5",
+      "counts": {
+        "errors": 0,
+        "fail": 0,
+        "pass": 34,
+        "skipped": 0,
+        "tests": 34
+      },
+      "screenshots": 15,
+      "report_sha256": "81b75b8587e5de908bfcec342ea1f86d246fb03665439784fe09657f0be25f62",
+      "harness_revision": "7e882be68a343c50443c70772ee247a31998c362",
+      "source_revision": "9df2a1c9fcc35e83f1a2fe35bee2480afac3254f",
+      "harness_file_count": 9,
+      "mobile_emulation": true
+    },
+    {
+      "engine": "chromium",
+      "artifact_id": 13038781975,
+      "archive_sha256": "sha256:9496a4cc2ae9a052c073f2e434e72299265132f585b2adb8d714680ffa46ca69",
+      "browser_version": "151.0.7922.34",
+      "counts": {
+        "errors": 0,
+        "fail": 0,
+        "pass": 34,
+        "skipped": 0,
+        "tests": 34
+      },
+      "screenshots": 15,
+      "report_sha256": "9fef1fe814b63875f24b6b9f2dfebaec74268054014462303f924e4ba407668c",
+      "harness_revision": "7e882be68a343c50443c70772ee247a31998c362",
+      "source_revision": "9df2a1c9fcc35e83f1a2fe35bee2480afac3254f",
+      "harness_file_count": 9,
+      "mobile_emulation": true
+    },
+    {
+      "engine": "firefox",
+      "artifact_id": 13037629599,
+      "archive_sha256": "sha256:53d8bfa576fee121d0d8b68ace1f6eddf731dd1074c1c6b6c4ab8c621fdc9659",
+      "browser_version": "153.0",
+      "counts": {
+        "errors": 0,
+        "fail": 0,
+        "pass": 34,
+        "skipped": 0,
+        "tests": 34
+      },
+      "screenshots": 15,
+      "report_sha256": "593abcb61f067a0aa999f4e93fb9ea27a3c71ec762f8ce993c2074a87f8e313c",
+      "harness_revision": "7e882be68a343c50443c70772ee247a31998c362",
+      "source_revision": "9df2a1c9fcc35e83f1a2fe35bee2480afac3254f",
+      "harness_file_count": 9,
+      "mobile_emulation": false
+    }
+  ],
+  "all_source_workflows": [
+    {
+      "id": 41190428925,
+      "name": "NOVA candidate browser tests",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 41190429029,
+      "name": "Safe unit tests",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 41190429027,
+      "name": "NOVA isolated browser tests",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 41190428973,
+      "name": "NOVA locked build acceptance",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 41190428897,
+      "name": "NOVA cross-browser acceptance",
+      "event": "pull_request",
+      "conclusion": "success"
+    },
+    {
+      "id": 41190426474,
+      "name": "NOVA candidate browser tests",
+      "event": "push",
+      "conclusion": "success"
+    },
+    {
+      "id": 41190426481,
+      "name": "Safe unit tests",
+      "event": "push",
+      "conclusion": "success"
+    },
+    {
+      "id": 41190426498,
+      "name": "NOVA isolated browser tests",
+      "event": "push",
+      "conclusion": "success"
+    },
+    {
+      "id": 41190426505,
+      "name": "NOVA locked build acceptance",
+      "event": "push",
+      "conclusion": "success"
+    },
+    {
+      "id": 41190426541,
+      "name": "NOVA cross-browser acceptance",
+      "event": "push",
+      "conclusion": "success"
+    }
+  ],
+  "local_offline": {
+    "tests": 682,
+    "skipped": 18,
+    "result": "passed",
+    "host_dependent_executed": false,
+    "new_contract_cases": 8
+  },
+  "functional_cases": 34,
+  "engine_case_executions": 102,
+  "screenshot_count": 45,
+  "artifact_hashes_verified": true,
+  "harness_file_hashes_verified": true,
+  "screenshot_bytes_verified": true,
+  "production_access": false,
+  "published": false,
+  "vps_runtime_updated": false,
+  "telegram_plan_updated": false,
+  "model_api_used": false,
+  "kinder_modified": false,
+  "inventory_modified": false,
+  "limitations": [
+    "All page/API/WebSocket traffic is intercepted fixture traffic.",
+    "Firefox has viewport/touch coverage but no Playwright mobile emulation.",
+    "Patched WebKit is not physical Safari/iOS acceptance.",
+    "No pixel comparison or full accessibility/localization acceptance.",
+    "UZ mobile screenshots retain Russian CTA/FAQ/supporting copy; separate draft work pending.",
+    "Runtime adapter and Telegram Plan integration remain pending.",
+    "Artifact retention ends 30 November2026; this is historical evidence."
+  ]
+}

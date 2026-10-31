@@ -9,13 +9,26 @@ Owner moved Kinder Spa into a separate chat and explicitly requested continued
 work here without Kinder. Historical evidence below is preserved; Kinder setup,
 source, Render resources and bot secrets are outside this increment's scope.
 
-**IN PROGRESS:** [NOVA three-engine frontend acceptance](NOVA_CROSS_BROWSER.md).
-New isolated hosted suite uses fixed NOVA Draft17/source9df2a1c9 and the existing
-34 fixture cases per engine: Chromium151.0.7922.34, Firefox153.0, WebKit26.5.
-The two HTML blobs match the previously reviewed PR15 candidate. There is no
-NOVA source change or production request. Eight local mutation/file-contract
-tests pass. Actual hosted runs and downloaded artifacts are still pending;
-do not promote synthetic/unit results to real cross-browser acceptance.
+**DONE, bounded hosted acceptance:** [NOVA three-engine frontend checks](NOVA_CROSS_BROWSER.md),
+Draft UAC PR63/source7e882be68a343c50443c70772ee247a31998c362, fixed NOVA
+Draft17/source9df2a1c9fcc35e83f1a2fe35bee2480afac3254f. Chromium151.0.7922.34,
+Firefox153.0 and WebKit26.5 each pass the same34 fixture cases with zero skips:
+102 engine/case executions, not102 distinct functional scenarios. Hosted push
+41190426541 and PR41190428897 pass all three engines on their first attempts.
+All ten source-commit workflows (new suite, original/candidate Chromium, locked
+build and safe units, push/PR) pass. Full local offline run682 tests has18 existing
+host-dependent skips; no claim that those sandbox cases ran here.
+
+All three push archives are downloaded and their published SHA256 verified:
+Chromium13038781975, Firefox13037629599, WebKit13038881380. Exact source/harness
+revision, nine harness-file hashes, all45 screenshot hashes/dimensions/file sets
+and zero-failure report contracts pass independent validation. The two HTML
+blobs match the reviewed PR15 candidate. No NOVA source/production request.
+Evidence: [machine-readable receipt](evidence/NOVA_CROSS_BROWSER_20261031.json).
+Visual inspection of the three UZ mobile captures still shows Russian CTA/FAQ
+text; the34 cases certify the defined placeholder/target/form/layout scope,
+not full translation. Next bounded NOVA work: complete those translations in
+a separate draft and add regressions without changing business rules.
 
 No installed UAC code, Telegram plan/status, scheduler, paid policy, Render,
 VPS service or Inventory change is part of this source/CI increment. Installed

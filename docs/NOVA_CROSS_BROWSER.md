@@ -1,6 +1,6 @@
 # NOVA: three-engine frontend acceptance
 
-Status31 October2026: source prepared; hosted acceptance pending.
+Status31 October2026: bounded hosted acceptance DONE, Draft UAC PR63.
 This continues ULTIMATE/NOVA after Kinder Spa was moved to its separate chat.
 
 The new ci/nova-cross-browser harness fixes NOVA Draft PR17 at
@@ -39,3 +39,34 @@ Workflow: .github/workflows/nova-cross-browser.yml, contents-read only, no persi
 checkout credential, existing hash-pinned packages/actions, separate30-day archives.
 No new cost approval, model setup, scheduler, Render publication, VPS installation,
 Inventory access or Kinder work is introduced.
+
+## Verified hosted result
+
+Harness7e882be68a343c50443c70772ee247a31998c362 passes push41190426541
+and PR41190428897 on first attempts. All three engines pass34/34, no skips,
+errors or failures:102 engine/case executions of34 functional cases. Chromium
+jobs124505924876/124505931241; Firefox124505924632/124505931405;
+WebKit124505924754/124505931391 (push/PR respectively).
+
+Downloaded push archives: Chromium13038781975, Firefox13037629599,
+WebKit13038881380. Published archive digests, exact harness/source revision,
+all nine harness-file hashes and45 PNG hashes/dimensions/complete file sets
+were independently validated. Full IDs, hashes and scope flags are recorded
+in [the receipt](evidence/NOVA_CROSS_BROWSER_20261031.json). Archives expire
+30 November2026; this receipt is historical, not perpetual artifact availability.
+
+All ten checks on the exact source commit succeed: new cross-browser, original
+Chromium, candidate Chromium, locked build and safe units on both push and PR.
+Local offline suite682 tests passes with18 existing host-dependent skips;
+the eight new mutation/file-contract cases execute successfully. No sandbox
+coverage is inferred from those skips. Original Chromium findings remain
+historical; its contract and the candidate contract still pass unchanged.
+
+The three full-page UZ mobile screenshots were also viewed. They show remaining
+Russian text in the mobile CTA, FAQ and some supporting copy. These are known
+uncovered localization work, not a failed placeholder/target regression or proof
+of complete RU/UZ quality. Next: prepare exact draft translations with tests,
+preserve user-entered values and submit behavior, and keep publication separate.
+
+This documentation receipt adds no runtime adapter, installation or Telegram
+plan update. Stage13 remains active for broader acceptance and live integration.
