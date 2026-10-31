@@ -1,7 +1,28 @@
 # ULTIMATE AI CONTROL 4.0 — current checkpoint
 
-Updated 2026-10-28 UTC. This is the resume point for later owner-authorized development. Historical
+Updated 2026-10-31 Asia/Tashkent. This is the resume point for later owner-authorized development. Historical
 deployment records retain their original observations; this file identifies the latest state.
+
+## 31 October2026 — UAC/NOVA continuation, Kinder separated
+
+Owner moved Kinder Spa into a separate chat and explicitly requested continued
+work here without Kinder. Historical evidence below is preserved; Kinder setup,
+source, Render resources and bot secrets are outside this increment's scope.
+
+**IN PROGRESS:** [NOVA three-engine frontend acceptance](NOVA_CROSS_BROWSER.md).
+New isolated hosted suite uses fixed NOVA Draft17/source9df2a1c9 and the existing
+34 fixture cases per engine: Chromium151.0.7922.34, Firefox153.0, WebKit26.5.
+The two HTML blobs match the previously reviewed PR15 candidate. There is no
+NOVA source change or production request. Eight local mutation/file-contract
+tests pass. Actual hosted runs and downloaded artifacts are still pending;
+do not promote synthetic/unit results to real cross-browser acceptance.
+
+No installed UAC code, Telegram plan/status, scheduler, paid policy, Render,
+VPS service or Inventory change is part of this source/CI increment. Installed
+UAC341d1277 and disabled/deferred model policy remain the last verified state,
+not a fresh server observation. Stage13 stays active; production/physical-device,
+pixel and full accessibility acceptance remain unfinished. Future runtime
+integration must be reviewed separately before the bot can show this evidence.
 
 ## Installed state
 

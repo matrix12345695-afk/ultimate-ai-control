@@ -21,13 +21,15 @@ BROWSER_VERSION=None
 
 
 class BrowserTests(unittest.TestCase):
+    ENGINE='chromium'
     @classmethod
     def setUpClass(cls):
         global BROWSER_VERSION
         cls.playwright=sync_playwright().start()
-        opts={'headless':True,'args':['--disable-background-networking']}
+        opts={'headless':True}
+        if cls.ENGINE=='chromium': opts['args']=['--disable-background-networking']
         if LOCAL_BROWSER: opts['executable_path']=LOCAL_BROWSER
-        cls.browser=cls.playwright.chromium.launch(**opts);BROWSER_VERSION=cls.browser.version
+        cls.browser=getattr(cls.playwright,cls.ENGINE).launch(**opts);BROWSER_VERSION=cls.browser.version
     @classmethod
     def tearDownClass(cls): cls.browser.close();cls.playwright.stop()
     def setUp(self): self.context=None;self.page=None;self.posts=[];self.denied=[];self.errors=[]
@@ -39,7 +41,9 @@ class BrowserTests(unittest.TestCase):
             if self.context: self.context.close()
     def open(self,path='/',viewport='desktop',mode='success'):
         width,height=VIEWPORTS[viewport]
-        self.context=self.browser.new_context(viewport={'width':width,'height':height},is_mobile=viewport=='mobile',has_touch=viewport=='mobile',device_scale_factor=1,
+        # Firefox supports viewport/touch checks but has no Playwright is_mobile emulation.
+        mobile_options={} if self.ENGINE=='firefox' else {'is_mobile':viewport=='mobile'}
+        self.context=self.browser.new_context(viewport={'width':width,'height':height},**mobile_options,has_touch=viewport=='mobile',device_scale_factor=1,
                                              reduced_motion='reduce',service_workers='block',accept_downloads=False)
         def handler(route):
             request=route.request;url=urlsplit(request.url)
